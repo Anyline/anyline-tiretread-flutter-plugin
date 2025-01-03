@@ -1,0 +1,4 @@
+enum ScanSpeed {
+  fast,
+  slow,
+}

@@ -1,0 +1,60 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // Anyline Maven registry
+        maven { url "https://europe-maven.pkg.dev/anyline-ttr-sdk/maven" }
+    }
+}
+
+android {
+    namespace = "io.anyline.tiretread.tire_tread_flutter_plugin_example"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "io.anyline.tiretread.flutter.example"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdk = flutter.minSdkVersion
+        minSdk = 26
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+dependencies {
+    // Uncomment below library if there is any in native mobile for not recognized flutter (Unresolved reference: MethodCallHandler)
+//    implementation 'io.flutter:flutter_embedding_debug:1.0.0'
+}
+
+flutter {
+    source = "../.."
+}
+

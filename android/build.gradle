@@ -1,0 +1,97 @@
+group = "io.anyline.tiretread.flutter"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "1.9.0"
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.2.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlin_version")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // Anyline Maven registry
+        maven { url "https://europe-maven.pkg.dev/anyline-ttr-sdk/maven" }
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlinx-serialization"
+
+android {
+    if (project.android.hasProperty("namespace")) {
+        namespace = "io.anyline.tiretread.flutter"
+    }
+
+    compileSdk = 34
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 26
+    }
+
+    buildFeatures {
+        viewBinding = true
+        compose = true
+        buildConfig = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.2"
+    }
+
+
+    dependencies {
+        implementation("androidx.core:core-ktx:1.13.1")
+        implementation("androidx.appcompat:appcompat:1.7.0")
+        implementation("com.google.android.material:material:1.12.0")
+        implementation("androidx.activity:activity-ktx:1.9.3")
+        implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+        implementation("androidx.activity:activity-compose:1.9.3")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+        implementation("io.ktor:ktor-client-android:2.3.2")
+
+        // Anyline Tire Tread SDK dependency
+        implementation("io.anyline.tiretread.sdk:shared:10.0.0")
+
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
+        testImplementation("org.mockito:mockito-core:5.0.0")
+        testImplementation("org.mockito:mockito-core:5.5.0")
+
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+}

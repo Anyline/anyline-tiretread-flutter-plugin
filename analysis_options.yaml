@@ -1,0 +1,87 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude: [ build/** ]
+  language:
+    strict-casts: true
+    strict-raw-types: true
+    strict-inference: true
+  errors:
+    deprecated_member_use: ignore
+    deprecated_member_use_from_same_package: ignore
+    dead_code: info
+    missing_return: error
+    invalid_assignment: warning
+
+linter:
+  rules:
+    # ----------------------- Error Rules -----------------------
+    - always_use_package_imports
+    - avoid_dynamic_calls
+    - avoid_empty_else
+    - avoid_print
+    - avoid_relative_lib_imports
+    - avoid_slow_async_io
+    - avoid_type_to_string
+    - avoid_types_as_parameter_names
+    - cancel_subscriptions
+    - close_sinks
+    - comment_references
+    - empty_statements
+    - hash_and_equals
+    - no_self_assignments
+    - throw_in_finally
+    - test_types_in_equals
+    - unnecessary_statements
+    - use_key_in_widget_constructors
+    - valid_regexps
+    # ----------------------- Style Rules -----------------------
+    - always_declare_return_types
+    - avoid_unnecessary_containers
+    - prefer_single_quotes
+    - camel_case_types
+    - avoid_setters_without_getters
+    - avoid_return_types_on_setters
+    - avoid_returning_null_for_void
+    - await_only_futures
+    - curly_braces_in_flow_control_structures
+    - empty_constructor_bodies
+    - unnecessary_getters_setters
+    - unnecessary_await_in_return
+    - unnecessary_breaks
+    - unnecessary_const
+    - unnecessary_constructor_name
+    - unnecessary_late
+    - unnecessary_string_escapes
+    - unnecessary_this
+    - unsafe_html
+    - use_enums
+    - use_function_type_syntax_for_parameters
+    - use_setters_to_change_properties
+    - void_checks
+    - use_rethrow_when_possible
+    - use_named_constants
+    - sized_box_shrink_expand
+    - sort_constructors_first
+    - sort_child_properties_last
+    - sized_box_for_whitespace
+    - prefer_void_to_null
+    - prefer_null_aware_operators
+    - prefer_foreach
+    - prefer_final_in_for_each
+    - prefer_for_elements_to_map_fromIterable
+    - prefer_if_null_operators
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
+
