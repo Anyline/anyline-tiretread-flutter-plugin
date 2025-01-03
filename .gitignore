@@ -49,19 +49,19 @@ Thumbs.db
 *.wmv
 
 # Dart Tool
-source/.dart_tool/
+.dart_tool/
 
 # SonarCloud
 .scannerwork/
 build/
 
 # Ignoring anything in Source/build/
-source/build/
-source/.idea/
+build/
+.idea/
 
-source/pubspec.lock
-source/example/pubspec.lock
-source/example/ios/.symlinks
+pubspec.lock
+example/pubspec.lock
+example/ios/.symlinks
 .vscode
 
 # Generally ignore all .env files
