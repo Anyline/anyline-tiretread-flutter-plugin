@@ -10,7 +10,8 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static AnylineTireTreadPluginPlatform _instance = MethodChannelAnylineTireTreadPlugin();
+  static AnylineTireTreadPluginPlatform _instance =
+      MethodChannelAnylineTireTreadPlugin();
 
   /// The default instance of [AnylineTireTreadPluginPlatform] to use.
   ///
@@ -45,7 +46,7 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
     throw UnimplementedError('getHeatMap() has not been implemented.');
   }
 
-  Stream<ScanningEvent> get onScanningEvent {
+  Stream<ScanEvent> get onScanningEvent {
     throw UnimplementedError('onEvent has not been implemented.');
   }
 }

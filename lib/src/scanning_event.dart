@@ -1,43 +1,38 @@
-abstract class ScanningEvent {
-  const ScanningEvent({required this.measurementUUID});
+abstract class ScanEvent {
+  const ScanEvent({required this.measurementUUID});
 
   final String? measurementUUID;
 
   Map<String, dynamic> toMap() => {'measurementUUID': measurementUUID};
 }
 
-class ScanningAborted extends ScanningEvent {
-  const ScanningAborted({required super.measurementUUID});
+class ScanAborted extends ScanEvent {
+  const ScanAborted({required super.measurementUUID});
 
-  factory ScanningAborted.fromMap(Map<String, dynamic> map) => ScanningAborted(
-        measurementUUID: map['measurementUUID'] as String,
-      );
+  factory ScanAborted.fromMap(Map<String, dynamic> map) =>
+      ScanAborted(measurementUUID: map['measurementUUID'] as String);
 }
 
-class UploadAbortedEvent extends ScanningEvent {
-  const UploadAbortedEvent({required super.measurementUUID});
+class UploadAborted extends ScanEvent {
+  const UploadAborted({required super.measurementUUID});
 
-  factory UploadAbortedEvent.fromMap(Map<String, dynamic> map) =>
-      UploadAbortedEvent(measurementUUID: map['measurementUUID'] as String);
+  factory UploadAborted.fromMap(Map<String, dynamic> map) =>
+      UploadAborted(measurementUUID: map['measurementUUID'] as String);
 }
 
-class UploadCompletedEvent extends ScanningEvent {
-  const UploadCompletedEvent({required super.measurementUUID});
+class UploadCompleted extends ScanEvent {
+  const UploadCompleted({required super.measurementUUID});
 
-  factory UploadCompletedEvent.fromMap(Map<String, dynamic> map) =>
-      UploadCompletedEvent(measurementUUID: map['measurementUUID'] as String);
+  factory UploadCompleted.fromMap(Map<String, dynamic> map) =>
+      UploadCompleted(measurementUUID: map['measurementUUID'] as String);
 }
 
-class UploadFailedEvent extends ScanningEvent {
-  factory UploadFailedEvent.fromMap(Map<String, dynamic> map) => UploadFailedEvent(
-        measurementUUID: map['measurementUUID'] as String,
-        error: map['error'] as String,
-      );
+class UploadFailed extends ScanEvent {
+  factory UploadFailed.fromMap(Map<String, dynamic> map) => UploadFailed(
+      measurementUUID: map['measurementUUID'] as String,
+      error: map['error'] as String);
 
-  const UploadFailedEvent({
-    required super.measurementUUID,
-    required this.error,
-  });
+  const UploadFailed({required super.measurementUUID, required this.error});
 
   final String error;
 }

@@ -22,34 +22,41 @@ class AnylineTireTreadPluginExample extends StatefulWidget {
   const AnylineTireTreadPluginExample({super.key});
 
   @override
-  State<AnylineTireTreadPluginExample> createState() => _AnylineTireTreadPluginExampleState();
+  State<AnylineTireTreadPluginExample> createState() =>
+      _AnylineTireTreadPluginExampleState();
 }
 
-class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginExample> {
+class _AnylineTireTreadPluginExampleState
+    extends State<AnylineTireTreadPluginExample> {
   bool showLoader = false;
 
-  static GlobalKey<ScaffoldMessengerState> snackBarKey = GlobalKey<ScaffoldMessengerState>();
+  static GlobalKey<ScaffoldMessengerState> snackBarKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   String _uuid = '';
   String _result = '';
   String _heatmap = '';
 
-  ValueNotifier<InitializationStatus> initializationStatus = ValueNotifier(InitializationStatus.pending);
+  ValueNotifier<InitializationStatus> initializationStatus =
+      ValueNotifier(InitializationStatus.pending);
 
   final TireTreadPlugin _tireTreadPlugin = TireTreadPlugin();
+  final GlobalKey heatMapViewKey = GlobalKey();
+  final GlobalKey resultViewKey = GlobalKey();
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     _tireTreadPlugin.onScanningEvent.listen((event) {
       switch (event) {
-        case ScanningAborted():
+        case ScanAborted():
           debugPrint('UUID : ${event.measurementUUID}');
-        case UploadAbortedEvent():
+        case UploadAborted():
           debugPrint('UUID : ${event.measurementUUID}');
-        case UploadCompletedEvent():
+        case UploadCompleted():
           debugPrint('UUID : ${event.measurementUUID}');
           setState(() => _uuid = event.measurementUUID ?? '');
-        case UploadFailedEvent():
+        case UploadFailed():
           debugPrint('UUID : ${event.error}');
       }
     });
@@ -80,23 +87,32 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
                         builder: (context, status, _) {
                           return Expanded(
                             child: SingleChildScrollView(
+                              controller: scrollController,
                               child: Column(
                                 children: [
                                   AppButton(
-                                      onPressed: (status != InitializationStatus.start)
+                                      onPressed: (status !=
+                                              InitializationStatus.start)
                                           ? () async {
-                                              EnvInfo.runTimeLicenseKey = EnvInfo.licenseKey ?? '';
+                                              EnvInfo.runTimeLicenseKey =
+                                                  EnvInfo.licenseKey ?? '';
                                               showDialog<void>(
                                                 barrierDismissible: false,
                                                 context: context,
-                                                builder: (BuildContext context) {
+                                                builder:
+                                                    (BuildContext context) {
                                                   return Dialog(
-                                                    backgroundColor: Colors.white,
-                                                    child: InitializeDialog(onCancel: () {
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    child: InitializeDialog(
+                                                        onCancel: () {
                                                       Navigator.pop(context);
-                                                    }, onDone: (licenseKey) async {
-                                                      EnvInfo.runTimeLicenseKey = licenseKey;
-                                                      Navigator.of(context).pop();
+                                                    }, onDone:
+                                                            (licenseKey) async {
+                                                      EnvInfo.runTimeLicenseKey =
+                                                          licenseKey;
+                                                      Navigator.of(context)
+                                                          .pop();
                                                       setState(() {
                                                         _uuid = '';
                                                         _result = '';
@@ -111,36 +127,53 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
                                       title: 'Initialize'),
                                   sizedBox,
                                   AppButton(
-                                      onPressed: (status == InitializationStatus.done)
-                                          ? () {
-                                              try {
-                                                setState(() {
-                                                  _uuid = '';
-                                                  _result = '';
-                                                  _heatmap = '';
-                                                });
-                                                _tireTreadPlugin.scan(options: ScanOptions());
-                                              } on PlatformException catch (error) {
-                                                if (kDebugMode) {
-                                                  print(error);
+                                      onPressed:
+                                          (status == InitializationStatus.done)
+                                              ? () {
+                                                  try {
+                                                    setState(() {
+                                                      _uuid = '';
+                                                      _result = '';
+                                                      _heatmap = '';
+                                                    });
+                                                    _tireTreadPlugin.scan(
+                                                        options: ScanOptions());
+                                                  } on PlatformException catch (error) {
+                                                    if (kDebugMode) {
+                                                      print(error);
+                                                    }
+                                                  }
                                                 }
-                                              }
-                                            }
-                                          : null,
+                                              : null,
                                       title: 'Scan'),
                                   sizedBox,
                                   AppButton(
-                                      onPressed: (status == InitializationStatus.done && _uuid.isNotEmpty)
+                                      onPressed: (status ==
+                                                  InitializationStatus.done &&
+                                              _uuid.isNotEmpty)
                                           ? () async {
                                               try {
                                                 setState(() {
                                                   showLoader = true;
                                                 });
-                                                _result = (await _tireTreadPlugin.getResult(measurementUUID: _uuid))!;
+                                                Scrollable.ensureVisible(
+                                                    resultViewKey
+                                                        .currentContext!,
+                                                    duration: const Duration(
+                                                        milliseconds: 300));
+
+                                                _result =
+                                                    (await _tireTreadPlugin
+                                                        .getResult(
+                                                            measurementUUID:
+                                                                _uuid))!;
                                               } on PlatformException catch (error) {
                                                 if (context.mounted) {
                                                   ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(content: Text(error.details as String)));
+                                                      .showSnackBar(SnackBar(
+                                                          content: Text(
+                                                              error.details
+                                                                  as String)));
                                                 }
                                               } finally {
                                                 setState(() {
@@ -149,20 +182,35 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
                                               }
                                             }
                                           : null,
-                                      title: 'Get Report'),
+                                      title: 'Get Result'),
                                   sizedBox,
                                   AppButton(
-                                      onPressed: (status == InitializationStatus.done && _uuid.isNotEmpty)
+                                      onPressed: (status ==
+                                                  InitializationStatus.done &&
+                                              _uuid.isNotEmpty)
                                           ? () async {
                                               try {
                                                 setState(() {
                                                   showLoader = true;
                                                 });
-                                                _heatmap = (await _tireTreadPlugin.getHeatMap(measurementUUID: _uuid))!;
+                                                Scrollable.ensureVisible(
+                                                    heatMapViewKey
+                                                        .currentContext!,
+                                                    duration: const Duration(
+                                                        milliseconds: 300));
+
+                                                _heatmap =
+                                                    (await _tireTreadPlugin
+                                                        .getHeatMap(
+                                                            measurementUUID:
+                                                                _uuid))!;
                                               } on PlatformException catch (error) {
                                                 if (context.mounted) {
                                                   ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(content: Text(error.details as String)));
+                                                      .showSnackBar(SnackBar(
+                                                          content: Text(
+                                                              error.details
+                                                                  as String)));
                                                 }
                                               } finally {
                                                 setState(() {
@@ -175,25 +223,41 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
                                   sizedBox,
                                   initializationStatusView(status),
                                   sizedBox,
+                                  if (_uuid.isNotEmpty)
+                                    Text(
+                                      'UUID: $_uuid',
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          color: AppColors.primary),
+                                    ),
+                                  sizedBox,
                                   if (showLoader)
                                     const SizedBox(
                                         height: 40,
                                         width: 40,
-                                        child: CircularProgressIndicator(color: AppColors.primary)),
+                                        child: CircularProgressIndicator(
+                                            color: AppColors.primary)),
                                   sizedBox,
-                                  if (_uuid.isNotEmpty)
-                                    Text(
-                                      'UUID: $_uuid',
-                                      style: const TextStyle(fontSize: 16, color: AppColors.primary),
-                                    ),
+                                  Image.network(
+                                    _heatmap,
+                                    key: heatMapViewKey,
+                                    errorBuilder: (
+                                      context,
+                                      _,
+                                      __,
+                                    ) {
+                                      return const SizedBox();
+                                    },
+                                  ),
                                   sizedBox,
-                                  if (_heatmap.isNotEmpty) Image.network(_heatmap),
-                                  sizedBox,
-                                  if (_result.isNotEmpty)
-                                    Text(
-                                      'Result: ${const JsonEncoder.withIndent('  ').convert(jsonDecode(_result))}',
-                                      style: const TextStyle(fontSize: 16, color: AppColors.primary),
-                                    ),
+                                  Text(
+                                    (_result.isNotEmpty)
+                                        ? 'Result: ${const JsonEncoder.withIndent('  ').convert(jsonDecode(_result))}'
+                                        : '',
+                                    key: resultViewKey,
+                                    style: const TextStyle(
+                                        fontSize: 16, color: AppColors.primary),
+                                  ),
                                 ],
                               ),
                             ),
@@ -221,7 +285,8 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
     } on PlatformException catch (error) {
       initializationStatus.value = InitializationStatus.fail;
 
-      snackBarKey.currentState?.showSnackBar(SnackBar(content: Text(error.details as String)));
+      snackBarKey.currentState
+          ?.showSnackBar(SnackBar(content: Text(error.details as String)));
     } finally {
       setState(() {
         showLoader = false;
@@ -237,7 +302,8 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
             builder: (context, snap) {
               if (snap.hasData) {
                 return Text('SDK Version: ${snap.data}',
-                    style: const TextStyle(fontSize: 14, color: AppColors.primary));
+                    style: const TextStyle(
+                        fontSize: 14, color: AppColors.primary));
               }
               return const SizedBox.shrink();
             }),
@@ -246,7 +312,8 @@ class _AnylineTireTreadPluginExampleState extends State<AnylineTireTreadPluginEx
             builder: (context, snap) {
               if (snap.hasData) {
                 return Text('Plugin Version: ${snap.data}',
-                    style: const TextStyle(fontSize: 14, color: AppColors.primary));
+                    style: const TextStyle(
+                        fontSize: 14, color: AppColors.primary));
               }
               return const SizedBox.shrink();
             }),

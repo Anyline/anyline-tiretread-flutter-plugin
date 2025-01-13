@@ -117,7 +117,7 @@ extension TireScannerViewController: TireTreadScanViewCallback {
         print("TireTreadScanViewCallback: onScanAbort")
         removeScanViewControllerAsChild()
         dismiss(animated: true, completion: nil)
-        TTEventHandler.shared.sendEvent(type: "ScanningAborted", uuid: uuid)
+        TTEventHandler.shared.sendEvent(type: "ScanAborted", uuid: uuid)
     }
     
     func onUploadCompleted(uuid: String?) {
@@ -132,11 +132,11 @@ extension TireScannerViewController: TireTreadScanViewCallback {
     
     func onUploadFailed(uuid: String?, exception: KotlinException) {
         print("TireTreadScanViewCallback: onUploadFailed")
-        TTEventHandler.shared.sendEvent(type: "UploadFailedEvent", uuid: uuid)    }
+        TTEventHandler.shared.sendEvent(type: "UploadFailed", uuid: uuid)    }
     
     func onUploadAborted(uuid: String?) {
         print("TireTreadScanViewCallback: onUploadAborted")
-        TTEventHandler.shared.sendEvent(type: "UploadAbortedEvent", uuid: uuid)
+        TTEventHandler.shared.sendEvent(type: "UploadAborted", uuid: uuid)
     }
     
     func onFocusFound(uuid: String?) {

@@ -207,17 +207,14 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                 when (measurementResultStatus) {
                     is MeasurementResultStatus.ScanAborted,
-                    MeasurementResultStatus.UploadAborted,
-                    is MeasurementResultStatus.UploadFailed -> {
-                        eventSink!!.success(measurementResultStatus.toString())
-                    }
-
+                    is MeasurementResultStatus.UploadAborted,
+                    is MeasurementResultStatus.UploadFailed,
                     is MeasurementResultStatus.UploadCompleted -> {
                         eventSink!!.success(measurementResultData.toString())
                     }
 
-                    MeasurementResultStatus.ScanStarted,
-                    MeasurementResultStatus.ScanStopped,
+                    is MeasurementResultStatus.ScanStarted,
+                    is MeasurementResultStatus.ScanStopped,
                     is MeasurementResultStatus.ImageUploaded,
                     is MeasurementResultStatus.TreadDepthResultQueried -> {
                         //these status are not currently being delivered to plugin

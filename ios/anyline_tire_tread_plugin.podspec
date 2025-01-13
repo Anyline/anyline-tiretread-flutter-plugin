@@ -5,13 +5,13 @@
 Pod::Spec.new do |s|
   s.name             = 'anyline_tire_tread_plugin'
   s.version          = '0.0.1'
-  s.summary          = 'A new Flutter project.'
+  s.summary          = 'The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device.'
   s.description      = <<-DESC
-A new Flutter project.
+The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'http://anyline.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Anyline GmbH' => 'capture-team@anyline.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'

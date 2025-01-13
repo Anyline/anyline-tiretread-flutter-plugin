@@ -8,6 +8,8 @@ abstract class EnvInfo {
   }
 
   static String? get licenseKey {
-    return (runTimeLicenseKey.isNotEmpty) ? runTimeLicenseKey : dotenv.env['licenseKey'] ?? (throw AssertionError());
+    return (runTimeLicenseKey.isNotEmpty)
+        ? runTimeLicenseKey
+        : dotenv.env['licenseKey'] ?? (throw AssertionError());
   }
 }

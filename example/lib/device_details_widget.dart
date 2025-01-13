@@ -18,8 +18,11 @@ class DeviceDetailsWidget extends StatelessWidget {
                 return Column(
                   children: [
                     Text('OS Version: ${snap.data?.version.release}',
-                        style: const TextStyle(fontSize: 14, color: AppColors.primary)),
-                    Text('Device: ${snap.data?.brand}', style: const TextStyle(fontSize: 14, color: AppColors.primary)),
+                        style: const TextStyle(
+                            fontSize: 14, color: AppColors.primary)),
+                    Text('Device: ${snap.data?.model}',
+                        style: const TextStyle(
+                            fontSize: 14, color: AppColors.primary)),
                   ],
                 );
               }
@@ -32,9 +35,11 @@ class DeviceDetailsWidget extends StatelessWidget {
                 return Column(
                   children: [
                     Text('OS Version: ${snap.data?.systemVersion}',
-                        style: const TextStyle(fontSize: 14, color: AppColors.primary)),
+                        style: const TextStyle(
+                            fontSize: 14, color: AppColors.primary)),
                     Text('Device: ${snap.data?.modelName}',
-                        style: const TextStyle(fontSize: 14, color: AppColors.primary)),
+                        style: const TextStyle(
+                            fontSize: 14, color: AppColors.primary)),
                   ],
                 );
               }

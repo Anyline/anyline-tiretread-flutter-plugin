@@ -6,11 +6,13 @@ import 'package:anyline_tire_tread_plugin/src/anyline_tire_tread_plugin_method_c
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelAnylineTireTreadPlugin platform = MethodChannelAnylineTireTreadPlugin();
+  MethodChannelAnylineTireTreadPlugin platform =
+      MethodChannelAnylineTireTreadPlugin();
   const MethodChannel channel = MethodChannel('anyline_tire_tread_plugin');
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
       channel,
       (MethodCall methodCall) async {
         if (methodCall.method == Constants.METHOD_INITIALIZE) {
@@ -24,7 +26,8 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('setupWithEmptyLicenseKey', () async {
