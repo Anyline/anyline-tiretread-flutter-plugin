@@ -42,8 +42,8 @@ class ScanOptions {
   Map<String, dynamic> toJson() {
     return {
       'configFileContent': configFileContent,
-      'scanSpeed': scanSpeed,
-      'measurementSystem': measurementSystem,
+      'scanSpeed': scanSpeed?.name,
+      'measurementSystem': measurementSystem?.name,
       'tireWidth': tireWidth,
       'showGuidance': showGuidance,
     };

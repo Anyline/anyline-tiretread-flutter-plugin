@@ -15,6 +15,11 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		C241D5D92D2D65C000E5B1A1 /* tiretread_sound_start.wav in Resources */ = {isa = PBXBuildFile; fileRef = C241D5D62D2D65C000E5B1A1 /* tiretread_sound_start.wav */; };
+		C241D5DA2D2D65C000E5B1A1 /* tiretread_focuspoint_found.wav in Resources */ = {isa = PBXBuildFile; fileRef = C241D5D32D2D65C000E5B1A1 /* tiretread_focuspoint_found.wav */; };
+		C241D5DB2D2D65C000E5B1A1 /* tiretread_sound_beep_too_close.wav in Resources */ = {isa = PBXBuildFile; fileRef = C241D5D42D2D65C000E5B1A1 /* tiretread_sound_beep_too_close.wav */; };
+		C241D5DC2D2D65C000E5B1A1 /* tiretread_sound_beep_too_far.wav in Resources */ = {isa = PBXBuildFile; fileRef = C241D5D52D2D65C000E5B1A1 /* tiretread_sound_beep_too_far.wav */; };
+		C241D5DD2D2D65C000E5B1A1 /* tiretread_sound_stop.wav in Resources */ = {isa = PBXBuildFile; fileRef = C241D5D72D2D65C000E5B1A1 /* tiretread_sound_stop.wav */; };
 		FF142A87B75ABFAE5C40491F /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14724EEC09E60118D1206B82 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +68,11 @@
 		A0E25B102D0C8F9E00AB9604 /* RunnerDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerDebug.entitlements; sourceTree = "<group>"; };
 		A0E25B112D0C98AD00AB9604 /* RunnerRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerRelease.entitlements; sourceTree = "<group>"; };
 		ABD21B57944EA92EF9728AFC /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		C241D5D32D2D65C000E5B1A1 /* tiretread_focuspoint_found.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tiretread_focuspoint_found.wav; sourceTree = "<group>"; };
+		C241D5D42D2D65C000E5B1A1 /* tiretread_sound_beep_too_close.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tiretread_sound_beep_too_close.wav; sourceTree = "<group>"; };
+		C241D5D52D2D65C000E5B1A1 /* tiretread_sound_beep_too_far.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tiretread_sound_beep_too_far.wav; sourceTree = "<group>"; };
+		C241D5D62D2D65C000E5B1A1 /* tiretread_sound_start.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tiretread_sound_start.wav; sourceTree = "<group>"; };
+		C241D5D72D2D65C000E5B1A1 /* tiretread_sound_stop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = tiretread_sound_stop.wav; sourceTree = "<group>"; };
 		D46D2BFA6C5641EA8D2156C2 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		E2B32E68172E9973F5E48C17 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		EC7C4ABFC7A1E55AEB950AD1 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
@@ -151,8 +161,21 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				C241D5D82D2D65C000E5B1A1 /* Resources */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		C241D5D82D2D65C000E5B1A1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				C241D5D32D2D65C000E5B1A1 /* tiretread_focuspoint_found.wav */,
+				C241D5D42D2D65C000E5B1A1 /* tiretread_sound_beep_too_close.wav */,
+				C241D5D52D2D65C000E5B1A1 /* tiretread_sound_beep_too_far.wav */,
+				C241D5D62D2D65C000E5B1A1 /* tiretread_sound_start.wav */,
+				C241D5D72D2D65C000E5B1A1 /* tiretread_sound_stop.wav */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		CBE18D5DC3860F4159C5B3D0 /* Pods */ = {
@@ -264,6 +287,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C241D5D92D2D65C000E5B1A1 /* tiretread_sound_start.wav in Resources */,
+				C241D5DA2D2D65C000E5B1A1 /* tiretread_focuspoint_found.wav in Resources */,
+				C241D5DB2D2D65C000E5B1A1 /* tiretread_sound_beep_too_close.wav in Resources */,
+				C241D5DC2D2D65C000E5B1A1 /* tiretread_sound_beep_too_far.wav in Resources */,
+				C241D5DD2D2D65C000E5B1A1 /* tiretread_sound_stop.wav in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
@@ -500,6 +528,24 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-framework",
+					"\"AnylineTireTreadSdk\"",
+					"-framework",
+					"\"UIKit\"",
+					"-framework",
+					"\"anyline_tire_tread_plugin\"",
+					"-framework",
+					"\"device_info_plus\"",
+					"-framework",
+					"\"integration_test\"",
+					"-Xlinker",
+					"-add_ast_path",
+					"-Xlinker",
+					"\"${BUILT_PRODUCTS_DIR}/anyline_tire_tread_plugin/anyline_tire_tread_plugin.framework/Modules/anyline_tire_tread_plugin.swiftmodule/arm64-apple-ios.swiftmodule\"",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.anyline.tiretread.flutter.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -685,6 +731,24 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-framework",
+					"\"AnylineTireTreadSdk\"",
+					"-framework",
+					"\"UIKit\"",
+					"-framework",
+					"\"anyline_tire_tread_plugin\"",
+					"-framework",
+					"\"device_info_plus\"",
+					"-framework",
+					"\"integration_test\"",
+					"-Xlinker",
+					"-add_ast_path",
+					"-Xlinker",
+					"\"${BUILT_PRODUCTS_DIR}/anyline_tire_tread_plugin/anyline_tire_tread_plugin.framework/Modules/anyline_tire_tread_plugin.swiftmodule/arm64-apple-ios.swiftmodule\"",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.anyline.tiretread.flutter.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -709,6 +773,24 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-framework",
+					"\"AnylineTireTreadSdk\"",
+					"-framework",
+					"\"UIKit\"",
+					"-framework",
+					"\"anyline_tire_tread_plugin\"",
+					"-framework",
+					"\"device_info_plus\"",
+					"-framework",
+					"\"integration_test\"",
+					"-Xlinker",
+					"-add_ast_path",
+					"-Xlinker",
+					"\"${BUILT_PRODUCTS_DIR}/anyline_tire_tread_plugin/anyline_tire_tread_plugin.framework/Modules/anyline_tire_tread_plugin.swiftmodule/arm64-apple-ios.swiftmodule\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.anyline.tiretread.flutter.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";

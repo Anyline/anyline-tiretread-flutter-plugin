@@ -1,7 +1,12 @@
+## 0.0.1
+
+* Initial stable release of the Anyline Tire Tread Flutter Plugin.
+
 
 ## 0.0.1-alpha.3
 
 * Fix pub.dev scores.
+
 
 ## 0.0.1-alpha.2
 

@@ -3,7 +3,8 @@ import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/material.dart';
 
 class InitializeDialog extends StatefulWidget {
-  const InitializeDialog({super.key, required this.onCancel, required this.onDone});
+  const InitializeDialog(
+      {super.key, required this.onCancel, required this.onDone});
 
   final VoidCallback onCancel;
 
@@ -14,7 +15,8 @@ class InitializeDialog extends StatefulWidget {
 }
 
 class _InitializeDialogState extends State<InitializeDialog> {
-  final TextEditingController _licenseKeyTextController = TextEditingController();
+  final TextEditingController _licenseKeyTextController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -25,8 +27,8 @@ class _InitializeDialogState extends State<InitializeDialog> {
   @override
   Widget build(BuildContext context) {
     // select the entire field on focus for more convenient input
-    _licenseKeyTextController.selection =
-        TextSelection(baseOffset: 0, extentOffset: _licenseKeyTextController.text.length);
+    _licenseKeyTextController.selection = TextSelection(
+        baseOffset: 0, extentOffset: _licenseKeyTextController.text.length);
 
     return Container(
       padding: const EdgeInsets.all(16).copyWith(bottom: 0),

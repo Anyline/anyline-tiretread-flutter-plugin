@@ -35,6 +35,10 @@ class ScanTireTreadViewModel: ViewModel() {
             }
             return ConfirmationToAbortRequired.No
         }
+
+        fun stopScanningOnFinishRequired(): Boolean {
+            return isScanning || measurementResultStatus == null
+        }
     }
 
     val measurementScanStateLiveData: MutableLiveData<MeasurementScanState> =

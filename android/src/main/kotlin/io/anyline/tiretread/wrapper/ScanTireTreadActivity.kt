@@ -7,10 +7,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import io.anyline.tiretread.flutter.databinding.ActivityScanTireTreadBinding
@@ -52,6 +57,7 @@ class ScanTireTreadActivity: AppCompatActivity() {
     private var doubleBackToExitPressedOnce = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -96,11 +102,27 @@ class ScanTireTreadActivity: AppCompatActivity() {
 
     private fun inflateLayout() {
         binding = ActivityScanTireTreadBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        binding.root.also { rootView ->
+            setContentView(rootView)
+            applyInsetsToView(rootView)
+        }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         observeMeasurementScanState()
+    }
+
+    private fun applyInsetsToView(view: View) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                leftMargin = insets.left
+                bottomMargin = insets.bottom
+                rightMargin = insets.right
+            }
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     private fun observeMeasurementScanState() {
@@ -185,22 +207,11 @@ class ScanTireTreadActivity: AppCompatActivity() {
 
     override fun onStop() {
         if (TireTreadScanner.isInitialized) {
-            TireTreadScanner.instance.apply {
-                if (isScanning) {
-                    stopScanning()
-                }
+            if (scanTireTreadViewModel.measurementScanStateLiveData.value?.stopScanningOnFinishRequired() == true) {
+                TireTreadScanner.instance.stopScanning()
             }
         }
         super.onStop()
-    }
-
-    override fun onDestroy() {
-        if (TireTreadScanner.isInitialized) {
-            TireTreadScanner.instance.apply {
-                stopScanning()
-            }
-        }
-        super.onDestroy()
     }
 
     private fun finishWithResult(result: Int,

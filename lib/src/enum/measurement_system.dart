@@ -1,4 +1,4 @@
 enum MeasurementSystem {
-  metric,
-  imperial,
+  Metric,
+  Imperial,
 }

@@ -101,7 +101,7 @@ data class MeasurementResultData(val measurementUUID: String,
     }
 
     override fun toString(): String {
-        return Json.encodeToString(this)
+        return Json{encodeDefaults = true}.encodeToString(this)
     }
 
     companion object {
