@@ -1,8 +1,9 @@
 name: Create Tag From Branch
 
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - automation_test
 jobs:
   create_tag:
     runs-on: ubuntu-latest
@@ -20,6 +21,7 @@ jobs:
         id: generate_tag
         run: |
           BRANCH_NAME=${{ github.head_ref }}
+          echo "$BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
           echo "::set-output name=tag_name::$TAG_NAME"
 
