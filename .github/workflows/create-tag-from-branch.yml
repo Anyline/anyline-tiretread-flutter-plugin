@@ -3,7 +3,7 @@ name: Create Tag From Branch
 on:
   pull_request:
     branches:
-      - automation_test
+      - 'release/**'
     types:
       - closed
 
