@@ -21,10 +21,9 @@ jobs:
         id: generate_tag
         run: |
           BRANCH_NAME=${{ github.head_ref }}
-          echo "{branch_name}={$BRANCH_NAME}" >> $GITHUB_STATE
-          echo "${{ state.branch_name }}" 
-          TAG_NAME=$(echo "${{ state.branch_name }}"  | sed -E 's/^release\/(.*)$/v\1/')
+          TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
           echo "{tag_name}={TAG_NAME}" >> $GITHUB_STATE
+
       - name: Push Tag
         run: |
           git tag ${{ state.tag_name }}
