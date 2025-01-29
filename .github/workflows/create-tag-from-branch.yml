@@ -2,14 +2,13 @@ name: Create Tag From Branch
 
 on:
   pull_request:
+    types: [closed]
     branches:
       - 'release/**'
-    types:
-      - closed
 
 jobs:
   create_tag:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
