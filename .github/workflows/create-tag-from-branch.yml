@@ -22,9 +22,9 @@ jobs:
         run: |
           BRANCH_NAME=${{ github.head_ref }}
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
-          echo "{tag_name}={TAG_NAME}" >> $GITHUB_STATE
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Push Tag
         run: |
-          git tag ${{ state.tag_name }}
-          git push origin ${{ state.tag_name }}
+          git tag ${{ env.TAG_NAME }}
+          git push origin ${{ env.TAG_NAME }}
