@@ -3,11 +3,11 @@ name: Create Tag From Branch
 on:
   push:
     branches:
-      - release/0.0.2-alpha.2
+      - automation_test
 jobs:
   create_tag:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
