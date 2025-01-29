@@ -1,0 +1,32 @@
+name: Create Tag From Branch
+
+on:
+  push:
+    branches:
+      - automation_test
+
+jobs:
+  create_tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config user.name "anyline-automated-release-bot"
+          git config user.email "1124528+anyline-automated-release-bot@users.noreply.github.com"
+
+      - name: Generate Tag
+        id: generate_tag
+        run: |
+          BRANCH_NAME=${{ github.head_ref }}
+          TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
+          echo "::set-output name=tag_name::$TAG_NAME"
+
+      - name: Push Tag
+        run: |
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
