@@ -1,4 +1,4 @@
-name: Create Tag From Branch
+name: Create Release From Tag
 
 on:
   push:
