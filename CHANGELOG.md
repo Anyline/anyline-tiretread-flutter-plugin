@@ -1,3 +1,8 @@
+## 0.0.2-alpha.1
+
+* Automation test to create TAG
+
+
 ## 0.0.1
 
 * Initial stable release of the Anyline Tire Tread Flutter Plugin.
