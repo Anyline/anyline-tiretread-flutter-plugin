@@ -33,15 +33,15 @@ jobs:
           git tag ${{ env.TAG_NAME }}
           git push origin ${{ env.TAG_NAME }}
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Anyline ${{ env.TAG_NAME }}
-          body: |
-            Release notes for ${{ env.TAG_NAME }}
-          draft: false
-          prerelease: false
+#      - name: Create GitHub Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ env.TAG_NAME }}
+#          release_name: Anyline ${{ env.TAG_NAME }}
+#          body: |
+#            Release notes for ${{ env.TAG_NAME }}
+#          draft: false
+#          prerelease: false

@@ -3,7 +3,7 @@ name: Create Release From Tag
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*'
 
 jobs:
   create_release:
