@@ -1,10 +1,12 @@
 name: Create Tag From Branch
 
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - automation_test
 jobs:
   create_tag:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
