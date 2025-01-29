@@ -1,7 +1,9 @@
 name: Create Release From Tag
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
   create_tag:
