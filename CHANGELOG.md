@@ -1,6 +1,6 @@
-## 0.0.2-alpha.1
+## 0.0.2-alpha.2
 
-* Automation test to create TAG, correct workflow add release some test
+* Automate Release 
 
 
 ## 0.0.1

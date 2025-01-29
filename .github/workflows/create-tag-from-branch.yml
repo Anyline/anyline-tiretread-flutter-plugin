@@ -1,11 +1,9 @@
 name: Create Tag From Branch
 
 on:
-  pull_request:
+  push:
     branches:
       - 'release/**'
-    types:
-      - closed
 
 jobs:
   create_tag:
@@ -18,8 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-      - uses: actions/checkout@v4
-      - uses: dart-lang/setup-dart@v1
+        uses: actions/checkout@v4
 
       - name: Set up Git
         run: |
@@ -51,9 +48,3 @@ jobs:
             Release notes for ${{ env.TAG_NAME }}
           draft: false
           prerelease: false
-
-      - name: Install dependencies
-        run: dart pub get
-
-      - name: Publish
-        run: dart pub publish --force
