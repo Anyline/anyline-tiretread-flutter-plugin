@@ -3,7 +3,7 @@ name: Create Tag From Branch
 on:
   push:
     branches:
-      - automation_test
+      - release/0.0.2-alpha.1
 jobs:
   create_tag:
     runs-on: ubuntu-latest
