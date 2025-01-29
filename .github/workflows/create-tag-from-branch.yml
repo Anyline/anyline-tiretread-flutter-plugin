@@ -3,14 +3,14 @@ name: Create Tag From Branch
 on:
   push:
     branches:
-      - automation_test
+      - release/0.0.2-alpha.2
 jobs:
   create_tag:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Git
         run: |
@@ -20,12 +20,12 @@ jobs:
       - name: Generate Tag
         id: generate_tag
         run: |
-          BRANCH_NAME=${{ github.head_ref }}
-          echo "$BRANCH_NAME"
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Current branch name is: $BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
-          echo "::set-output name=tag_name::$TAG_NAME"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Push Tag
         run: |
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
+          git tag ${{ env.TAG_NAME }}
+          git push origin ${{ env.TAG_NAME }}
