@@ -6,7 +6,6 @@ on:
       - automation_test
 jobs:
   create_tag:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +21,7 @@ jobs:
         id: generate_tag
         run: |
           BRANCH_NAME=${{ github.head_ref }}
+          echo "$BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
           echo "::set-output name=tag_name::$TAG_NAME"
 
