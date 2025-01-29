@@ -28,7 +28,9 @@ jobs:
           BRANCH_NAME=${GITHUB_REF#refs/heads/}
           echo "Current branch name is: $BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
+          TAG_VERSION=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/\1/')
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
       - name: Push Tag
         run: |
@@ -45,9 +47,9 @@ jobs:
           release_name: Anyline ${{ env.TAG_NAME }}
           body: |
             ## What's Changed
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_NAME }}/changelog
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}/changelog
 
             ## Documentation
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_NAME }}
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}
           draft: false
           prerelease: false
