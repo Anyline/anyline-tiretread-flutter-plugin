@@ -44,6 +44,10 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           release_name: Anyline ${{ env.TAG_NAME }}
           body: |
-            Release notes for ${{ env.TAG_NAME }}
+            ## What's Changed
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_NAME }}/changelog
+
+            ## Documentation
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_NAME }}
           draft: false
           prerelease: false
