@@ -1,0 +1,30 @@
+name: Create Tag From Branch
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "anyline-automated-release-bot"
+          git config user.email "1124528+anyline-automated-release-bot@users.noreply.github.com"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Release notes for ${{ github.ref }}
+          draft: false
+          prerelease: false
