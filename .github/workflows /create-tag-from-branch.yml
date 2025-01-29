@@ -1,9 +1,7 @@
 name: Create Tag From Branch
 
 on:
-  push:
-    branches:
-      - automation_test
+  workflow_dispatch:
 
 jobs:
   create_tag:
