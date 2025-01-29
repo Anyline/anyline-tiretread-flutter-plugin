@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Git
         run: |
@@ -23,8 +23,7 @@ jobs:
           BRANCH_NAME=${{ github.head_ref }}
           echo "$BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
-          echo "::set-output name=tag_name::$TAG_NAME"
-
+          echo "{tag_name}={$TAG_NAME}" >> $GITHUB_OUTPUT
       - name: Push Tag
         run: |
           git tag $TAG_NAME
