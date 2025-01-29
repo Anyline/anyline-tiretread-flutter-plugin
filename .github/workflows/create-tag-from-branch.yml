@@ -20,7 +20,8 @@ jobs:
       - name: Generate Tag
         id: generate_tag
         run: |
-          BRANCH_NAME=${{ github.head_ref }}
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          echo "Current branch name is: $BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
