@@ -3,11 +3,15 @@ name: Create Release From Tag
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*'
 
 jobs:
-  create_tag:
+  create_release:
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
 
     steps:
       - name: Checkout repository

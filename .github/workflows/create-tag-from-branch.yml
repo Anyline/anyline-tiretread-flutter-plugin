@@ -1,16 +1,25 @@
 name: Create Tag From Branch
 
 on:
-  push:
+  pull_request:
     branches:
       - 'release/**'
+    types:
+      - closed
 
 jobs:
   create_tag:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
 
       - name: Set up Git
         run: |
@@ -29,3 +38,22 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }}
           git push origin ${{ env.TAG_NAME }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Anyline ${{ env.TAG_NAME }}
+          body: |
+            Release notes for ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Publish
+        run: dart pub publish --force
