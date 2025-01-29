@@ -1,12 +1,12 @@
 name: Create Tag From Branch
 
 on:
-  push:
-    branches:
-      - 'release/**'
+  pull_request:
+    types: [closed]
 
 jobs:
   create_tag:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
 
     permissions:
@@ -25,7 +25,7 @@ jobs:
       - name: Generate Tag
         id: generate_tag
         run: |
-          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          BRANCH_NAME=${github.event.pull_request.head.ref}
           echo "Current branch name is: $BRANCH_NAME"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
           TAG_VERSION=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/\1/')
