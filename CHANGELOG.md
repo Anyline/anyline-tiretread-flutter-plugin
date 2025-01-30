@@ -1,6 +1,6 @@
 ## 0.0.2-alpha.2
 
-* Automate Release on branch merge
+* Automate Release on branch merge 
 
 
 ## 0.0.1
