@@ -3,10 +3,13 @@ name: Create Tag From Branch
 on:
   pull_request:
     types: [closed]
+    branches:
+      - automation_test
+
 
 jobs:
   create_tag:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'automation_test'
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-latest
 
     permissions:
