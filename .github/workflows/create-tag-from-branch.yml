@@ -6,7 +6,6 @@ on:
     branches:
       - automation_test
 
-
 jobs:
   create_tag:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
