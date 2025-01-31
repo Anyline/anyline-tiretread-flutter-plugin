@@ -17,8 +17,8 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config user.name "anyline-automated-release-bot" # Set Git username
-          git config user.email "1124528+anyline-automated-release-bot@users.noreply.github.com" # Set Git email
+          git config user.name "${{ secrets.RELEASE_BOT_USERNAME }}" # Set Git username
+          git config user.email "${{ secrets.RELEASE_BOT_EMAIL }}" # Set Git email
 
       - name: Generate Tag
         id: generate_tag
