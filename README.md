@@ -8,10 +8,27 @@ This Flutter plugin provides an interface to the Anyline Tire Tread SDK, allowin
 In order to use the Anyline Tire Tread SDK Flutter Plugin, please see to it that the following requirements are met:
 
 ### Android
+
+#### Device
 - Android 8.0 - Oreo - or newer (API level 26+)
 - Decent camera functionality (recommended: ≥ 720p and adequate  **auto focus**)
 - 'Flash' capability
 - Stable internet connection
+
+#### Environment
+Your development/application environment is required to have at least the following tools and versions (or newer) available:
+
+- JDK 17
+- Gradle 8.1.0
+    - id 'com.android.application' version '8.1.0' apply false
+- Kotlin 1.9.0
+    - id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+- compileSdk 34
+    - android { compileSdk 34 ...
+- minSdk 26
+    - ... minSdk 26 ...
+- Compose Compiler 1.5.0
+    - ... composeOptions { kotlinCompilerExtensionVersion = "1.5.0" } ...
 
 ### iOS
 - iOS Version >= 16.4
