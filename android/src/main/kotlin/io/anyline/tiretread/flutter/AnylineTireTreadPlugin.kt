@@ -1,13 +1,12 @@
 package io.anyline.tiretread.flutter
 
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.Log
-import android.view.View
 
 import io.anyline.tiretread.sdk.AnylineTireTreadSdk
-import io.anyline.tiretread.sdk.SdkInitializeFailedException
+import io.anyline.tiretread.sdk.NoConnectionException
+import io.anyline.tiretread.sdk.SdkLicenseKeyForbiddenException
+import io.anyline.tiretread.sdk.SdkLicenseKeyInvalidException
 import io.anyline.tiretread.sdk.init
 import io.anyline.tiretread.sdk.scanner.MeasurementSystem
 import io.anyline.tiretread.sdk.scanner.ScanSpeed
@@ -90,7 +89,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     call.argument<String?>(Constants.EXTRA_MEASUREMENT_UUID).toString()
                 val measurementResultData = MeasurementResultData(
                     measurementUUID = measurementUUID,
-                    measurementResultStatus = MeasurementResultStatus.UploadCompleted
+                    measurementResultStatus = MeasurementResultStatus.ScanProcessCompleted
                 )
                 getMeasurementResult(measurementResultData, result)
             }
@@ -100,7 +99,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     call.argument<String?>(Constants.EXTRA_MEASUREMENT_UUID).toString()
                 val measurementResultData = MeasurementResultData(
                     measurementUUID = measurementUUID,
-                    measurementResultStatus = MeasurementResultStatus.UploadCompleted
+                    measurementResultStatus = MeasurementResultStatus.ScanProcessCompleted
                 )
                 val measurementResultDetails = MeasurementResultDetails(measurementResultData)
                 getHeatMapResult(measurementResultDetails, result)
@@ -166,7 +165,17 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             AnylineTireTreadSdk.init(licenseKey, activityPluginBinding!!.activity)
             return result.success(true)
 
-        } catch (e: SdkInitializeFailedException) {
+        } catch (e: SdkLicenseKeyForbiddenException) {
+            return PluginError.SdkInitializationFailedError.throwToResult(
+                result,
+                e.localizedMessage
+            )
+        } catch (e: NoConnectionException) {
+            return PluginError.SdkInitializationFailedError.throwToResult(
+                result,
+                e.localizedMessage
+            )
+        } catch (e: SdkLicenseKeyInvalidException) {
             return PluginError.SdkInitializationFailedError.throwToResult(
                 result,
                 e.localizedMessage
@@ -207,9 +216,8 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                 when (measurementResultStatus) {
                     is MeasurementResultStatus.ScanAborted,
-                    is MeasurementResultStatus.UploadAborted,
-                    is MeasurementResultStatus.UploadFailed,
-                    is MeasurementResultStatus.UploadCompleted -> {
+                    is MeasurementResultStatus.ScanProcessCompleted,
+                    is MeasurementResultStatus.ExceptionCaught -> {
                         eventSink!!.success(measurementResultData.toString())
                     }
 
@@ -219,6 +227,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     is MeasurementResultStatus.TreadDepthResultQueried -> {
                         //these status are not currently being delivered to plugin
                     }
+
                 }
             }).also { intent ->
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -240,9 +249,12 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
 
                     is TreadDepthResultStatus.Failed -> {
-                        PluginError.GetMeasurementResultError.throwToResult(
+                        PluginError.GetMeasurementResultError(onStatusResult.errorCode ?: "", onStatusResult.reason).throwToResult(
                             result,
-                            onStatusResult.reason
+                            mutableMapOf(
+                                "code" to onStatusResult.errorCode,
+                                "message" to onStatusResult.reason
+                            ),
                         )
                     }
                 }
@@ -262,9 +274,13 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             measurementResultDetails.heatMapResultValue.collect { heatMapState ->
                 when (heatMapState) {
                     is MeasurementResultDetails.HeatMapState.Failed -> {
-                        PluginError.GetHeatMapResultError.throwToResult(
+                        PluginError.GetHeatMapResultError(heatMapState.code, heatMapState.message).throwToResult(
                             result,
-                            heatMapState.message
+                            mutableMapOf(
+                                "code" to heatMapState.code,
+                                "message" to heatMapState.message
+                            )
+
                         )
                     }
 
@@ -284,33 +300,24 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
 
-    sealed class PluginError(internal val message: String?) {
+    sealed class PluginError(private val errorCode: String = "", private val errorMessage: String?) {
         data object PluginNotAttachedToActivityError :
-            PluginError("Plugin is not attached to main activity")
+            PluginError(Constants.ERROR_CODE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, "Plugin is not attached to main activity")
 
         data object SdkInitializationFailedError :
-            PluginError("Tire Tread SDK could not be initialized")
+            PluginError(Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED, "Tire Tread SDK could not be initialized")
 
-        data object MeasurementScanAbortedError :
-            PluginError("Scan Aborted")
+        data class GetMeasurementResultError(val code: String, val message: String?) :
+            PluginError(code, message)
 
-        data object MeasurementUploadAbortedError :
-            PluginError("Upload Aborted")
-
-        data object MeasurementError :
-            PluginError("Measurement Error")
-
-        data object GetMeasurementResultError :
-            PluginError("GetMeasurementResult Error")
-
-        data object GetHeatMapResultError :
-            PluginError("GetHeatMapResultError Error")
+        data class GetHeatMapResultError(val code: String, val message: String?) :
+            PluginError(code, message)
 
         data class GenericExceptionError(private val exceptionMessage: String?) :
-            PluginError(exceptionMessage)
+            PluginError(Constants.ERROR_CODE_GENERIC_EXCEPTION, exceptionMessage)
 
         fun throwToResult(result: Result, details: Any? = null) {
-            result.error(this::class.simpleName!!, message, details)
+            result.error(errorCode, errorMessage, details)
         }
     }
 

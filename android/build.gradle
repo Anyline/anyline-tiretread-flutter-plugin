@@ -75,7 +75,7 @@ android {
         implementation("io.ktor:ktor-client-android:2.3.2")
 
         // Anyline Tire Tread SDK dependency
-        implementation("io.anyline.tiretread.sdk:shared:10.0.1")
+        implementation("io.anyline.tiretread.sdk:shared:11.0.1")
 
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")

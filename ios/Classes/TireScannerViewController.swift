@@ -51,23 +51,97 @@ class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
             - scan direction: \(scanViewConfig.defaultUiConfig.scanDirectionConfig.visible)
             - tire overlay: \(scanViewConfig.defaultUiConfig.tireOverlayConfig.visible)
             """)
-            TireTreadScanViewKt.TireTreadScanView(context: UIViewController(),
-                                                  config: scanViewConfig,
-                                                  callback: self) { error in
-                print("Initialization failed: \(error)")
-                self.dismiss(animated: true)
-            }
+            
+            TireTreadScanViewKt.TireTreadScanView(
+                context: self,
+                config: scanViewConfig,
+                onScanAborted: onScanAborted,
+                onScanProcessCompleted: onScanProcessCompleted,
+                callback: handleScanEvent,
+                onError: onError
+            )
+            
         } else if let scanViewConfigStr = scanViewConfigStr {
             print("Tire Config: \(scanViewConfigStr)")
-            TireTreadScanViewKt.TireTreadScanView(context: UIViewController(), config: scanViewConfigStr, callback: self) { error in
-                print("Initialization failed: \(error)")
-                self.dismiss(animated: true)
-            }
+            
+            TireTreadScanViewKt.TireTreadScanView(
+                context: self,
+                config: scanViewConfigStr,
+                onScanAborted: onScanAborted,
+                onScanProcessCompleted: onScanProcessCompleted,
+                callback: handleScanEvent,
+                onError_: onError
+            )
+            
         }
         
         self.dismissViewController = { print("Dismissing view controller") }
         addScanViewControllerAsChild()
     }
+    
+    /**
+     * Handles the event when an error occurs during the scan process.
+     *
+     * @param measurementUUID The unique identifier for the measurement that encountered an error.
+     */
+    private func onError(measurementUUID: String?, exception: KotlinException) {
+        print("onUploadFailed")
+        TTEventHandler.shared.sendEvent(type: "ScanFailed", uuid: measurementUUID, error: exception.message)
+    }
+    
+    /**
+     * Handles the event when a scan is aborted.
+     *
+     * @param measurementUUID The unique identifier for the measurement that was aborted.
+     */
+    private func onScanAborted(measurementUUID: String?) {
+        print("TireTreadScanViewCallback: onScanAbort")
+        removeScanViewControllerAsChild()
+        dismiss(animated: true, completion: nil)
+        TTEventHandler.shared.sendEvent(type: "ScanAborted", uuid: measurementUUID)
+    }
+    
+    /**
+     * Handles the event when the scan process is completed.
+     *
+     * @param measurementUUID The unique identifier for the completed measurement.
+     */
+    private func onScanProcessCompleted(measurementUUID: String) {
+        print("TireTreadScanViewCallback: onScanProcessCompleted")
+        removeScanViewControllerAsChild()
+        dismiss(animated: true)
+        TTEventHandler.shared.sendEvent(type: "ScanProcessCompleted", uuid: measurementUUID)
+    }
+    
+    /**
+     * Handles various scan events and logs appropriate messages.
+     *
+     * @param event The scan event to handle.
+     */
+    private func handleScanEvent(event: ScanEvent) {
+        switch(event) {
+        case let event as OnScanStarted:
+            print("TireTreadScanViewCallback: onScanStart")
+            break
+            
+        case let event as OnScanStopped:
+            print("TireTreadScanViewCallback: onScanStop")
+            break
+            
+        case let event as OnImageUploaded:
+            print("onImageUploaded: \(event.total) images uploaded in total")
+            break
+            
+        case let event as OnDistanceChanged:
+            print("TireTreadScanViewCallback: OnDistanceChanged")
+            break
+            
+        default:
+            print("ScanEvent: \(event.description)")
+            break
+        }
+    }
+    
     
     private func addScanViewControllerAsChild() {
         guard let scannerViewController = self.scannerViewController else {
@@ -97,57 +171,3 @@ class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
         scannerViewController.removeFromParent()
     }
 }
-
-
-extension TireScannerViewController: TireTreadScanViewCallback {
-    
-    func onImageUploaded(uuid: String?, uploaded: Int32, total: Int32) {
-        print("TireTreadScanViewCallback: onImageUploaded: \(total) images uploaded in total")
-    }
-    
-    func onScanStart(uuid: String?) {
-        print("TireTreadScanViewCallback: onScanStart")
-    }
-    
-    func onScanStop(uuid: String?) {
-        print("TireTreadScanViewCallback: onScanStop")
-    }
-    
-    func onScanAbort(uuid: String?) {
-        print("TireTreadScanViewCallback: onScanAbort")
-        removeScanViewControllerAsChild()
-        dismiss(animated: true, completion: nil)
-        TTEventHandler.shared.sendEvent(type: "ScanAborted", uuid: uuid)
-    }
-    
-    func onUploadCompleted(uuid: String?) {
-        print("TireTreadScanViewCallback: onUploadCompleted")
-        removeScanViewControllerAsChild()
-        if let uuid = uuid {
-            print("UUID: \(uuid)")
-        }
-        dismiss(animated: true)
-        TTEventHandler.shared.sendEvent(type: "UploadCompleted", uuid: uuid)
-    }
-    
-    func onUploadFailed(uuid: String?, exception: KotlinException) {
-        print("TireTreadScanViewCallback: onUploadFailed")
-        TTEventHandler.shared.sendEvent(type: "UploadFailed", uuid: uuid)    }
-    
-    func onUploadAborted(uuid: String?) {
-        print("TireTreadScanViewCallback: onUploadAborted")
-        TTEventHandler.shared.sendEvent(type: "UploadAborted", uuid: uuid)
-    }
-    
-    func onFocusFound(uuid: String?) {
-        print("TireTreadScanViewCallback: onFocusFound")
-    }
-    
-    func onDistanceChanged(uuid: String?,
-                           previousStatus: DistanceStatus,
-                           newStatus: DistanceStatus,
-                           previousDistance: Float,
-                           newDistance: Float) {
-    }
-}
-

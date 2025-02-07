@@ -1,3 +1,15 @@
+
+## 0.0.2
+
+### Breaking Changes
+
+#### Updated ScanEvent Handling:
+There are changes in `ScanEvent` which now provides the current state of the scanning process. Some events have been removed and consolidated with new events:
+
+* `UploadAborted` event has been removed and consolidated into `ScanAborted` to simplify communication with the app.
+* `UploadCompleted` event has been removed and consolidated into `ScanProcessCompleted` to simplify communication with the app.
+* `UploadFailed` event has been removed and consolidated into `ScanFailed` to simplify communication with the app.
+
 ## 0.0.1
 
 * Initial stable release of the Anyline Tire Tread Flutter Plugin.

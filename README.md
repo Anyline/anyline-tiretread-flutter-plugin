@@ -171,14 +171,13 @@ Handling SDK's events with an instance of `TireTreadPlugin` call `onScanningEven
    switch (event) {
      case ScanAborted(): 
        debugPrint('measurementUUID : ${event.measurementUUID}');
-     case UploadAborted(): 
-       debugPrint('measurementUUID : ${event.measurementUUID}'); 
-     case UploadCompleted(): 
+     case ScanProcessCompleted(): 
        debugPrint('measurementUUID : ${event.measurementUUID}'); 
        setState(() => _uuid = event.measurementUUID ?? ''); 
-     case UploadFailed(): 
-       debugPrint('measurementUUID : ${event.error}');
-   }
+     case ScanFailed(): 
+       debugPrint('error : ${event.error}');
+       debugPrint('measurementUUID : ${event.measurementUUID}');
+}
  });  
 ```  
 
@@ -189,6 +188,17 @@ After the upload of your scanned frames is completed (that is, the  `UploadCompl
 ```dart  
 String result = await tireTreadPlugin.getResult(measurementUUID:measurementUUID);  
 ```
+
+## Error Codes
+
+| Error Code | Error Origin        | Error Message                                                                                                                                       |
+|------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| 100        | Platform-native SDK | General Processing Error: Please try again or contact support, if this error persists.                                                              |
+| 110        | Platform-native SDK | Bad Images: too fev images -> record for longer; images too blurry -> move device slower.                                                           |
+| 111        | Platform-native SDK | Unexpected image Count: Server did not receive all send images.                                                                                     |
+| 150        | Platform-native SDK | Processing Error: Measurement could not be processed, please try again. See the documentation for advice on how to perform successful measurements. |
+| 1000       | Flutter Plugin      | Plugin Not Attached To Activity: The plugin has not been integrated with the main activity.                                                         |
+| 1001       | Flutter Plugin      | SDK Initialization Failed: Tire Tread SDK could not be initialized                                                                                  |
 
 ## Analytics
 

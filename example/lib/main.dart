@@ -51,13 +51,11 @@ class _AnylineTireTreadPluginExampleState
       switch (event) {
         case ScanAborted():
           debugPrint('UUID : ${event.measurementUUID}');
-        case UploadAborted():
-          debugPrint('UUID : ${event.measurementUUID}');
-        case UploadCompleted():
+        case ScanProcessCompleted():
           debugPrint('UUID : ${event.measurementUUID}');
           setState(() => _uuid = event.measurementUUID ?? '');
-        case UploadFailed():
-          debugPrint('UUID : ${event.error}');
+        case ScanFailed():
+          debugPrint('Error : ${event.error}');
       }
     });
     super.initState();
@@ -172,7 +170,7 @@ class _AnylineTireTreadPluginExampleState
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(SnackBar(
                                                           content: Text(
-                                                              error.details
+                                                              error.message
                                                                   as String)));
                                                 }
                                               } finally {
@@ -209,7 +207,7 @@ class _AnylineTireTreadPluginExampleState
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(SnackBar(
                                                           content: Text(
-                                                              error.details
+                                                              error.message
                                                                   as String)));
                                                 }
                                               } finally {
