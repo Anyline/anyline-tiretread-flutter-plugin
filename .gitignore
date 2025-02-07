@@ -66,3 +66,5 @@ example/ios/.symlinks
 
 # Generally ignore all .env files
 *.env
+# Except the "how to add your license key" file
+!example/ADD YOUR LICENSE KEY AND RENAME THIS FILE TO .env
