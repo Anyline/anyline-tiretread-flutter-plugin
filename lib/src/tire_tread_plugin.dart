@@ -1,6 +1,6 @@
 import 'package:anyline_tire_tread_plugin/src/anyline_tire_tread_plugin_platform_interface.dart';
 import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
-import 'package:anyline_tire_tread_plugin/src/scanning_event.dart';
+import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:flutter/services.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 

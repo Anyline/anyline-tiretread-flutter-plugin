@@ -25,7 +25,7 @@ class MeasurementResultDetails(private val measurementResultData: MeasurementRes
         data object GettingHeatMapUrl: HeatMapState()
         data class HeatMapUrlReady(val heatmap: Heatmap): HeatMapState()
         data class DownloadingHeatMap(val heatmap: Heatmap): HeatMapState()
-        data class Failed(val message: String)
+        data class Failed(val code: String, val message: String)
             : HeatMapState()
         data class Ready(val heatmap: Heatmap, val stream: InputStream)
             : HeatMapState()
@@ -54,6 +54,7 @@ class MeasurementResultDetails(private val measurementResultData: MeasurementRes
                 is Response.Error -> {
                     heatMapResult.update {
                         HeatMapState.Failed(
+                            heatMapResponse.errorCode ?: "",
                             heatMapResponse.errorMessage ?: "HeatMap Url not available!"
                         )
                     }
@@ -61,6 +62,7 @@ class MeasurementResultDetails(private val measurementResultData: MeasurementRes
                 is Response.Exception -> {
                     heatMapResult.update {
                         HeatMapState.Failed(
+                            "",
                             heatMapResponse.exception.message ?: "Failed to get HeatMap Url!"
                         )
                     }
@@ -82,13 +84,13 @@ class MeasurementResultDetails(private val measurementResultData: MeasurementRes
                 when (response.status) {
                     HttpStatusCode.OK -> HeatMapState.Ready(heatmap, response.body())
                     else -> {
-                        HeatMapState.Failed(response.bodyAsText())
+                        HeatMapState.Failed("", response.bodyAsText())
                     }
                 }
             }
         }
         catch (e: Exception) {
-            heatMapResult.update { HeatMapState.Failed(e.localizedMessage ?: "") }
+            heatMapResult.update { HeatMapState.Failed("", e.localizedMessage ?: "") }
         }
         return heatMapResult.value
     }

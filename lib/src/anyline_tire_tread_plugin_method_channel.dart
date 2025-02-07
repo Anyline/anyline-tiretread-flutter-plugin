@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:anyline_tire_tread_plugin/src/constants.dart';
 import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
-import 'package:anyline_tire_tread_plugin/src/scanning_event.dart';
+import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -66,12 +66,10 @@ class MethodChannelAnylineTireTreadPlugin
       switch (measurementResultStatus) {
         case 'ScanAborted':
           return ScanAborted.fromMap(eventType);
-        case 'UploadAborted':
-          return UploadAborted.fromMap(eventType);
-        case 'UploadCompleted':
-          return UploadCompleted.fromMap(eventType);
-        case 'UploadFailed':
-          return UploadFailed.fromMap(eventType);
+        case 'ScanProcessCompleted':
+          return ScanProcessCompleted.fromMap(eventType);
+        case 'ScanFailed':
+          return ScanFailed.fromMap(eventType);
         default:
           return ScanAborted.fromMap(eventType);
       }
