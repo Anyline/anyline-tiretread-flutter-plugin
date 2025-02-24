@@ -1,7 +1,11 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:convert';
 
+import 'package:anyline_tire_tread_plugin/anyline_tire_tread_plugin.dart';
 import 'package:anyline_tire_tread_plugin/src/constants.dart';
 import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
+import 'package:anyline_tire_tread_plugin/src/models/tread_depth_result.dart';
 import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -25,9 +29,13 @@ class MethodChannelAnylineTireTreadPlugin
   }
 
   @override
-  Future<bool?> initialize({required String licenseKey}) async {
-    final result = await methodChannel.invokeMethod<bool>(
-        Constants.METHOD_INITIALIZE, {Constants.EXTRA_LICENSE_KEY: licenseKey});
+  Future<bool?> initialize(
+      {required String licenseKey, required String pluginVersion}) async {
+    final result =
+    await methodChannel.invokeMethod<bool>(Constants.METHOD_INITIALIZE, {
+      Constants.EXTRA_LICENSE_KEY: licenseKey,
+      Constants.EXTRA_PLUGIN_VERSION: pluginVersion
+    });
     return result;
   }
 
@@ -39,11 +47,12 @@ class MethodChannelAnylineTireTreadPlugin
   }
 
   @override
-  Future<String?> getResult({required String measurementUUID}) async {
-    final version = await methodChannel.invokeMethod<String>(
+  Future<TreadDepthResult?> getResult({required String measurementUUID}) async {
+    final result = await methodChannel.invokeMethod<String>(
         Constants.METHOD_GET_RESULT,
         {Constants.EXTRA_MEASUREMENT_UUID: measurementUUID});
-    return version;
+    return TreadDepthResult.fromJson(
+        jsonDecode(result!) as Map<String, dynamic>);
   }
 
   @override
@@ -74,5 +83,29 @@ class MethodChannelAnylineTireTreadPlugin
           return ScanAborted.fromMap(eventType);
       }
     });
+  }
+
+  @override
+  Future<String?> sendFeedbackComment(
+      {required String measurementUUID, required String comment}) async {
+    final result = await methodChannel
+        .invokeMethod<String>(Constants.METHOD_SEND_FEEDBACK_COMMENT, {
+      Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
+      Constants.EXTRA_FEEDBACK_COMMENT: comment
+    });
+    return result;
+  }
+
+  @override
+  Future<String?> sendTreadDepthResultFeedback(
+      {required String measurementUUID,
+      required List<TreadResultRegion> resultRegions}) async {
+    final result = await methodChannel.invokeMethod<String>(
+        Constants.METHOD_SEND_TREAD_DEPTH_RESULT_FEEDBACK, {
+      Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
+      Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK:
+          jsonEncode(resultRegions.map((obj) => obj.toJson()).toList())
+    });
+    return result;
   }
 }

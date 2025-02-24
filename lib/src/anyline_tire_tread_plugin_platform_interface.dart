@@ -1,4 +1,5 @@
 import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
+import 'package:anyline_tire_tread_plugin/src/models/tread_depth_result.dart';
 import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -30,15 +31,16 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
     throw UnimplementedError('getSdkVersion() has not been implemented.');
   }
 
-  Future<bool?> initialize({required String licenseKey}) {
-    throw UnimplementedError('setup() has not been implemented.');
+  Future<bool?> initialize(
+      {required String licenseKey, required String pluginVersion}) {
+    throw UnimplementedError('initialize() has not been implemented.');
   }
 
   Future<bool?> scan({required ScanOptions options}) {
     throw UnimplementedError('scan() has not been implemented.');
   }
 
-  Future<String?> getResult({required String measurementUUID}) {
+  Future<TreadDepthResult?> getResult({required String measurementUUID}) {
     throw UnimplementedError('getResult() has not been implemented.');
   }
 
@@ -48,5 +50,17 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
 
   Stream<ScanEvent> get onScanningEvent {
     throw UnimplementedError('onEvent has not been implemented.');
+  }
+
+  Future<String?> sendFeedbackComment(
+      {required String measurementUUID, required String comment}) {
+    throw UnimplementedError('sendFeedbackComment() has not been implemented.');
+  }
+
+  Future<String?> sendTreadDepthResultFeedback(
+      {required String measurementUUID,
+      required List<TreadResultRegion> resultRegions}) {
+    throw UnimplementedError(
+        'sendTreadDepthResultFeedback() has not been implemented.');
   }
 }
