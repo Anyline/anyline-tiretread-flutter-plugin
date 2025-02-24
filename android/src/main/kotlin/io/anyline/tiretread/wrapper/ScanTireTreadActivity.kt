@@ -20,7 +20,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import io.anyline.tiretread.flutter.AnylineTireTreadPlugin
 import io.anyline.tiretread.flutter.databinding.ActivityScanTireTreadBinding
 import io.anyline.tiretread.sdk.scanner.DistanceStatus
 import io.anyline.tiretread.sdk.scanner.MeasurementSystem
@@ -66,7 +65,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
         super.onCreate(savedInstanceState)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {

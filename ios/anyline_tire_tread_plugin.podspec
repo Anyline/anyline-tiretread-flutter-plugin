@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'anyline_tire_tread_plugin'
-  s.version          = '0.0.2'
+  s.version          = '0.0.3'
   s.summary          = 'The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device.'
   s.description      = <<-DESC
 The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device.
@@ -15,7 +15,7 @@ The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'AnylineTireTreadSdk', '11.0.0'
+  s.dependency 'AnylineTireTreadSdk', '11.1.0'
   s.platform = :ios, '15.6'
   s.ios.deployment_target = '15.6'
   s.static_framework = true

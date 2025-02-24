@@ -36,6 +36,14 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
             Task{
                 await getHeatMap(result: result, call: call)
             }
+        case Constants.METHOD_SEND_FEEDBACK_COMMENT:
+            Task{
+                await postFeedbackComment(result: result, call: call)
+            }
+        case Constants.METHOD_SEND_TREAD_DEPTH_RESULT_FEEDBACK:
+            Task{
+                await sendTreadDepthResultFeedback(result: result, call: call)
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -44,9 +52,16 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     private func initializeSdk(result: @escaping FlutterResult, call: FlutterMethodCall) {
             let arguments = call.arguments as? [String: Any]
             let licenseKey = arguments?[Constants.EXTRA_LICENSE_KEY] as? String
+            let pluginVersion = arguments?[Constants.EXTRA_PLUGIN_VERSION] as? String
+
             if (licenseKey != nil) {
                 do {
-                    try AnylineTireTreadSdk.shared.doInit(licenseKey: licenseKey ?? "")
+                    try AnylineTireTreadSdk.shared.doInit(
+                        licenseKey: licenseKey ?? "",
+                        customTag: nil,
+                        wrapperInfo: WrapperInfo.Flutter(version: pluginVersion ?? "")
+                    )
+
                     result(true)
                 } catch {
                     let kotlinException = (error as NSError).userInfo["KotlinException"]
@@ -154,11 +169,10 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     private func getHeatMap(result: @escaping FlutterResult, call: FlutterMethodCall) async{
         let arguments = call.arguments as? [String: Any]
         guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
-            PluginError.genericExceptionError("","uuid parameter not found").throwToResult(result: result)
+            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
             return
         }
-        
-        
+
         await withCheckedContinuation {
             continuation in
             AnylineTireTreadSdk.shared.getHeatmap(measurementUuid: uuid, timeoutSeconds: 30) { response in
@@ -179,7 +193,91 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    
+    /// Sends feedback comment for a specific measurement.
+    /// - Parameters:
+    ///   - result: The Flutter result callback.
+    ///   - call: The Flutter method call containing arguments.
+    private func postFeedbackComment(result: @escaping FlutterResult, call: FlutterMethodCall) async{
+        let arguments = call.arguments as? [String: Any]
+        guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
+            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
+            return
+        }
+        guard let comment = arguments?[Constants.EXTRA_FEEDBACK_COMMENT] as? String else {
+            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"comment parameter not found").throwToResult(result: result)
+            return
+        }
+
+
+        await withCheckedContinuation {
+            continuation in
+            AnylineTireTreadSdk.shared.sendCommentFeedback(uuid: uuid, comment: comment) { response in
+                switch(response) {
+                case let response as ResponseSuccess<MeasurementInfo>:
+                    continuation.resume(returning:  result(response.data.measurementUuid))
+                case let response as ResponseError<MeasurementInfo>:
+                    let message = response.errorMessage ?? "Unknown error"
+                    continuation.resume(returning:  PluginError.genericExceptionError(response.errorCode,message).throwToResult(result: result))
+                case let responseException as ResponseException<MeasurementInfo>:
+                    let exceptionMessage = "Unable to get tread depth result: " + (responseException.exception.message ?? "Unknown exception")
+                    continuation.resume(returning:  PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,exceptionMessage).throwToResult(result: result))
+                    break
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    /// Sends tread depth result feedback for a specific measurement.
+    /// - Parameters:
+    ///   - result: The Flutter result callback.
+    ///   - call: The Flutter method call containing arguments.
+    private func sendTreadDepthResultFeedback(result: @escaping FlutterResult, call: FlutterMethodCall) async{
+        let arguments = call.arguments as? [String: Any]
+        guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
+            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
+            return
+        }
+        guard let regionsAsString = arguments?[Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK] as? String else {
+            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"comment parameter not found").throwToResult(result: result)
+            return
+        }
+
+        let data =     regionsAsString.data(using: .utf8)
+        var regions: [TreadResultRegion] = []
+        do {
+            if let jsonArray = try JSONSerialization.jsonObject(with: data!, options: []) as? [[String: Any]] {
+                for name in jsonArray {
+                    let deit = String(data: try  JSONSerialization.data(withJSONObject: name), encoding: .utf8)!
+                    regions.append(TreadResultRegion.companion.fromJson(json: deit))
+                }
+            }
+        } catch {
+            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"Error deserializing JSON: \(error)").throwToResult(result: result)
+        }
+
+        await withCheckedContinuation {
+            continuation in
+            AnylineTireTreadSdk.shared.sendTreadDepthResultFeedback(resultUuid: uuid, treadResultRegions:regions) { response in
+                switch(response) {
+                case let response as ResponseSuccess<MeasurementInfo>:
+                    continuation.resume(returning:  result(response.data.measurementUuid))
+                case let response as ResponseError<MeasurementInfo>:
+                    let message = response.errorMessage ?? "Unknown error"
+                    continuation.resume(returning:  PluginError.genericExceptionError(response.errorCode,message).throwToResult(result: result))
+                case let responseException as ResponseException<MeasurementInfo>:
+                    let exceptionMessage = "Unable to get tread depth result: " + (responseException.exception.message ?? "Unknown exception")
+                    continuation.resume(returning:  PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,exceptionMessage).throwToResult(result: result))
+                    break
+                default:
+                    break
+                }
+            }
+        }
+
+    }
+
     // Returns a Tire Tread Scan View Config JSON string from another, with custom scan speed / measurement system
     // values introduced. Can return null if input isn't valid JSON, or if the resulting output cannot be converted
     // to a String.

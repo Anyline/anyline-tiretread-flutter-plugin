@@ -186,7 +186,32 @@ Handling SDK's events with an instance of `TireTreadPlugin` call `onScanningEven
 ### Obtaining the Measurement Results
 After the upload of your scanned frames is completed (that is, the  `UploadCompletedEvent` ), your measurement results may still take a few seconds to become available. To fetch the results, call the function  `getResult(measurementUuid)`:
 ```dart  
-String result = await tireTreadPlugin.getResult(measurementUUID:measurementUUID);  
+TreadDepthResult? result = await tireTreadPlugin.getResult(measurementUUID:measurementUUID);  
+```
+
+## User Corrected Values and Comments
+
+### User Comments
+To send a comment on a measurement, use the `sendFeedbackComment` function of the TireTreadPlugin.
+```dart
+await tireTreadPlugin.sendFeedbackComment(measurementUUID: _uuid, comment: comment);
+```
+
+### User Corrected Region Values
+To send user corrected region values, use the `sendTreadDepthResultFeedback` function from the TireTreadPlugin. The result feedback should be provided as a list of `TreadResultRegion`, ordered from left to right.
+
+> **_IMPORTANT:_**  You can only provide feedback for the regions returned by the SDK in the `TreadDepthResult` object. 
+> The values of all regions need be added to the list before sending the feedback.
+
+
+The TreadResultRegion objects can be initialized with Millimeters or Inches, e.g.:
+```dart
+TreadResultRegion regionMm = TreadResultRegion.initMm(available: true,valueMm: 1.2);
+TreadResultRegion regionInch = TreadResultRegion.initInch(available: true,valueInch: 0.047);
+
+List<TreadResultRegion>  myCorrectedResults =  [regionMm, regionInch];
+
+await tireTreadPlugin.sendTreadDepthResultFeedback(measurementUUID: _uuid, resultRegions: myCorrectedResults);
 ```
 
 ## Error Codes
