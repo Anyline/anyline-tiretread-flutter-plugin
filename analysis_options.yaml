@@ -21,6 +21,7 @@ analyzer:
     dead_code: info
     missing_return: error
     invalid_assignment: warning
+    constant_identifier_names: ignore
 
 linter:
   rules:

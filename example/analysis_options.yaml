@@ -21,6 +21,7 @@ analyzer:
     dead_code: info
     missing_return: error
     invalid_assignment: warning
+    use_build_context_synchronously: ignore
 
 linter:
   rules:

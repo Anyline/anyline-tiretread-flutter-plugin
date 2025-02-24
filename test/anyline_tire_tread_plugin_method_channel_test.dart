@@ -32,7 +32,7 @@ void main() {
 
   test('setupWithEmptyLicenseKey', () async {
     try {
-      await platform.initialize(licenseKey: '');
+      await platform.initialize(licenseKey: '', pluginVersion: '');
     } on PlatformException catch (e) {
       await expectLater(e.message, 'Tire Tread SDK could not be initialized');
     }
