@@ -2,7 +2,7 @@
 name: Publish to pub.dev
 
 on:
-  push:
+  create:
     tags:
       - 'v**' # tag pattern on pub.dev: 'v{{version}'
 
