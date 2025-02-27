@@ -12,8 +12,6 @@ jobs:
     permissions:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
-    with:
-      environment: pub.dev
     steps:
 
 
