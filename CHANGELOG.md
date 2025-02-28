@@ -1,4 +1,4 @@
-## 0.0.4-alpha.2
+## 0.0.4-alpha.3
 
 * Automate Release on branch merge test v2
 
