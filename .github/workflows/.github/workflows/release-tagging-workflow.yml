@@ -7,8 +7,6 @@ on:
       - release_automation # Only trigger for pull requests merged into the main branch
 
 jobs:
-  permissions:
-    id-token: write # Required for authentication using OIDC
   create_tag:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') # Run only if the PR is merged and the branch name starts with 'release/'
     runs-on: ubuntu-latest # Use the latest Ubuntu environment
@@ -36,7 +34,7 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }} # Create the tag
           git push origin ${{ env.TAG_NAME }} # Push the tag to the repository
-          
+
       - name: Publish
         uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
 
