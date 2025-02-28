@@ -1,39 +1,25 @@
 name: Publish to pub.dev
 
-#on:
-#  workflow_dispatch:
-
-#
-
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+
 
 jobs:
   publish:
     permissions:
       id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    # with:
-    #   working-directory: path/to/package/within/repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-#jobs:
-#  publish:
-#    permissions:
-#      id-token: write # Required for authentication using OIDC
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v2
-#
-#      - uses: dart-lang/setup-dart@v1
-#      - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
-#      - name: Install dependencies
-#        run: dart pub get
-#      # Here you can insert custom steps you need
-#      # - run: dart tool/generate-code.dart
-#      - name: Publish
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.PAT }}
-#        run: dart pub publish --force
+      - uses: dart-lang/setup-dart@v1
+      - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
+      - name: Install dependencies
+        run: dart pub get
+      # Here you can insert custom steps you need
+      # - run: dart tool/generate-code.dart
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: dart pub publish --force

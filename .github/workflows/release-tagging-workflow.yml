@@ -53,3 +53,25 @@ jobs:
             * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}
           draft: false # Publish the release immediately
           prerelease: false # Mark the release as a full release
+
+  publish:
+    needs: create_tag
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: refs/tags/${{ env.TAG_NAME }}
+
+      - uses: dart-lang/setup-dart@v1
+      - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
+      - name: Install dependencies
+        run: dart pub get
+      # Here you can insert custom steps you need
+      # - run: dart tool/generate-code.dart
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: dart pub publish --force
