@@ -31,6 +31,8 @@ jobs:
           echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
       - name: Push Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           git tag ${{ env.TAG_NAME }} # Create the tag
           git push origin ${{ env.TAG_NAME }} # Push the tag to the repository
