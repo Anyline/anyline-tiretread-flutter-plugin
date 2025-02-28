@@ -1,20 +1,18 @@
-# .github/workflows/publish.yml
-name: Publish to pub.dev
+name: Tag Push Workflow
 
 on:
   push:
     tags:
-      - '*' # tag pattern on pub.dev: 'v{{version}'
+      - '*'
 
-# Publish using custom workflow
 jobs:
-  publish:
-    permissions:
-      id-token: write # Required for authentication using OIDC
+  build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Use PAT to push tags
-      - env:
-      - GITHUB_TOKEN: ${{ secrets.PAT }}
-      - name: Publish
-        uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: |
+          echo "This job is trigger"
