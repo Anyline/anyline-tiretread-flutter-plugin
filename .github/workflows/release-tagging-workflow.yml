@@ -10,7 +10,8 @@ jobs:
   create_tag:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') # Run only if the PR is merged and the branch name starts with 'release/'
     runs-on: ubuntu-latest # Use the latest Ubuntu environment
-
+    outputs:
+     tag-version: ${{ steps.generate_tag.outputs.VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # Check out the repository
@@ -29,6 +30,7 @@ jobs:
           TAG_VERSION=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/\1/')
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
+          echo "VERSION=$TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: Push Tag
         env:
@@ -59,6 +61,8 @@ jobs:
     permissions:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
+    env:
+      TAG_VERSION: ${{ needs.create_tag.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
