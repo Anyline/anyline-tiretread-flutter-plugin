@@ -2,10 +2,6 @@ name: Publish to pub.dev
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "The version to release. The version should be the same as version in package.json. For example, 1.0.0"
-        required: true
 
 #
 #jobs:
@@ -24,8 +20,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-            ref: refs/tags/${{ github.event.inputs.tag }}
+
       - uses: dart-lang/setup-dart@v1
       - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
       - name: Install dependencies
@@ -33,4 +28,6 @@ jobs:
       # Here you can insert custom steps you need
       # - run: dart tool/generate-code.dart
       - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: dart pub publish --force
