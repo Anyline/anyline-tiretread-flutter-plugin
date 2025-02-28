@@ -52,7 +52,3 @@ jobs:
             * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }} # Link to the documentation
           draft: false # Publish the release immediately
           prerelease: false # Mark the release as a full release
-  publish:
-    permissions:
-      id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
