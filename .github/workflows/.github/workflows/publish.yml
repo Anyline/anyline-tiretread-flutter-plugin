@@ -13,5 +13,8 @@ jobs:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
+      - name: Use PAT to push tags
+      - env:
+      - GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Publish
         uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
