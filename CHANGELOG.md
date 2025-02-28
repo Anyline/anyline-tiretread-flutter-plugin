@@ -1,6 +1,6 @@
 ## 0.0.4-alpha.5
 
-* Automate Release on branch merge test v3
+* Automate Release on branch merge test v4
 
 
 ## 0.0.1
