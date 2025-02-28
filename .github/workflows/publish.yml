@@ -3,7 +3,7 @@ name: Publish to pub.dev
 on:
   workflow_dispatch:
     inputs:
-      version:
+      tag:
         description: "The version to release. The version should be the same as version in package.json. For example, 1.0.0"
         required: true
 
@@ -22,9 +22,10 @@ jobs:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
         with:
-          ref: ref/tags/${{ inputs.version }}
+            ref: refs/tags/${{ github.event.inputs.tag }}
       - uses: dart-lang/setup-dart@v1
       - name: Install dependencies
         run: dart pub get
