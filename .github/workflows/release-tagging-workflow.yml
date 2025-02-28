@@ -35,8 +35,6 @@ jobs:
           git tag ${{ env.TAG_NAME }} # Create the tag
           git push origin ${{ env.TAG_NAME }} # Push the tag to the repository
 
-      - name: Publish
-        uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
 
       - name: Create GitHub Release
         id: create_release
