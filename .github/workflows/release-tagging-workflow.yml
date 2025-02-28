@@ -11,7 +11,7 @@ jobs:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') # Run only if the PR is merged and the branch name starts with 'release/'
     runs-on: ubuntu-latest # Use the latest Ubuntu environment
     outputs:
-     tag-version: ${{ steps.generate_tag.outputs.VERSION }}
+      tag-version: ${{ steps.generate_tag.outputs.VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # Check out the repository
@@ -67,7 +67,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: refs/tags/$TAG_VERSION
+          ref: refs/tags/${{ needs.create_tag.outputs.tag-version }}
+          fetch-depth: 0
 
       - uses: dart-lang/setup-dart@v1
       - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
