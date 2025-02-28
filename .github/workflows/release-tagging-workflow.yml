@@ -17,7 +17,6 @@ on:
 
 jobs:
   create_tag:
-    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') # Run only if the PR is merged and the branch name starts with 'release/'
     runs-on: ubuntu-latest # Use the latest Ubuntu environment
 
     steps:
