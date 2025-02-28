@@ -62,12 +62,12 @@ jobs:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     env:
-      TAG_VERSION: ${{ needs.create_tag.outputs.version }}
+      TAG_VERSION: ${{ needs.create_tag.outputs.tag-version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: refs/tags/${{ env.TAG_VERSION }}
+          ref: refs/tags/${{ TAG_VERSION }}
 
       - uses: dart-lang/setup-dart@v1
       - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
