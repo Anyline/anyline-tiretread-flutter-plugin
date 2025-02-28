@@ -1,10 +1,19 @@
 name: Release Tagging Workflow
 
+#on:
+#  pull_request:
+#    types: [closed] # Trigger the workflow when a pull request is closed
+#    branches:
+#      - automation_test # Only trigger for pull requests merged into the main branch
+
 on:
-  pull_request:
-    types: [closed] # Trigger the workflow when a pull request is closed
-    branches:
-      - automation_test # Only trigger for pull requests merged into the main branch
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release. The version should be the same as version in package.json. For example, 1.0.0"
+        required: true
+
+
 
 jobs:
   create_tag:
@@ -25,15 +34,15 @@ jobs:
         run: |
           BRANCH_NAME=${{github.event.pull_request.head.ref}}
           echo "Current branch name is: $BRANCH_NAME"
-          TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
-          TAG_VERSION=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/\1/')
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
+#          TAG_NAME=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/v\1/')
+#          TAG_VERSION=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/\1/')
+#          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+#          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
       - name: Push Tag
         run: |
-          git tag ${{ env.TAG_NAME }} # Create the tag
-          git push origin ${{ env.TAG_NAME }} # Push the tag to the repository
+          git tag ${{ inputs.version }} # Create the tag
+          git push origin ${{ inputs.version }} # Push the tag to the repository
 
 
       - name: Create GitHub Release
@@ -42,13 +51,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub token from secrets
         with:
-          tag_name: ${{ env.TAG_NAME }} # Use the generated tag name
-          release_name: Anyline ${{ env.TAG_NAME }} # Set the release name
+          tag_name: ${{ inputs.version }} # Use the generated tag name
+          release_name: Anyline ${{ inputs.version }} # Set the release name
           body: |
             ## What's Changed
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}/changelog # Link to the changelog
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ inputs.version }}/changelog # Link to the changelog
 
             ## Documentation
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }} # Link to the documentation
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ inputs.version }} # Link to the documentation
           draft: false # Publish the release immediately
           prerelease: false # Mark the release as a full release
