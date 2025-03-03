@@ -1,8 +1,3 @@
-## 0.0.4-alpha.5
-
-* Automate Release on branch merge test v7
-
-
 ## 0.0.1
 
 * Initial stable release of the Anyline Tire Tread Flutter Plugin.
