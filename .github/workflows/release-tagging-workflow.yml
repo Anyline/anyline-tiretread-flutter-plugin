@@ -10,8 +10,6 @@ jobs:
   create_tag:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') # Run only if the PR is merged and the branch name starts with 'release/'
     runs-on: ubuntu-latest # Use the latest Ubuntu environment
-    outputs:
-      tag-version: ${{ steps.generate_tag.outputs.VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # Check out the repository
@@ -38,45 +36,3 @@ jobs:
         run: |
           git tag ${{ env.TAG_NAME }} # Create the tag
           git push origin ${{ env.TAG_NAME }} # Push the tag to the repository
-
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1 # Use the create-release action
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub token from secrets
-        with:
-          tag_name: ${{ env.TAG_NAME }} # Use the generated tag name
-          release_name: Anyline ${{ env.TAG_NAME }} # Set the release name
-          body: |
-            ## What's Changed
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}/changelog
-            ## Documentation
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}
-          draft: false # Publish the release immediately
-          prerelease: false # Mark the release as a full release
-
-  publish:
-    needs: create_tag
-    permissions:
-      id-token: write # Required for authentication using OIDC
-    runs-on: ubuntu-latest
-    env:
-      TAG_VERSION: ${{ needs.create_tag.outputs.tag-version }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: refs/tags/${{ needs.create_tag.outputs.tag-version }}
-          fetch-depth: 0
-
-      - uses: dart-lang/setup-dart@v1
-      - uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
-      - name: Install dependencies
-        run: dart pub get
-      # Here you can insert custom steps you need
-      # - run: dart tool/generate-code.dart
-      - name: Publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        run: dart pub publish --force
