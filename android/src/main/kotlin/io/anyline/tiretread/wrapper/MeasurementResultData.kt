@@ -27,14 +27,11 @@ sealed class MeasurementResultStatus(val statusDescription: String) {
         false -> "Processing images...."
     })
     @Serializable
-    data object UploadAborted
-        : MeasurementResultStatus("Upload Aborted.")
+    data object ScanProcessCompleted
+        : MeasurementResultStatus("ScanProcess completed!")
     @Serializable
-    data class UploadFailed(val reason: String?)
-        : MeasurementResultStatus("Upload Failed: ${reason?: "unknown"}.")
-    @Serializable
-    data object UploadCompleted
-        : MeasurementResultStatus("Upload completed!")
+    data class ExceptionCaught(val reason: String?)
+        : MeasurementResultStatus("Exception: $reason")
     @Serializable
     data class TreadDepthResultQueried(val treadDepthResultStatus: TreadDepthResultStatus)
         : MeasurementResultStatus(treadDepthResultStatus.statusDescription)
@@ -53,7 +50,7 @@ sealed class TreadDepthResultStatus(val statusDescription: String) {
     data class Succeed(val treadDepthResult: TreadDepthResult): TreadDepthResultStatus(
         "Tread depth result ready.")
     @Serializable
-    data class Failed(val reason: String?): TreadDepthResultStatus(
+    data class Failed(val errorCode: String?, val reason: String?): TreadDepthResultStatus(
         "Failed to get tread depth result.")
 
     override fun toString(): String {
@@ -81,15 +78,17 @@ data class MeasurementResultData(val measurementUUID: String,
                     }
 
                     is Response.Error -> {
-                        TreadDepthResultStatus.Failed(response.errorMessage).apply {
-                            measurementResultStatus =
-                                MeasurementResultStatus.TreadDepthResultQueried(this)
-                            onStatusResult.invoke(this)
+                        response.errorCode?.let {
+                            TreadDepthResultStatus.Failed(it,response.errorMessage).apply {
+                                measurementResultStatus =
+                                    MeasurementResultStatus.TreadDepthResultQueried(this)
+                                onStatusResult.invoke(this)
+                            }
                         }
                     }
 
                     is Response.Exception -> {
-                        TreadDepthResultStatus.Failed(response.exception.message).apply {
+                        TreadDepthResultStatus.Failed("",response.exception.message).apply {
                             measurementResultStatus =
                                 MeasurementResultStatus.TreadDepthResultQueried(this)
                             onStatusResult.invoke(this)

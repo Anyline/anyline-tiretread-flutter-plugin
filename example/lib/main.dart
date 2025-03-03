@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:anyline_tire_tread_plugin/anyline_tire_tread_plugin.dart';
 import 'package:anyline_tire_tread_plugin_example/app_colors.dart';
+import 'package:anyline_tire_tread_plugin_example/app_strings.dart';
 import 'package:anyline_tire_tread_plugin_example/device_details_widget.dart';
 import 'package:anyline_tire_tread_plugin_example/env_info.dart';
+import 'package:anyline_tire_tread_plugin_example/feedback_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/initalize_dialog.dart';
+import 'package:anyline_tire_tread_plugin_example/tread_depth_feedback_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +37,7 @@ class _AnylineTireTreadPluginExampleState
       GlobalKey<ScaffoldMessengerState>();
 
   String _uuid = '';
-  String _result = '';
+  TreadDepthResult? _result;
   String _heatmap = '';
 
   ValueNotifier<InitializationStatus> initializationStatus =
@@ -51,13 +54,11 @@ class _AnylineTireTreadPluginExampleState
       switch (event) {
         case ScanAborted():
           debugPrint('UUID : ${event.measurementUUID}');
-        case UploadAborted():
-          debugPrint('UUID : ${event.measurementUUID}');
-        case UploadCompleted():
+        case ScanProcessCompleted():
           debugPrint('UUID : ${event.measurementUUID}');
           setState(() => _uuid = event.measurementUUID ?? '');
-        case UploadFailed():
-          debugPrint('UUID : ${event.error}');
+        case ScanFailed():
+          debugPrint('Error : ${event.error}');
       }
     });
     super.initState();
@@ -72,7 +73,7 @@ class _AnylineTireTreadPluginExampleState
           appBar: AppBar(
             backgroundColor: const Color(0xFF000000),
             title: const Text(
-              'Anyline Tire Tread Plugin Example',
+            AppStrings.appTitle,
               style: TextStyle(color: AppColors.primary),
             ),
           ),
@@ -115,7 +116,7 @@ class _AnylineTireTreadPluginExampleState
                                                           .pop();
                                                       setState(() {
                                                         _uuid = '';
-                                                        _result = '';
+                                                        _result = null;
                                                       });
                                                       await startInitialization();
                                                     }),
@@ -124,7 +125,7 @@ class _AnylineTireTreadPluginExampleState
                                               );
                                             }
                                           : null,
-                                      title: 'Initialize'),
+                                      title: AppStrings.btnInitialize),
                                   sizedBox,
                                   AppButton(
                                       onPressed:
@@ -133,7 +134,7 @@ class _AnylineTireTreadPluginExampleState
                                                   try {
                                                     setState(() {
                                                       _uuid = '';
-                                                      _result = '';
+                                                      _result = null;
                                                       _heatmap = '';
                                                     });
                                                     _tireTreadPlugin.scan(
@@ -145,7 +146,7 @@ class _AnylineTireTreadPluginExampleState
                                                   }
                                                 }
                                               : null,
-                                      title: 'Scan'),
+                                      title: AppStrings.btnScan),
                                   sizedBox,
                                   AppButton(
                                       onPressed: (status ==
@@ -166,15 +167,10 @@ class _AnylineTireTreadPluginExampleState
                                                     (await _tireTreadPlugin
                                                         .getResult(
                                                             measurementUUID:
-                                                                _uuid))!;
+                                                                _uuid));
                                               } on PlatformException catch (error) {
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              error.details
-                                                                  as String)));
-                                                }
+                                                showSnackBar(context,
+                                                    error.message as String);
                                               } finally {
                                                 setState(() {
                                                   showLoader = false;
@@ -182,7 +178,7 @@ class _AnylineTireTreadPluginExampleState
                                               }
                                             }
                                           : null,
-                                      title: 'Get Result'),
+                                      title: AppStrings.btnGetResult),
                                   sizedBox,
                                   AppButton(
                                       onPressed: (status ==
@@ -205,13 +201,8 @@ class _AnylineTireTreadPluginExampleState
                                                             measurementUUID:
                                                                 _uuid))!;
                                               } on PlatformException catch (error) {
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              error.details
-                                                                  as String)));
-                                                }
+                                                showSnackBar(context,
+                                                    error.message as String);
                                               } finally {
                                                 setState(() {
                                                   showLoader = false;
@@ -219,7 +210,119 @@ class _AnylineTireTreadPluginExampleState
                                               }
                                             }
                                           : null,
-                                      title: 'Get HeatMap'),
+                                      title: AppStrings.btnGetHeatMap),
+                                  sizedBox,
+                                  AppButton(
+                                      onPressed: (status ==
+                                                  InitializationStatus.done &&
+                                              _uuid.isNotEmpty &&
+                                              _result != null)
+                                          ? () async {
+                                              showDialog<void>(
+                                                barrierDismissible: false,
+                                                context: context,
+                                                builder:
+                                                    (BuildContext con) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    child: FeedbackDialog(
+                                                        onCancel: () {
+                                                      Navigator.pop(con);
+                                                    }, onDone: (comment) async {
+                                                      Navigator.of(con)
+                                                          .pop();
+                                                      try {
+                                                        setState(() {
+                                                          showLoader = true;
+                                                        });
+                                                        await _tireTreadPlugin
+                                                            .sendFeedbackComment(
+                                                                measurementUUID:
+                                                                    _uuid,
+                                                                comment:
+                                                                    comment);
+
+                                                        showSnackBar(context,
+                                                            AppStrings.messageFeedbackSuccess);
+                                                      } on PlatformException catch (error) {
+                                                        showSnackBar(
+                                                            context,
+                                                            error.message
+                                                                as String);
+                                                      } finally {
+                                                        setState(() {
+                                                          showLoader = false;
+                                                        });
+                                                      }
+                                                    }),
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          : null,
+                                      title: AppStrings.btnSendFeedback),
+                                  sizedBox,
+                                  AppButton(
+                                      onPressed: (status ==
+                                                  InitializationStatus.done &&
+                                              _uuid.isNotEmpty &&
+                                              _result != null)
+                                          ? () async {
+                                              showDialog<void>(
+                                                barrierDismissible: false,
+                                                context: context,
+                                                builder:
+                                                    (BuildContext con) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    child:
+                                                        TreadDepthResultFeedbackDialog(
+                                                            regions: _result
+                                                                    ?.regions ??
+                                                                [],
+                                                            onCancel: () {
+                                                              Navigator.pop(
+                                                                  con);
+                                                            },
+                                                            onDone:
+                                                                (regions) async {
+                                                              Navigator.of(
+                                                                  con)
+                                                                  .pop();
+                                                              try {
+                                                                setState(() {
+                                                                  showLoader =
+                                                                      true;
+                                                                });
+                                                                await _tireTreadPlugin.sendTreadDepthResultFeedback(
+                                                                    measurementUUID:
+                                                                        _uuid,
+                                                                    resultRegions:
+                                                                        regions);
+
+                                                                showSnackBar(
+                                                                    context,
+                                                                    AppStrings.messageFeedbackSuccess);
+                                                              } on PlatformException catch (error) {
+                                                                showSnackBar(
+                                                                    context,
+                                                                    error.message
+                                                                        as String);
+                                                              } finally {
+                                                                setState(() {
+                                                                  showLoader =
+                                                                      false;
+                                                                });
+                                                              }
+                                                            }),
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          : null,
+                                      title: AppStrings.btnSendTreadDepthFeedback),
                                   sizedBox,
                                   initializationStatusView(status),
                                   sizedBox,
@@ -241,18 +344,14 @@ class _AnylineTireTreadPluginExampleState
                                   Image.network(
                                     _heatmap,
                                     key: heatMapViewKey,
-                                    errorBuilder: (
-                                      context,
-                                      _,
-                                      __,
-                                    ) {
+                                    errorBuilder: (context, _, __) {
                                       return const SizedBox();
                                     },
                                   ),
                                   sizedBox,
                                   Text(
-                                    (_result.isNotEmpty)
-                                        ? 'Result: ${const JsonEncoder.withIndent('  ').convert(jsonDecode(_result))}'
+                                    (_result != null)
+                                        ? 'Result: ${const JsonEncoder.withIndent('  ').convert(_result?.toJson())}'
                                         : '',
                                     key: resultViewKey,
                                     style: const TextStyle(
@@ -271,6 +370,30 @@ class _AnylineTireTreadPluginExampleState
             ),
           )),
     );
+  }
+
+  Future<void> onGetResult(BuildContext context) async {
+    {
+      try {
+        setState(() {
+          showLoader = true;
+        });
+        Scrollable.ensureVisible(resultViewKey.currentContext!,
+            duration: const Duration(milliseconds: 300));
+        _result = (await _tireTreadPlugin.getResult(measurementUUID: _uuid));
+      } on PlatformException catch (error) {
+        showSnackBar(context, error.message as String);
+      } finally {
+        setState(() {
+          showLoader = false;
+        });
+      }
+    }
+  }
+
+  void showSnackBar(BuildContext context, String message) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> startInitialization() async {

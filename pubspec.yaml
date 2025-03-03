@@ -1,6 +1,6 @@
 name: anyline_tire_tread_plugin
 description: "The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device."
-version: 0.0.4-alpha.5
+version: 0.0.3
 homepage: https://www.anyline.com
 repository: https://github.com/Anyline/anyline-tiretread-flutter-plugin
 documentation: https://documentation.anyline.com
@@ -19,13 +19,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_oss_licenses: ^3.0.4
 
 # For information on the generic Dart part of this file, see the
-# following  page: https://dart.dev/tools/pub/pubspec
+# following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-  # This section id entifies this Flutter project as a plugin project.
+  # This section identifies this Flutter project as a plugin project.
   # The 'pluginClass' specifies the class (in Java, Kotlin, Swift, Objective-C, etc.)
   # which should be registered in the plugin registry. This is required for
   # using method channels.

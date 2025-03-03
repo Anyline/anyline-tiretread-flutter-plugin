@@ -8,10 +8,27 @@ This Flutter plugin provides an interface to the Anyline Tire Tread SDK, allowin
 In order to use the Anyline Tire Tread SDK Flutter Plugin, please see to it that the following requirements are met:
 
 ### Android
+
+#### Device
 - Android 8.0 - Oreo - or newer (API level 26+)
 - Decent camera functionality (recommended: ≥ 720p and adequate  **auto focus**)
 - 'Flash' capability
 - Stable internet connection
+
+#### Environment
+Your development/application environment is required to have at least the following tools and versions (or newer) available:
+
+- JDK 17
+- Gradle 8.1.0
+    - id 'com.android.application' version '8.1.0' apply false
+- Kotlin 1.9.0
+    - id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+- compileSdk 34
+    - android { compileSdk 34 ...
+- minSdk 26
+    - ... minSdk 26 ...
+- Compose Compiler 1.5.0
+    - ... composeOptions { kotlinCompilerExtensionVersion = "1.5.0" } ...
 
 ### iOS
 - iOS Version >= 16.4
@@ -154,14 +171,13 @@ Handling SDK's events with an instance of `TireTreadPlugin` call `onScanningEven
    switch (event) {
      case ScanAborted(): 
        debugPrint('measurementUUID : ${event.measurementUUID}');
-     case UploadAborted(): 
-       debugPrint('measurementUUID : ${event.measurementUUID}'); 
-     case UploadCompleted(): 
+     case ScanProcessCompleted(): 
        debugPrint('measurementUUID : ${event.measurementUUID}'); 
        setState(() => _uuid = event.measurementUUID ?? ''); 
-     case UploadFailed(): 
-       debugPrint('measurementUUID : ${event.error}');
-   }
+     case ScanFailed(): 
+       debugPrint('error : ${event.error}');
+       debugPrint('measurementUUID : ${event.measurementUUID}');
+}
  });  
 ```  
 
@@ -170,8 +186,44 @@ Handling SDK's events with an instance of `TireTreadPlugin` call `onScanningEven
 ### Obtaining the Measurement Results
 After the upload of your scanned frames is completed (that is, the  `UploadCompletedEvent` ), your measurement results may still take a few seconds to become available. To fetch the results, call the function  `getResult(measurementUuid)`:
 ```dart  
-String result = await tireTreadPlugin.getResult(measurementUUID:measurementUUID);  
+TreadDepthResult? result = await tireTreadPlugin.getResult(measurementUUID:measurementUUID);  
 ```
+
+## User Corrected Values and Comments
+
+### User Comments
+To send a comment on a measurement, use the `sendFeedbackComment` function of the TireTreadPlugin.
+```dart
+await tireTreadPlugin.sendFeedbackComment(measurementUUID: _uuid, comment: comment);
+```
+
+### User Corrected Region Values
+To send user corrected region values, use the `sendTreadDepthResultFeedback` function from the TireTreadPlugin. The result feedback should be provided as a list of `TreadResultRegion`, ordered from left to right.
+
+> **_IMPORTANT:_**  You can only provide feedback for the regions returned by the SDK in the `TreadDepthResult` object. 
+> The values of all regions need be added to the list before sending the feedback.
+
+
+The TreadResultRegion objects can be initialized with Millimeters or Inches, e.g.:
+```dart
+TreadResultRegion regionMm = TreadResultRegion.initMm(available: true,valueMm: 1.2);
+TreadResultRegion regionInch = TreadResultRegion.initInch(available: true,valueInch: 0.047);
+
+List<TreadResultRegion>  myCorrectedResults =  [regionMm, regionInch];
+
+await tireTreadPlugin.sendTreadDepthResultFeedback(measurementUUID: _uuid, resultRegions: myCorrectedResults);
+```
+
+## Error Codes
+
+| Error Code | Error Origin        | Error Message                                                                                                                                       |
+|------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| 100        | Platform-native SDK | General Processing Error: Please try again or contact support, if this error persists.                                                              |
+| 110        | Platform-native SDK | Bad Images: too fev images -> record for longer; images too blurry -> move device slower.                                                           |
+| 111        | Platform-native SDK | Unexpected image Count: Server did not receive all send images.                                                                                     |
+| 150        | Platform-native SDK | Processing Error: Measurement could not be processed, please try again. See the documentation for advice on how to perform successful measurements. |
+| 1000       | Flutter Plugin      | Plugin Not Attached To Activity: The plugin has not been integrated with the main activity.                                                         |
+| 1001       | Flutter Plugin      | SDK Initialization Failed: Tire Tread SDK could not be initialized                                                                                  |
 
 ## Analytics
 
