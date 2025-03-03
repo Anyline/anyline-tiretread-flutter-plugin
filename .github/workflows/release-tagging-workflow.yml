@@ -4,13 +4,12 @@ on:
   pull_request:
     types: [closed] # Trigger the workflow when a pull request is closed
     branches:
-      - release_automation # Only trigger for pull requests merged into the main branch
+      - automation_test # Only trigger for pull requests merged into the main branch
 
 jobs:
   create_tag:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') # Run only if the PR is merged and the branch name starts with 'release/'
     runs-on: ubuntu-latest # Use the latest Ubuntu environment
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # Check out the repository
@@ -29,28 +28,11 @@ jobs:
           TAG_VERSION=$(echo "$BRANCH_NAME" | sed -E 's/^release\/(.*)$/\1/')
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
+          echo "VERSION=$TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: Push Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           git tag ${{ env.TAG_NAME }} # Create the tag
           git push origin ${{ env.TAG_NAME }} # Push the tag to the repository
-
-      - name: Publish
-        uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1 # Use the create-release action
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub token from secrets
-        with:
-          tag_name: ${{ env.TAG_NAME }} # Use the generated tag name
-          release_name: Anyline ${{ env.TAG_NAME }} # Set the release name
-          body: |
-            ## What's Changed
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}/changelog # Link to the changelog
-
-            ## Documentation
-            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }} # Link to the documentation
-          draft: false # Publish the release immediately
-          prerelease: false # Mark the release as a full release

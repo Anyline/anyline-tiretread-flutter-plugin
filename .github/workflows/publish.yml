@@ -1,0 +1,55 @@
+name: Publish to pub.dev
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup dart SDK
+        uses: dart-lang/setup-dart@v1
+
+      - name: Setup flutter SDK
+        uses: flutter-actions/setup-flutter@54feb1e258158303e041b9eaf89314dcfbf6d38a
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Publish on Pub.dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: dart pub publish --force
+
+  release:
+    runs-on: ubuntu-latest
+#    needs: publish
+    steps:
+      - name: Generate Release
+        id: generate_release
+        run: |
+          TAG=${{github.ref_name}}
+          TAG_VERSION=$(echo "$TAG" | sed 's/^v//')
+          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1 # Use the create-release action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub token from secrets
+        with:
+          tag_name: ${{ github.ref_name }} # Use the generated tag name
+          release_name: Anyline ${{ env.TAG_VERSION}} # Set the release name
+          body: |
+            ## What's Changed
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}/changelog
+            ## Documentation
+            * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}
+          draft: false # Publish the release immediately
+          prerelease: false # Mark the release as a full release
+
