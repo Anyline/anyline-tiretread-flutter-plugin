@@ -84,20 +84,21 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     
     private func scan(result: @escaping FlutterResult, call: FlutterMethodCall) {
         
-        var viewController = TireScannerViewController(config: TireTreadScanViewConfig())
+        var viewController = TireScannerViewController(config: TireTreadScanViewConfig(),defaultTireWidth: nil)
 
         if let args = call.arguments as? [String: Any] {
             
             let customMeasurementString: String? = args["measurementSystem"] as? String
             let customScanSpeed: String? = args["scanSpeed"] as? String
             let customShowGuidance: Bool? = args["showGuidance"] as? Bool
-            
+            let defaultTireWidth = args["tireWidth"] as? Int
+
             if let configJSONStr = args["configFileContent"] as? String {
                 if let newConfigJSONString = type(of: self).configString(from: configJSONStr,
                                                                          customScanSpeed: customScanSpeed,
                                                                          customMeasurementSystem: customMeasurementString,
                                                                          customShowGuidance: customShowGuidance) {
-                    viewController = TireScannerViewController(configString: newConfigJSONString)
+                    viewController = TireScannerViewController(configString: newConfigJSONString,defaultTireWidth: defaultTireWidth)
                 }
             } else {
                 
@@ -123,12 +124,14 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                         break
                     }
                 }
+                                     
                 if let showGuidance = args["showGuidance"] as? Bool {
                     config.defaultUiConfig.scanDirectionConfig.visible = showGuidance
                     config.defaultUiConfig.countdownConfig.visible = showGuidance
                     config.defaultUiConfig.tireOverlayConfig.visible = showGuidance
                 }
-                viewController = TireScannerViewController(config: config)
+                
+                viewController = TireScannerViewController(config: config,defaultTireWidth: defaultTireWidth)
             }
         }
 

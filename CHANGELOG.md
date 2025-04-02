@@ -1,3 +1,19 @@
+## 1.0.0
+
+This release officially marks the Anyline Tire Tread Flutter Plugin as feature complete, stable, and fully supported for the Anyline Tire Tread SDK.
+
+### Added
+
+- Introduced a new feature allowing users to send feedback values in 32" from the plugin. This will help us gather valuable insights and continuously improve the plugin.
+
+### Fixed
+
+- Resolved minor bugs to enhance overall performance and stability.
+
+### Dependencies
+
+Tire Tread SDK 11.2.0 : [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#11-2-0-2025-02-28)
+
 ## 0.0.3
 
 ### Added

@@ -135,7 +135,7 @@ The SDK only supports these file names, and the .wav extension.
 
 You can customize how the scanning behavior works by passing in a `ScanOptions` object to the `scan` call:
 
-```
+```dart
 tireTreadPlugin.scan(options: ScanOptions());
 ```
 
@@ -143,14 +143,21 @@ A `ScanOptions` object, constructed without parameters, contains sensible defaul
 
 If you wish, you can also specify the scan speed (fast or slow), and measurement system (metric or imperial units) in this way:
 
-```
+```dart
 var scanOptions = ScanOptions(measurementSystem: MeasurementSystem.Imperial, scanSpeed: ScanSpeed.Fast);
+tireTreadPlugin.scan(options: scanOptions);
+```
+
+If you wish, you can also specify the tire width in this way:
+
+```dart
+var scanOptions = ScanOptions(tireWidth: 236);
 tireTreadPlugin.scan(options: scanOptions);
 ```
 
 Alternatively, you can provide a string containing the SDK's Tire Tread ScanView configuration JSON to the `ScanOptions` object, for example:
 
-```
+```dart
 const configJSON = '{
   "scanSpeed": "Fast",
   "measurementSystem": "Metric",

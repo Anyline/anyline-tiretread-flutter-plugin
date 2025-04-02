@@ -1,3 +1,4 @@
+import 'package:anyline_tire_tread_plugin_example/app_strings.dart';
 import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,6 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
-    // select the entire field on focus for more convenient input
     _feedbackTextController.selection = TextSelection(
         baseOffset: 0, extentOffset: _feedbackTextController.text.length);
 
@@ -36,19 +36,18 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'Enter Your Comment:',
+            AppStrings.titleCommentFeedbackDialog,
             style: TextStyle(fontSize: 16, color: Color(0xFF0099FF)),
           ),
           sizedBox,
           TextField(
-            controller: _feedbackTextController,
-            autofocus: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFF0099FF), width: 1.0),
-              ),
-            ),
-          ),
+              controller: _feedbackTextController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xFF0099FF), width: 1.0)),
+              )),
           sizedBox,
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -61,7 +60,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   _feedbackTextController.text = '';
                   widget.onCancel();
                 },
-                child: const Text('Cancel'),
+                child: const Text(AppStrings.btnCancel),
               ),
               TextButton(
                 style: TextButton.styleFrom(
@@ -71,7 +70,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 onPressed: () async {
                   widget.onDone(_feedbackTextController.text);
                 },
-                child: const Text('Send'),
+                child: const Text(AppStrings.btnSend),
               ),
             ],
           )

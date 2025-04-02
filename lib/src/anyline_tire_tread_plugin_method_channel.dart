@@ -4,9 +4,6 @@ import 'dart:convert';
 
 import 'package:anyline_tire_tread_plugin/anyline_tire_tread_plugin.dart';
 import 'package:anyline_tire_tread_plugin/src/constants.dart';
-import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
-import 'package:anyline_tire_tread_plugin/src/models/tread_depth_result.dart';
-import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 

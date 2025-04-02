@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anyline_tire_tread_plugin_example/app_strings.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 
@@ -17,10 +18,11 @@ class DeviceDetailsWidget extends StatelessWidget {
               if (snap.hasData) {
                 return Column(
                   children: [
-                    Text('OS Version: ${snap.data?.version.release}',
+                    Text(
+                        '${AppStrings.labelOsVersion}: ${snap.data?.version.release}',
                         style: const TextStyle(
                             fontSize: 14, color: AppColors.primary)),
-                    Text('Device: ${snap.data?.model}',
+                    Text('${AppStrings.labelDevice}: ${snap.data?.model}',
                         style: const TextStyle(
                             fontSize: 14, color: AppColors.primary)),
                   ],
@@ -34,10 +36,11 @@ class DeviceDetailsWidget extends StatelessWidget {
               if (snap.hasData) {
                 return Column(
                   children: [
-                    Text('OS Version: ${snap.data?.systemVersion}',
+                    Text(
+                        '${AppStrings.labelOsVersion}: ${snap.data?.systemVersion}',
                         style: const TextStyle(
                             fontSize: 14, color: AppColors.primary)),
-                    Text('Device: ${snap.data?.modelName}',
+                    Text('${AppStrings.labelDevice}: ${snap.data?.modelName}',
                         style: const TextStyle(
                             fontSize: 14, color: AppColors.primary)),
                   ],

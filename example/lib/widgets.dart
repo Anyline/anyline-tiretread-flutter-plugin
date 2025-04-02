@@ -9,20 +9,23 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        disabledForegroundColor: AppColors.white,
-        disabledBackgroundColor: const Color(0xFF939292),
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          disabledForegroundColor: AppColors.white,
+          disabledBackgroundColor: const Color(0x3DFFFFFF),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+        child: Text(title),
       ),
-      child: Text(title),
     );
   }
 }
 
-SizedBox get sizedBox => const SizedBox(height: 20);
+SizedBox get sizedBox => const SizedBox(height: 12);
