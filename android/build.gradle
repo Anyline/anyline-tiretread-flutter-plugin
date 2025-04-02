@@ -2,7 +2,10 @@ group = "io.anyline.tiretread.flutter"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "1.9.0"
+    ext{
+        kotlin_version = "1.9.0"
+        tiretread_sdk_version = '11.2.0'
+    }
     repositories {
         google()
         mavenCentral()
@@ -75,7 +78,7 @@ android {
         implementation("io.ktor:ktor-client-android:2.3.2")
 
         // Anyline Tire Tread SDK dependency
-        implementation("io.anyline.tiretread.sdk:shared:11.1.0")
+        implementation("io.anyline.tiretread.sdk:shared:$tiretread_sdk_version")
 
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")

@@ -1,0 +1,21 @@
+{
+  "useDefaultUi": true,
+  "useDefaultHaptic": true,
+  "defaultUiConfig": {
+    "tireWidthInputConfig": {
+      "visible": true,
+      "skipButtonText": "Test",
+      "titleText": "This is a test string.",
+      "explanationText": "This is a test string too.",
+      "continueButtonText": "TextButton",
+      "prefilledTireWidth": 300,
+      "tireWidthRange": {
+        "lowerLimit": 250,
+        "upperLimit": 400
+      },
+      "tireWidthOptions": [
+        100, 110
+      ]
+    }
+  }
+}

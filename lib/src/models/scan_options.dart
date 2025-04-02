@@ -27,13 +27,13 @@ class ScanOptions {
   final MeasurementSystem? measurementSystem;
 
   /// The width of the tire to be scanned.
-  final int? tireWidth;
+  int? tireWidth;
 
   /// Whether to show guidance during the scan.
   final bool showGuidance;
 
   /// This parameter contains the configuration settings required for the scan.
-  final String? configFileContent;
+  String? configFileContent;
 
   /// Converts the [ScanOptions] instance to a JSON object.
   ///

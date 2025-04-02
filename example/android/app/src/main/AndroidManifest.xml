@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="anyline_tire_tread_plugin_example"
+        android:label="Anyline Tire Tread Plugin Example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
