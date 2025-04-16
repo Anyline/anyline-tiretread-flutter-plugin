@@ -1,6 +1,6 @@
 name: anyline_tire_tread_plugin
 description: "The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device."
-version:  1.0.0
+version: 1.1.0-sdk.12.0.1
 homepage: https://www.anyline.com
 repository: https://github.com/Anyline/anyline-tiretread-flutter-plugin
 documentation: https://documentation.anyline.com

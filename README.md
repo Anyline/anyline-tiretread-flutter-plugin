@@ -35,6 +35,14 @@ Your development/application environment is required to have at least the follow
 - Stable internet connection
 - 'Flash' capability
 
+## How it works
+
+The Anyline Tire Tread SDK processes scans asynchronously. Once a scan is completed, the SDK uploads and processes the scan data in the background, allowing integrators to benefit from this behavior.
+
+After initiating and completing a scan, your application can continue with any desired workflow without needing to wait for immediate results. When you need to access the results, such as measurement data or heatmaps, simply query them using the `getResult` or `getHeatMap` methods with the relevant `measurementUUID`.
+
+This design enhances the user experience by keeping the application responsive and separating the scanning process from result retrieval.
+
 ## Anyline Tire Tread Flutter Plugin Guide
 
 In this guide, we want to show you how you can make the most out of Anyline Tire Tread using our Flutter plugin. Feel free to contact us if you feel that it is incomplete or particular sections need elaboration.
@@ -239,3 +247,34 @@ After the upload of your scanned frames is completed (that is, the  `UploadCompl
 ```dart  
 String heatmap = await tireTreadPlugin.getHeatMap(measurementUUID:measurementUUID);  
 ```
+
+## Experimental Flags (internal use only)
+
+When a new TTR SDK feature is implemented, it’s sometimes put behind an experimental flag. This enables the engineering team to provide new features to you more quickly, while still being able to change feature APIs before they move to a stable release. The experimental flag is then removed once the feature moves to a stable release.
+
+Using functionality that’s behind an experimental flag requires you to enable the flag, or flags, in your application.
+
+You should always enable/disable the experimental flags before using the functionality provided by it. Changing flags in the middle of the process might result in unexpected behaviour.
+
+> **_WARNING:_**   Consuming functionality that’s behind an experimental flag might result in unwanted behaviour in your application.
+
+### Enabling flags
+To enable an experimental flag in your project, use the `setExperimentalFlags` function of the TireTreadPlugin.
+```dart  
+await tireTreadPlugin.setExperimentalFlags(experimentalFlags:[ExperimentalFlags.ExperimentalContinuousPictureFocusMode, "Another_Flag_Name"]);  
+```
+> **_NOTE:_**   Trying to set a flag that does not exist will not produce any effect, and the flag will be ignored. You will not be notified.
+
+### Removing flags
+To remove all experimental flags from your project, use the `clearExperimentalFlags` function of the TireTreadPlugin.
+```dart  
+await tireTreadPlugin.clearExperimentalFlags();  
+```
+
+### Experimental Flags available
+The Tire Tread SDK currently includes the following experimental flags:
+- Experimental_Continuous_Picture_Focus_Mode
+
+
+
+

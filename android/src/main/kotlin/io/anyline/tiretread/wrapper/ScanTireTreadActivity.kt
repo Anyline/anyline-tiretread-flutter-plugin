@@ -1,23 +1,15 @@
 package io.anyline.tiretread.wrapper
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import io.anyline.tiretread.flutter.databinding.ActivityScanTireTreadBinding
@@ -28,9 +20,9 @@ import io.anyline.tiretread.sdk.scanner.OnImageUploaded
 import io.anyline.tiretread.sdk.scanner.OnScanStarted
 import io.anyline.tiretread.sdk.scanner.OnScanStopped
 import io.anyline.tiretread.sdk.scanner.ScanEvent
+import io.anyline.tiretread.sdk.scanner.ScanSpeed
 import io.anyline.tiretread.sdk.scanner.TireTreadScanViewConfig
 import io.anyline.tiretread.sdk.scanner.TireTreadScanner
-import io.anyline.tiretread.sdk.scanner.ScanSpeed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -44,28 +36,17 @@ class ScanTireTreadActivity : AppCompatActivity() {
         ViewModelProvider(this)[ScanTireTreadViewModel::class.java]
     }
 
-    private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            scanTireTreadViewModel.cameraPermissionStateLiveData.postValue(ScanTireTreadViewModel.CameraPermissionState.Granted)
-        } else {
-            scanTireTreadViewModel.cameraPermissionStateLiveData.postValue(ScanTireTreadViewModel.CameraPermissionState.Denied)
-        }
-    }
-
     private var useDefaultUi = false
     var measurementSystem = MeasurementSystem.Metric
 
     private var customDataContent: String? = null
     private var scopeStrategy: ScopeStrategy = ScopeStrategy.WaitForProcessing
-    private var measurementResultData: MeasurementResultData? = null
 
     private var doubleBackToExitPressedOnce = false
     private val TAG = ScanTireTreadActivity::class.qualifiedName
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
         super.onCreate(savedInstanceState)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -97,46 +78,17 @@ class ScanTireTreadActivity : AppCompatActivity() {
             }
         })
 
-        scanTireTreadViewModel.cameraPermissionStateLiveData.observe(this) { cameraPermissionState ->
-            when (cameraPermissionState) {
-                ScanTireTreadViewModel.CameraPermissionState.NotRequested -> {
-                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                }
-
-                ScanTireTreadViewModel.CameraPermissionState.Granted -> {
-                    inflateLayout()
-                }
-
-                ScanTireTreadViewModel.CameraPermissionState.Denied -> {
-                    finishWithResult(RESULT_CANCELED, null, CANCEL_MESSAGE_CAMERA_PERMISSION_DENIED)
-                }
-            }
-        }
+        inflateLayout()
     }
 
     private fun inflateLayout() {
         binding = ActivityScanTireTreadBinding.inflate(layoutInflater)
         binding.root.also { rootView ->
             setContentView(rootView)
-            applyInsetsToView(rootView)
         }
-
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         observeMeasurementScanState()
-    }
-
-    private fun applyInsetsToView(view: View) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
-                leftMargin = insets.left
-                bottomMargin = insets.bottom
-                rightMargin = insets.right
-            }
-            WindowInsetsCompat.CONSUMED
-        }
     }
 
     private fun observeMeasurementScanState() {
@@ -187,7 +139,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
 
                             measurementSystem = scanConfig.measurementSystem
 
-                            measurementResultData = null
+                            scanTireTreadViewModel.measurementResultData = null
 
                             this.init(
                                 tireTreadScanViewConfig = scanConfig,
@@ -197,7 +149,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
                                 tireTreadScanViewCallback = ::handleEvent
                             ) { measurementUUID, exception ->
                                 onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ExceptionCaught(exception.message))
-                                finishWithResult(RESULT_CANCELED, measurementResultData, exception.message)
+                                finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, exception.message)
                             }
                         }
 
@@ -234,15 +186,6 @@ class ScanTireTreadActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStop() {
-        if (TireTreadScanner.isInitialized) {
-            if (scanTireTreadViewModel.measurementScanStateLiveData.value?.stopScanningOnFinishRequired() == true) {
-                TireTreadScanner.instance.stopScanning()
-            }
-        }
-        super.onStop()
-    }
-
     private fun finishWithResult(
         result: Int,
         measurementResultData: MeasurementResultData?,
@@ -266,7 +209,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
         Log.d(TAG, "onScanAborted: $measurementUUID")
         MeasurementResultStatus.ScanAborted.also { scanAbortedStatus ->
             onMeasurementResultDataStatusUpdate(scanAbortedStatus)
-            finishWithResult(RESULT_CANCELED, measurementResultData, scanAbortedStatus.statusDescription)
+            finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, scanAbortedStatus.statusDescription)
         }
     }
 
@@ -285,20 +228,20 @@ class ScanTireTreadActivity : AppCompatActivity() {
                     MeasurementResultStatus.TreadDepthResultQueried(TreadDepthResultStatus.NotYetAvailable)
                 )
                 lifecycleScope.launch(Dispatchers.IO) {
-                    measurementResultData?.getTreadDepthReportResult { treadDepthResultStatus ->
+                    scanTireTreadViewModel.measurementResultData?.getTreadDepthReportResult { treadDepthResultStatus ->
                         onMeasurementResultDataStatusUpdate(
                             MeasurementResultStatus.TreadDepthResultQueried(
                                 treadDepthResultStatus
                             )
                         )
-                        finishWithResult(RESULT_OK, measurementResultData)
+                        finishWithResult(RESULT_OK, scanTireTreadViewModel.measurementResultData)
                     }
                 }
             }
 
             ScopeStrategy.CaptureAndUploadOnly -> {
                 //Tread Depth Report Result will be fetch later/somewhere else
-                finishWithResult(RESULT_OK, measurementResultData)
+                finishWithResult(RESULT_OK, scanTireTreadViewModel.measurementResultData)
             }
         }
     }
@@ -320,7 +263,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
         when (event) {
             is OnScanStarted -> {
                 event.measurementUUID.let { measurementUUID ->
-                    measurementResultData = provideNewMeasurementResultData(measurementUUID)
+                    scanTireTreadViewModel.measurementResultData = provideNewMeasurementResultData(measurementUUID)
                     onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ScanStarted)
                 }
             }
@@ -360,7 +303,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
                 TireTreadScanner.instance.isScanning, measurementResultStatus
             )
         )
-        measurementResultData?.let { measurementResultDataNonNull ->
+        scanTireTreadViewModel.measurementResultData?.let { measurementResultDataNonNull ->
             measurementResultDataNonNull.measurementResultStatus = measurementResultStatus
 
             scanTireTreadViewModel.measurementResultUpdateInterface?.onMeasurementResultDataStatusUpdate(
@@ -405,7 +348,6 @@ class ScanTireTreadActivity : AppCompatActivity() {
         const val INTENT_EXTRA_OUT_CUSTOM_DATA = "INTENT_EXTRA_OUT_CUSTOM_DATA"
         const val INTENT_EXTRA_OUT_CANCEL_MESSAGE = "INTENT_EXTRA_OUT_CANCEL_MESSAGE"
 
-        const val CANCEL_MESSAGE_CAMERA_PERMISSION_DENIED = "Camera permission denied."
         const val CANCEL_MESSAGE_ABORTED = "Aborted."
         const val CANCEL_MESSAGE_ABORTED_WHILE_SCANNING = "Aborted while scanning."
         const val CANCEL_MESSAGE_ABORTED_WHILE_WAITING_FOR_RESULT = "Aborted while waiting for result."

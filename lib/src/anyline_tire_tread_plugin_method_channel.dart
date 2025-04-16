@@ -105,4 +105,20 @@ class MethodChannelAnylineTireTreadPlugin
     });
     return result;
   }
+
+  @override
+  Future<void> setExperimentalFlags(
+      {required List<String> experimentalFlags}) async {
+    final result = await methodChannel.invokeMethod<void>(
+        Constants.METHOD_SET_EXPERIMENTAL_FLAGS,
+        {Constants.EXTRA_EXPERIMENTAL_FLAGS: experimentalFlags});
+    return result;
+  }
+
+  @override
+  Future<void> clearExperimentalFlags() async {
+    final result = await methodChannel.invokeMethod<void>(
+        Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS);
+    return result;
+  }
 }

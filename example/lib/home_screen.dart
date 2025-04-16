@@ -3,6 +3,7 @@ import 'package:anyline_tire_tread_plugin_example/app_colors.dart';
 import 'package:anyline_tire_tread_plugin_example/app_strings.dart';
 import 'package:anyline_tire_tread_plugin_example/device_details_widget.dart';
 import 'package:anyline_tire_tread_plugin_example/env_info.dart';
+import 'package:anyline_tire_tread_plugin_example/experimental_flags_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/feedback_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/initalize_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/main.dart';
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TreadDepthResult? _result;
   String selectedConfig = '';
   int? tireWidth;
+  List<String> selectedFlags = [];
 
   ValueNotifier<InitializationStatus> initializationStatus =
       ValueNotifier(InitializationStatus.pending);
@@ -68,6 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
+                        experimentalFlagsButton(),
+                        sizedBox,
                         initializeButton(status, context),
                         sizedBox,
                         scanButton(status),
@@ -138,6 +142,61 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             : null,
         title: AppStrings.btnInitialize);
+  }
+
+  AppButton experimentalFlagsButton() {
+    return AppButton(
+        onPressed: () async {
+          showDialog<void>(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext con) {
+              return Dialog(
+                backgroundColor: Colors.white,
+                child: ExperimentalFlagsDialog(
+                  selectedFlags: selectedFlags,
+                  onCancel: () {
+                    Navigator.pop(con);
+                  },
+                  onDone: (flags) async {
+                    Navigator.of(con).pop();
+                    try {
+                      setState(() {
+                        showLoader = true;
+                        selectedFlags = flags;
+                      });
+                      await tireTreadPlugin.setExperimentalFlags(
+                          experimentalFlags: flags);
+                    } on PlatformException catch (error) {
+                      showSnackBar(context, error.message as String);
+                    } finally {
+                      setState(() {
+                        showLoader = false;
+                      });
+                    }
+                  },
+                  onClearFlags: () async {
+                    Navigator.of(con).pop();
+                    try {
+                      setState(() {
+                        showLoader = true;
+                        selectedFlags.clear();
+                      });
+                      await tireTreadPlugin.clearExperimentalFlags();
+                    } on PlatformException catch (error) {
+                      showSnackBar(context, error.message as String);
+                    } finally {
+                      setState(() {
+                        showLoader = false;
+                      });
+                    }
+                  },
+                ),
+              );
+            },
+          );
+        },
+        title: AppStrings.btnExperimentalFlags);
   }
 
   AppButton scanButton(InitializationStatus status) {

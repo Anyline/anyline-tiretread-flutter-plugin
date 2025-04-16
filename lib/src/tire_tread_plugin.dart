@@ -53,4 +53,13 @@ class TireTreadPlugin {
     return AnylineTireTreadPluginPlatform.instance.sendTreadDepthResultFeedback(
         measurementUUID: measurementUUID, resultRegions: resultRegions);
   }
+
+  Future<void> setExperimentalFlags({required List<String> experimentalFlags}) {
+    return AnylineTireTreadPluginPlatform.instance
+        .setExperimentalFlags(experimentalFlags: experimentalFlags);
+  }
+
+  Future<void> clearExperimentalFlags() {
+    return AnylineTireTreadPluginPlatform.instance.clearExperimentalFlags();
+  }
 }
