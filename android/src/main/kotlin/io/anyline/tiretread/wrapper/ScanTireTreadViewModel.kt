@@ -35,23 +35,12 @@ class ScanTireTreadViewModel: ViewModel() {
             }
             return ConfirmationToAbortRequired.No
         }
-
-        fun stopScanningOnFinishRequired(): Boolean {
-            return isScanning || measurementResultStatus == null
-        }
     }
 
     val measurementScanStateLiveData: MutableLiveData<MeasurementScanState> =
         MutableLiveData(MeasurementScanState(false, null))
 
+    var measurementResultData: MeasurementResultData? = null
+
     var measurementResultUpdateInterface: MeasurementResultUpdateInterface? = null
-
-    enum class CameraPermissionState {
-        NotRequested,
-        Granted,
-        Denied
-    }
-    val cameraPermissionStateLiveData: MutableLiveData<CameraPermissionState> =
-        MutableLiveData(CameraPermissionState.NotRequested)
-
 }

@@ -63,4 +63,14 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
     throw UnimplementedError(
         'sendTreadDepthResultFeedback() has not been implemented.');
   }
+
+  Future<void> setExperimentalFlags({required List<String> experimentalFlags}) {
+    throw UnimplementedError(
+        'setExperimentalFlags() has not been implemented.');
+  }
+
+  Future<void> clearExperimentalFlags() {
+    throw UnimplementedError(
+        'clearExperimentalFlags() has not been implemented.');
+  }
 }

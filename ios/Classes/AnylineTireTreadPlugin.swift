@@ -44,6 +44,10 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
             Task{
                 await sendTreadDepthResultFeedback(result: result, call: call)
             }
+        case Constants.METHOD_SET_EXPERIMENTAL_FLAGS:
+            result(true)
+        case Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS:
+            result(true)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -84,21 +88,20 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     
     private func scan(result: @escaping FlutterResult, call: FlutterMethodCall) {
         
-        var viewController = TireScannerViewController(config: TireTreadScanViewConfig(),defaultTireWidth: nil)
+        var viewController = TireScannerViewController(config: TireTreadScanViewConfig())
 
         if let args = call.arguments as? [String: Any] {
             
             let customMeasurementString: String? = args["measurementSystem"] as? String
             let customScanSpeed: String? = args["scanSpeed"] as? String
             let customShowGuidance: Bool? = args["showGuidance"] as? Bool
-            let defaultTireWidth = args["tireWidth"] as? Int
 
             if let configJSONStr = args["configFileContent"] as? String {
                 if let newConfigJSONString = type(of: self).configString(from: configJSONStr,
                                                                          customScanSpeed: customScanSpeed,
                                                                          customMeasurementSystem: customMeasurementString,
                                                                          customShowGuidance: customShowGuidance) {
-                    viewController = TireScannerViewController(configString: newConfigJSONString,defaultTireWidth: defaultTireWidth)
+                    viewController = TireScannerViewController(configString: newConfigJSONString)
                 }
             } else {
                 
@@ -131,7 +134,7 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                     config.defaultUiConfig.tireOverlayConfig.visible = showGuidance
                 }
                 
-                viewController = TireScannerViewController(config: config,defaultTireWidth: defaultTireWidth)
+                viewController = TireScannerViewController(config: config)
             }
         }
 

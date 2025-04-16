@@ -5,20 +5,13 @@ import AnylineTireTreadSdk
 class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
     
     // if config is non-null, jsonConfig would be ignored
-    init(config: TireTreadScanViewConfig,defaultTireWidth: Int?) {
+    init(config: TireTreadScanViewConfig) {
         scanViewConfig = config
-        if let width = defaultTireWidth {
-            tireWidth = KotlinInt(integerLiteral: width)
-            }
         super.init(nibName: nil, bundle: nil)
     }
     
-    init(configString: String,defaultTireWidth: Int?) {
+    init(configString: String) {
         scanViewConfigStr = configString
-        if let width = defaultTireWidth {
-            tireWidth = KotlinInt(integerLiteral: width)
-            }
-
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -33,9 +26,7 @@ class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
     var uuid: String?
     
     var scanViewConfig: TireTreadScanViewConfig!
-    
-    var tireWidth: KotlinInt!
-    
+        
     var scanViewConfigStr: String?
     
     override func viewDidLoad() {
@@ -59,13 +50,11 @@ class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
             - countdown: \(scanViewConfig.defaultUiConfig.countdownConfig.visible)
             - scan direction: \(scanViewConfig.defaultUiConfig.scanDirectionConfig.visible)
             - tire overlay: \(scanViewConfig.defaultUiConfig.tireOverlayConfig.visible)
-            - tire width: \(tireWidth.stringValue)
             """)
             
             TireTreadScanViewKt.TireTreadScanView(
                 context: self,
                 config: scanViewConfig,
-                tireWidth: tireWidth,
                 onScanAborted: onScanAborted,
                 onScanProcessCompleted: onScanProcessCompleted,
                 callback: handleScanEvent,
@@ -78,7 +67,6 @@ class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
             TireTreadScanViewKt.TireTreadScanView(
                 context: self,
                 config: scanViewConfigStr,
-                tireWidth: tireWidth,
                 onScanAborted: onScanAborted,
                 onScanProcessCompleted: onScanProcessCompleted,
                 callback: handleScanEvent,

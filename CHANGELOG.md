@@ -1,3 +1,21 @@
+## 1.1.0-sdk.12.0.1
+
+### Breaking Changes
+
+#### Android
+
+- Minimum required Gradle version and AGP version is 8.2.1
+
+### Added
+- Added a new MissingPermission screen to the DefaultUI, which can be configured via the MissingPermissionConfig
+    - If DefaultUI is not used, a black screen will be shown, when the user denies camera permission.
+- Added edge-to-edge support in the DefaultUI for Android API 35 and above
+
+### Dependencies
+
+Tire Tread SDK 12.0.1 : [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#12-0-1-2025-04-07)
+
+
 ## 1.0.0
 
 This release officially marks the Anyline Tire Tread Flutter Plugin as feature complete, stable, and fully supported for the Anyline Tire Tread SDK.

@@ -62,6 +62,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         eventChannel.setStreamHandler(this)
     }
 
+    @OptIn(InternalAPI::class)
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             Constants.METHOD_INITIALIZE -> {
@@ -128,6 +129,21 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val data: List<TreadResultRegion> =
                     Json.decodeFromString<List<TreadResultRegion>>(call.argument<String?>(Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK).toString())
                 sendTreadDepthResultFeedback(measurementUUID, data, result)
+            }
+
+            Constants.METHOD_SET_EXPERIMENTAL_FLAGS -> {
+                val experimentalFlags: List<String>? = call.argument(Constants.EXTRA_EXPERIMENTAL_FLAGS)
+                if (experimentalFlags != null) {
+                    AnylineTireTreadSdk.setExperimentalFlags(newFlags = experimentalFlags)
+                    result.success(true)
+                } else {
+                    result.error("INVALID_ARGUMENT", "Experimental flags are null", null)
+                }
+            }
+
+            Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS -> {
+                AnylineTireTreadSdk.clearExperimentalFlags()
+                result.success(true)
             }
 
             else -> {

@@ -49,6 +49,18 @@ class MockAnylineTireTreadPluginPlatform
       required List<TreadResultRegion> resultRegions}) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> clearExperimentalFlags() {
+    // TODO: implement clearExperimentalFlags
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setExperimentalFlags({required List<String> experimentalFlags}) {
+    // TODO: implement setExperimentalFlags
+    throw UnimplementedError();
+  }
 }
 
 void main() {
