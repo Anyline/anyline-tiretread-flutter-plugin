@@ -70,8 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        experimentalFlagsButton(),
-                        sizedBox,
                         initializeButton(status, context),
                         sizedBox,
                         scanButton(status),

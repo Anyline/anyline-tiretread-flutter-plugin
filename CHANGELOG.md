@@ -1,3 +1,23 @@
+## 1.2.0
+
+### Changed
+- The default scan speed is now ScanSpeed.Fast. 
+  - The scan process will now, by default, take 7 seconds to be completed (instead of 10 seconds). 
+  - This configuration can still be changed by setting the scanSpeed property of the TireTreadScanView to ScanSpeed.Slow.
+
+### Added
+- The TireTreadScanView can now also be initialized without any config object/string.
+  - In this scenario, the default config values will be used. 
+  - For more details, refer to the Scan Process - Overview page.
+
+#### iOS
+- Added support for iOS Simulator builds when using the SPM package
+  - While the camera and scanning capabilites cannot be used in the simulator, the package from SPM now can also run on x64 and arm64 simulators, allowing running automated tests, or testing other features in your application.
+
+### Dependencies
+
+Tire Tread SDK 12.1.0 : [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#12-1-0-2025-04-23)
+
 ## 1.1.0
 
 ### Breaking Changes
