@@ -26,7 +26,6 @@ class ExperimentalFlagsDialog extends StatefulWidget {
 class _ExperimentalFlagsDialogState extends State<ExperimentalFlagsDialog> {
   List<String> selectedFlags = [];
   List<String> flags = [
-    ExperimentalFlags.ExperimentalContinuousPictureFocusMode
   ];
 
   @override
