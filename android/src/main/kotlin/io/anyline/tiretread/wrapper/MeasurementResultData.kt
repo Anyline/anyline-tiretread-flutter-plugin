@@ -59,14 +59,14 @@ sealed class TreadDepthResultStatus(val statusDescription: String) {
 }
 
 @Serializable
-data class MeasurementResultData(val measurementUUID: String,
+data class MeasurementResultData(val measurementUUID: String?,
                                  var measurementSystem: MeasurementSystem = MeasurementSystem.Metric,
                                  var measurementResultStatus: MeasurementResultStatus = MeasurementResultStatus.ScanStarted
 ) {
 
     fun getTreadDepthReportResult(onStatusResult: ((TreadDepthResultStatus) -> Unit)) {
         AnylineTireTreadSdk.getTreadDepthReportResult(
-            measurementUUID,
+            measurementUUID.toString(),
             onResponse = { response: Response<TreadDepthResult> ->
                 when (response) {
                     is Response.Success -> {

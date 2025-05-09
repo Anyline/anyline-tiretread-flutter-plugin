@@ -10,7 +10,14 @@ class ScanAborted extends ScanEvent {
   const ScanAborted({required super.measurementUUID});
 
   factory ScanAborted.fromMap(Map<String, dynamic> map) =>
-      ScanAborted(measurementUUID: map['measurementUUID'] as String);
+      ScanAborted(measurementUUID: map['measurementUUID'] as String?);
+}
+
+class ScanStarted extends ScanEvent {
+  const ScanStarted({required super.measurementUUID});
+
+  factory ScanStarted.fromMap(Map<String, dynamic> map) =>
+      ScanStarted(measurementUUID: map['measurementUUID'] as String);
 }
 
 class ScanProcessCompleted extends ScanEvent {

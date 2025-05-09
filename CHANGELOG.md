@@ -1,3 +1,18 @@
+## 1.2.1
+
+### Added
+
+* A new event is sent upon successfully starting scanning: `ScanStarted`.
+
+### Fixed
+
+* [Android] A `ScanAborted` event is now sent upon aborting a scan, even if the scan was not successfully started before.
+
+### Dependencies
+
+Tire Tread SDK 12.1.0 : [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#12-1-0-2025-04-23)
+
+
 ## 1.2.0
 
 ### Changed
