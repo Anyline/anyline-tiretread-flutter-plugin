@@ -122,6 +122,7 @@ class TireScannerViewController: UIViewController, ScannerViewControllerHolder {
         switch(event) {
         case let event as OnScanStarted:
             print("TireTreadScanViewCallback: onScanStart")
+            TTEventHandler.shared.sendEvent(type: "ScanStarted", uuid: event.measurementUUID)
             break
             
         case let event as OnScanStopped:

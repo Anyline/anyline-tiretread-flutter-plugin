@@ -208,6 +208,9 @@ class ScanTireTreadActivity : AppCompatActivity() {
     private fun onScanAborted(measurementUUID: String?) {
         Log.d(TAG, "onScanAborted: $measurementUUID")
         MeasurementResultStatus.ScanAborted.also { scanAbortedStatus ->
+            if(measurementUUID == null){
+                scanTireTreadViewModel.measurementResultData = provideNewMeasurementResultData(measurementUUID)
+            }
             onMeasurementResultDataStatusUpdate(scanAbortedStatus)
             finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, scanAbortedStatus.statusDescription)
         }
@@ -246,19 +249,19 @@ class ScanTireTreadActivity : AppCompatActivity() {
         }
     }
 
+    fun provideNewMeasurementResultData(measurementUUID: String?): MeasurementResultData {
+        return MeasurementResultData(
+            measurementUUID = measurementUUID,
+            measurementSystem = measurementSystem
+        )
+    }
+
     /**
      * Handles various scan events and updates the measurement result data accordingly.
      *
      * @param event The scan event to handle.
      */
     private fun handleEvent(event: ScanEvent) {
-
-        fun provideNewMeasurementResultData(measurementUUID: String): MeasurementResultData {
-            return MeasurementResultData(
-                measurementUUID = measurementUUID,
-                measurementSystem = measurementSystem
-            )
-        }
 
         when (event) {
             is OnScanStarted -> {
@@ -303,6 +306,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
                 TireTreadScanner.instance.isScanning, measurementResultStatus
             )
         )
+
         scanTireTreadViewModel.measurementResultData?.let { measurementResultDataNonNull ->
             measurementResultDataNonNull.measurementResultStatus = measurementResultStatus
 

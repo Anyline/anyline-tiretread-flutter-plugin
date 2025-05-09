@@ -258,7 +258,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 showGuidance = showGuidance,
                 scopeStrategy = ScanTireTreadActivity.ScopeStrategy.CaptureAndUploadOnly
             ),
-            measurementResultUpdateInterface = { measurementResultData: MeasurementResultData,
+            measurementResultUpdateInterface = { measurementResultData: MeasurementResultData?,
                                                  measurementResultStatus: MeasurementResultStatus, _ ->
                 if (eventSink == null) {
                     return@buildIntent
@@ -267,11 +267,11 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 when (measurementResultStatus) {
                     is MeasurementResultStatus.ScanAborted,
                     is MeasurementResultStatus.ScanProcessCompleted,
+                    is MeasurementResultStatus.ScanStarted,
                     is MeasurementResultStatus.ExceptionCaught -> {
                         eventSink!!.success(measurementResultData.toString())
                     }
 
-                    is MeasurementResultStatus.ScanStarted,
                     is MeasurementResultStatus.ScanStopped,
                     is MeasurementResultStatus.ImageUploaded,
                     is MeasurementResultStatus.TreadDepthResultQueried -> {

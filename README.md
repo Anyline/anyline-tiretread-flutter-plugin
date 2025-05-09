@@ -147,7 +147,7 @@ You can customize how the scanning behavior works by passing in a `ScanOptions` 
 tireTreadPlugin.scan(options: ScanOptions());
 ```
 
-A `ScanOptions` object, constructed without parameters, contains sensible defaults to help you get quickly started.
+A `ScanOptions` object, constructed without parameters, contains sensible defaults to help you get quickly started. If you're interested in the defaults being used, please consult the documentation here: https://documentation.anyline.com/tiretreadsdk-component/latest/scan-process/overview.html
 
 If you wish, you can also specify the scan speed (fast or slow), and measurement system (metric or imperial units) in this way:
 
@@ -175,7 +175,7 @@ const configJSON = '{
 tireTreadPlugin.scan(options: ScanOptions(configFileContent: configJSON));
 ```
 
-More information about the JSON configuration can be found here: https://documentation.anyline.com/tiretreadsdk-component/latest/scanconfiguration.html
+More information about the JSON configuration can be found here: https://documentation.anyline.com/tiretreadsdk-component/latest/scan-configuration.html
 
 
 
@@ -184,6 +184,8 @@ Handling SDK's events with an instance of `TireTreadPlugin` call `onScanningEven
 ```dart  
  tireTreadPlugin.onScanningEvent.listen((event) { 
    switch (event) {
+     case ScanStarted():
+       debugPrint('UUID : ${event.measurementUUID}');
      case ScanAborted(): 
        debugPrint('measurementUUID : ${event.measurementUUID}');
      case ScanProcessCompleted(): 

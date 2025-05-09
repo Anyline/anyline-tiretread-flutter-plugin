@@ -76,6 +76,8 @@ class MethodChannelAnylineTireTreadPlugin
           return ScanProcessCompleted.fromMap(eventType);
         case 'ScanFailed':
           return ScanFailed.fromMap(eventType);
+        case 'ScanStarted':
+          return ScanStarted.fromMap(eventType);
         default:
           return ScanAborted.fromMap(eventType);
       }

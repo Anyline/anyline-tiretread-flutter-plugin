@@ -46,7 +46,7 @@ class MeasurementResultDetails(private val measurementResultData: MeasurementRes
     private fun getHeatMapUrl(): HeatMapState {
         heatMapResult.update { HeatMapState.Unknown }
         heatMapResult.update { HeatMapState.GettingHeatMapUrl }
-        AnylineTireTreadSdk.getHeatmap(measurementResultData.measurementUUID) { heatMapResponse ->
+        AnylineTireTreadSdk.getHeatmap(measurementResultData.measurementUUID.toString()) { heatMapResponse ->
             when (heatMapResponse) {
                 is Response.Success -> {
                     heatMapResult.update { HeatMapState.HeatMapUrlReady(heatMapResponse.data) }
