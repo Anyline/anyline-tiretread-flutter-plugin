@@ -8,10 +8,11 @@ class TreadDepthResult {
         ? TreadResultRegion.fromJson(json['global'] as Map<String, dynamic>)
         : null;
     if (json['regions'] != null) {
-      regions = <TreadResultRegion>[];
-      json['regions'].forEach((v) {
-        regions!.add(TreadResultRegion.fromJson(v as Map<String, dynamic>));
-      });
+      regions = (json['regions'] as List)
+          .cast<Map<String, dynamic>>()
+          .where((regionMap) => regionMap.isNotEmpty)
+          .map((regionMap) => TreadResultRegion.fromJson(regionMap))
+          .toList();
     }
     measurementInfo = json['measurementInfo'] != null
         ? MeasurementInfo.fromJson(
@@ -24,8 +25,10 @@ class TreadDepthResult {
   MeasurementInfo? measurementInfo;
 
   TreadResultRegion? get minimumValue {
-    return regions?.where((region) => region.available)
-        .reduce((current, next) => current.valueMm < next.valueMm ? current : next) ?? global;
+    return regions?.where((region) => region.available).reduce(
+            (current, next) =>
+                current.valueMm < next.valueMm ? current : next) ??
+        global;
   }
 
   Map<String, dynamic> toJson() {

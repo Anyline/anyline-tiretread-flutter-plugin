@@ -14,6 +14,7 @@ import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -209,16 +210,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     _result = null;
                   });
 
-                  ScanOptions option = ScanOptions();
+                  TireTreadConfig config = TireTreadConfig();
                   if (selectedConfig.isNotEmpty) {
                     var data = await rootBundle.loadString(selectedConfig);
-                    option.configFileContent = data;
+                    debugPrint('Loading config from: $selectedConfig');
+                    debugPrint('Raw JSON data: $data');
+                    var jsonData = jsonDecode(data) as Map<String, dynamic>;
+                    debugPrint('Parsed JSON keys: ${jsonData.keys.toList()}');
+                    config = TireTreadConfig.fromJson(jsonData);
                   }
                   if (tireWidth != null) {
-                    option.tireWidth = tireWidth;
+                    config.scanConfig.tireWidth = tireWidth;
                   }
 
-                  tireTreadPlugin.scan(options: option);
+                  tireTreadPlugin.scan(config: config);
                 } on PlatformException catch (error) {
                   if (kDebugMode) {
                     print(error);

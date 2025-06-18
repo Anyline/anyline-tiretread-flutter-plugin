@@ -1,34 +1,8 @@
 {
-  "useDefaultUi": true,
-  "useDefaultHaptic": true,
-  "defaultUiConfig": {
-    "distanceIndicatorConfig": {
-      "visible": true,
-      "textOk": "Distance OK",
-      "textMoveCloser": "Move closer",
-      "textMoveAway": "Move away"
-    },
-    "focusPointTooltipConfig": {
-      "visible": true,
-      "text": "Move your device slowly back and forth to detect the tire."
-    },
-    "tapToStartScanningTooltipConfig": {
-      "visible": true,
-      "textOk": "Tap to start recording",
-      "textNotOkMetric": "Hold your phone around 20cm from the tire to start.",
-      "textNotOkImperial": "Hold your phone around 8in from the tire to start."
-    },
-    "uploadViewConfig": {
-      "visible": true,
-      "text": "Uploading..."
-    },
-    "orientationWarningConfig": {
-      "visible": true,
-      "text": "Rotate to landscape mode."
-    },
+  "uiConfig": {
+    "measurementSystem": "Metric",
     "tireWidthInputConfig": {
       "visible": false
     }
-  },
-  "measurementSystem": "Metric"
+  }
 }

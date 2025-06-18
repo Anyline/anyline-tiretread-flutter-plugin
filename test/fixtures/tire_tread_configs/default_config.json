@@ -1,0 +1,72 @@
+{
+    "uiConfig": {
+        "measurementSystem": "Metric",
+        "useDefaultUi": true,
+        "useDefaultHaptic": true,
+        "scanSpeed": "Fast",
+        "distanceIndicatorConfig": {
+            "visible": true,
+            "textOk": "Distance OK",
+            "textMoveCloser": "Move closer",
+            "textMoveAway": "Move away"
+        },
+        "focusPointTooltipConfig": {
+            "visible": true,
+            "smallText": "Initializing tire detection...",
+            "text": "Move device to start"
+        },
+        "tapToStartScanningTooltipConfig": {
+            "visible": true,
+            "textOk": "Tap to start recording",
+            "textNotOkMetric": "Hold your phone around 20cm from the tire to start.",
+            "textNotOkImperial": "Hold your phone around 8in from the tire to start."
+        },
+        "tireOverlayConfig": {
+            "visible": true
+        },
+        "uploadViewConfig": {
+            "visible": true,
+            "text": "Uploading..."
+        },
+        "orientationWarningConfig": {
+            "visible": true,
+            "text": "Rotate your device horizontally",
+            "rotationLockHint": "Make sure your device's auto-rotate feature is enabled."
+        },
+        "countdownConfig": {
+            "visible": true
+        },
+        "scanDirectionConfig": {
+            "visible": true
+        },
+        "tireWidthInputConfig": {
+            "visible": true,
+            "skipButtonText": "Skip",
+            "titleText": "Tire Width",
+            "explanationText": "Choose the Tire Width from the options or enter manually.",
+            "continueButtonText": "Continue",
+            "prefilledTireWidth": null,
+            "tireWidthRange": {
+                "lowerLimit": 100,
+                "upperLimit": 500
+            },
+            "tireWidthOptions": [
+                185,
+                195,
+                205,
+                215,
+                225,
+                235
+            ]
+        },
+        "missingPermissionConfig": {
+            "title": "Camera permission not granted!",
+            "text": "Camera is needed to be able to scan the tire.\nPlease go to the app settings and grant camera permissions."
+        }
+    },
+    "scanConfig": {
+        "tireWidth": null,
+        "showMeasuringSpots": true,
+        "heatmapStyle": "Colored"
+    }
+}

@@ -43,3 +43,37 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# iOS/CocoaPods related
+ios/Pods/
+ios/Podfile.lock
+ios/.symlinks/
+ios/build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# Xcode Archives
+ios/RunnerArchive.xcarchive/
+ios/*.xcarchive/
+
+# Xcode user data and workspace settings
+ios/Runner.xcworkspace/
+ios/xcuserdata/
+ios/DerivedData/
+
+# Other
+*.xcuserstate
+*.xcscmblueprint
+*.xcworkspacedata
+*.xcsettings
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.app.dSYM
+
+# Local environment
+.env

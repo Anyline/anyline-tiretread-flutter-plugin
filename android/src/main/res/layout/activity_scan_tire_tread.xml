@@ -18,30 +18,4 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
-
-    <LinearLayout
-        android:id="@+id/processingLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-        <TextView
-            android:id="@+id/processingTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-        <ProgressBar
-            android:id="@+id/processingProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:minHeight="50dp"
-            android:minWidth="250dp" />
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

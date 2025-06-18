@@ -1,4 +1,4 @@
-import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
+import 'package:anyline_tire_tread_plugin/src/models/tire_tread_config.dart';
 import 'package:anyline_tire_tread_plugin/src/models/tread_depth_result.dart';
 import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +28,7 @@ class MockAnylineTireTreadPluginPlatform
   Stream<ScanEvent> get onScanningEvent => throw UnimplementedError();
 
   @override
-  Future<bool?> scan({required ScanOptions options}) {
+  Future<bool?> scan({required TireTreadConfig config}) {
     throw UnimplementedError();
   }
 
