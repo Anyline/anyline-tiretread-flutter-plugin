@@ -1,7 +1,8 @@
 {
-  "useDefaultUi": true,
-  "useDefaultHaptic": true,
-  "defaultUiConfig": {
+  "uiConfig": {
+    "useDefaultUi": true,
+    "useDefaultHaptic": true,
+    "measurementSystem": "Metric",
     "tireWidthInputConfig": {
       "visible": true,
       "skipButtonText": "Test",
@@ -14,7 +15,8 @@
         "upperLimit": 400
       },
       "tireWidthOptions": [
-        100, 110
+        100,
+        110
       ]
     }
   }

@@ -1,5 +1,5 @@
 import 'package:anyline_tire_tread_plugin/src/anyline_tire_tread_plugin_platform_interface.dart';
-import 'package:anyline_tire_tread_plugin/src/models/scan_options.dart';
+import 'package:anyline_tire_tread_plugin/src/models/tire_tread_config.dart';
 import 'package:anyline_tire_tread_plugin/src/models/tread_depth_result.dart';
 import 'package:anyline_tire_tread_plugin/src/scan_event.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +23,8 @@ class TireTreadPlugin {
         .initialize(licenseKey: licenseKey, pluginVersion: version);
   }
 
-  Future<bool?> scan({required ScanOptions options}) async {
-    return AnylineTireTreadPluginPlatform.instance.scan(options: options);
+  Future<bool?> scan({required TireTreadConfig config}) async {
+    return AnylineTireTreadPluginPlatform.instance.scan(config: config);
   }
 
   Future<TreadDepthResult?> getResult({required String measurementUUID}) {

@@ -37,9 +37,9 @@ class MethodChannelAnylineTireTreadPlugin
   }
 
   @override
-  Future<bool?> scan({required ScanOptions options}) async {
+  Future<bool?> scan({required TireTreadConfig config}) async {
     final result = await methodChannel.invokeMethod<bool>(
-        Constants.METHOD_SCAN, options.toJson());
+        Constants.METHOD_SCAN, config.toJson());
     return result;
   }
 

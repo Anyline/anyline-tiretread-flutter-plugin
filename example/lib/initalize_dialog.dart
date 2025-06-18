@@ -35,10 +35,13 @@ class _InitializeDialogState extends State<InitializeDialog> {
 
   Future<void> loadAssetFileNames() async {
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent) as Map<String, dynamic>;
+    final Map<String, dynamic> manifestMap =
+        json.decode(manifestContent) as Map<String, dynamic>;
     final files = manifestMap.keys
         .where((String key) => key.startsWith('assets/'))
         .toList();
+
+    files.insert(0, '');
 
     setState(() {
       fileNames = files;

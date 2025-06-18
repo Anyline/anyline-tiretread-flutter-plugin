@@ -88,58 +88,25 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     
     private func scan(result: @escaping FlutterResult, call: FlutterMethodCall) {
         
-        var viewController = TireScannerViewController(config: TireTreadScanViewConfig())
+        var viewController = TireScannerViewController(config: TireTreadConfig())
 
         if let args = call.arguments as? [String: Any] {
-            
-            let customMeasurementString: String? = args["measurementSystem"] as? String
-            let customScanSpeed: String? = args["scanSpeed"] as? String
-            let customShowGuidance: Bool? = args["showGuidance"] as? Bool
-
-            if let configJSONStr = args["configFileContent"] as? String {
-                if let newConfigJSONString = type(of: self).configString(from: configJSONStr,
-                                                                         customScanSpeed: customScanSpeed,
-                                                                         customMeasurementSystem: customMeasurementString,
-                                                                         customShowGuidance: customShowGuidance) {
-                    viewController = TireScannerViewController(configString: newConfigJSONString)
+            // Convert TireTreadConfig dictionary to JSON string
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: args, options: [])
+                if let tireTreadConfigJson = String(data: jsonData, encoding: .utf8) {
+                    viewController = TireScannerViewController(tireTreadConfigJson: tireTreadConfigJson)
                 }
-            } else {
-                
-                // NOTE: the tireWidth config parameter is not being used on iOS.
-                let config = TireTreadScanViewConfig()
-                if let measurementSystem = customMeasurementString {
-                    switch measurementSystem {
-                    case "Imperial":
-                        config.measurementSystem = .imperial
-                    case "Metric":
-                        config.measurementSystem = .metric
-                    default:
-                        break
-                    }
-                }
-                if let scanSpeed = customScanSpeed {
-                    switch scanSpeed {
-                    case "Fast":
-                        config.scanSpeed = .fast
-                    case "Slow":
-                        config.scanSpeed = .slow
-                    default:
-                        break
-                    }
-                }
-                                     
-                if let showGuidance = args["showGuidance"] as? Bool {
-                    config.defaultUiConfig.scanDirectionConfig.visible = showGuidance
-                    config.defaultUiConfig.countdownConfig.visible = showGuidance
-                    config.defaultUiConfig.tireOverlayConfig.visible = showGuidance
-                }
-                
-                viewController = TireScannerViewController(config: config)
+            } catch {
+                print("Failed to serialize TireTreadConfig to JSON: \(error)")
+                // Fallback to default config
+                viewController = TireScannerViewController(config: TireTreadConfig())
             }
         }
 
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
+            viewController.modalPresentationStyle = .fullScreen
             window.rootViewController?.present(viewController, animated: true, completion: nil)
         }
     }
@@ -250,7 +217,7 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
             return
         }
 
-        let data =     regionsAsString.data(using: .utf8)
+        let data = regionsAsString.data(using: .utf8)
         var regions: [TreadResultRegion] = []
         do {
             if let jsonArray = try JSONSerialization.jsonObject(with: data!, options: []) as? [[String: Any]] {
@@ -282,78 +249,6 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
             }
         }
 
-    }
-
-    // Returns a Tire Tread Scan View Config JSON string from another, with custom scan speed / measurement system
-    // values introduced. Can return null if input isn't valid JSON, or if the resulting output cannot be converted
-    // to a String.
-    private static func configString(from configJSONStr: String,
-                                     customScanSpeed: String? = nil,
-                                     customMeasurementSystem: String? = nil,
-                                     customShowGuidance: Bool? = nil) -> String? {
-        
-        guard let jsonData = configJSONStr.data(using: .utf8) else {
-            return nil
-        }
-        do {
-            if var jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-                // enumerate the properties and set the tire tread config object
-                if let customScanSpeed = customScanSpeed {
-                    jsonObject["scanSpeed"] = customScanSpeed
-                }
-                if let customMeasurementSystem = customMeasurementSystem {
-                    jsonObject["measurementSystem"] = customMeasurementSystem
-                }
-                if let showGuidance = customShowGuidance {
-                    if var defaultUiConfig = jsonObject["defaultUiConfig"] as? [String: Any] {
-                        if var scanDirectionConfig = defaultUiConfig["scanDirectionConfig"] as? [String: Any] {
-                            scanDirectionConfig["visible"] = showGuidance
-                            defaultUiConfig["scanDirectionConfig"] = scanDirectionConfig
-                        } else {
-                            defaultUiConfig["scanDirectionConfig"] = ["visible": showGuidance]
-                        }
-                        
-                        if var countdownConfig = defaultUiConfig["countdownConfig"] as? [String: Any] {
-                            countdownConfig["visible"] = showGuidance
-                            defaultUiConfig["countdownConfig"] = countdownConfig
-                        } else {
-                            defaultUiConfig["countdownConfig"] = ["visible": showGuidance]
-                        }
-                        
-                        if var tireOverlayConfig = defaultUiConfig["tireOverlayConfig"] as? [String: Any] {
-                            tireOverlayConfig["visible"] = showGuidance
-                            defaultUiConfig["tireOverlayConfig"] = tireOverlayConfig
-                        } else {
-                            defaultUiConfig["tireOverlayConfig"] = ["visible": showGuidance]
-                        }
-
-                        jsonObject["defaultUiConfig"] = defaultUiConfig
-                    } else {
-                        jsonObject["defaultUiConfig"] = [
-                            "scanDirectionConfig": ["visible": showGuidance],
-                            "countdownConfig": ["visible": showGuidance],
-                            "tireOverlayConfig": ["visible": showGuidance],
-                        ]
-                    }
-                }
-
-                // turn the json object back into string
-                let jsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-                if let newConfigStr = String(data: jsonData, encoding: .utf8) {
-                    return newConfigStr
-                } else {
-                    print("Failed to convert JSON object to string")
-                    return nil
-                }
-                
-            } else {
-                print("JSON object is not of a suitable type")
-                return configJSONStr
-            }
-        } catch {
-            print("Failed to convert JSON string to dictionary: \(error.localizedDescription)")
-            return nil
-        }
     }
 }
 

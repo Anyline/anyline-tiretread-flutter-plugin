@@ -21,7 +21,11 @@ import io.anyline.tiretread.sdk.scanner.OnScanStarted
 import io.anyline.tiretread.sdk.scanner.OnScanStopped
 import io.anyline.tiretread.sdk.scanner.ScanEvent
 import io.anyline.tiretread.sdk.scanner.ScanSpeed
-import io.anyline.tiretread.sdk.scanner.TireTreadScanViewConfig
+import io.anyline.tiretread.sdk.config.TireTreadConfig
+import io.anyline.tiretread.sdk.config.HeatmapStyle
+import io.anyline.tiretread.sdk.types.AdditionalContext
+import io.anyline.tiretread.sdk.types.TirePosition
+import io.anyline.tiretread.sdk.types.TireSide
 import io.anyline.tiretread.sdk.scanner.TireTreadScanner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,48 +40,12 @@ class ScanTireTreadActivity : AppCompatActivity() {
         ViewModelProvider(this)[ScanTireTreadViewModel::class.java]
     }
 
-    private var useDefaultUi = false
-    var measurementSystem = MeasurementSystem.Metric
-
     private var customDataContent: String? = null
-    private var scopeStrategy: ScopeStrategy = ScopeStrategy.WaitForProcessing
 
-    private var doubleBackToExitPressedOnce = false
     private val TAG = ScanTireTreadActivity::class.qualifiedName
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                scanTireTreadViewModel.measurementScanStateLiveData.value?.let {
-                    val confirmationToAbortRequired = it.confirmationToAbortRequired()
-                    when (confirmationToAbortRequired) {
-                        is ScanTireTreadViewModel.MeasurementScanState.ConfirmationToAbortRequired.Yes -> {
-                            if (doubleBackToExitPressedOnce) {
-                                finishWithResult(RESULT_CANCELED, null, confirmationToAbortRequired.abortMessage)
-                                return@let
-                            }
-                            doubleBackToExitPressedOnce = true
-                            Toast.makeText(
-                                this@ScanTireTreadActivity,
-                                "${confirmationToAbortRequired.confirmationMessage} Press again to abort.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            Handler(Looper.getMainLooper()).postDelayed(
-                                { doubleBackToExitPressedOnce = false }, 2000
-                            )
-                        }
-
-                        is ScanTireTreadViewModel.MeasurementScanState.ConfirmationToAbortRequired.No -> {
-                            finishWithResult(RESULT_CANCELED, null, CANCEL_MESSAGE_ABORTED)
-                        }
-                    }
-                } ?: run { finish() }
-            }
-        })
-
         inflateLayout()
     }
 
@@ -105,81 +73,34 @@ class ScanTireTreadActivity : AppCompatActivity() {
                         }
 
                         val activityParameters: ScanTireTreadActivityParameters =
-                            intent.getStringExtra(INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS)?.let {
-                                ScanTireTreadActivityParameters.fromString(it)
-                            } ?: run { ScanTireTreadActivityParameters() }
+                            if (intent.hasExtra(INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS)) {
+                                intent.getStringExtra(INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS)?.let {
+                                    ScanTireTreadActivityParameters.fromString(it)
+                                } ?: ScanTireTreadActivityParameters()
+                            } else {
+                                ScanTireTreadActivityParameters()
+                            }
 
                         customDataContent = activityParameters.customData
-                        scopeStrategy = activityParameters.scopeStrategy
 
-                        var optionalTireWidth: Int? = null
                         binding.tireTreadScanView.apply {
-                            val scanConfig = activityParameters.configContent?.let {
-                                Json.decodeFromString<TireTreadScanViewConfig>(it)
-                            } ?: run { TireTreadScanViewConfig() }
-
-                            activityParameters.scanSpeed?.let {
-                                scanConfig.scanSpeed = it
-                            }
-
-                            activityParameters.measurementSystem?.let {
-                                scanConfig.measurementSystem = it
-                            }
-
-                            activityParameters.tireWidth?.let {
-                                optionalTireWidth = it
-                            }
-
-                            activityParameters.showGuidance?.let {
-                                scanConfig.defaultUiConfig.countdownConfig.visible = it
-                                scanConfig.defaultUiConfig.scanDirectionConfig.visible = it
-                                scanConfig.defaultUiConfig.tireOverlayConfig.visible = it
-                            }
-                            useDefaultUi = scanConfig.useDefaultUi
-
-                            measurementSystem = scanConfig.measurementSystem
-
+                            val scanConfig = activityParameters.tireTreadConfigJson
                             scanTireTreadViewModel.measurementResultData = null
 
                             this.init(
-                                tireTreadScanViewConfig = scanConfig,
-                                tireWidth = optionalTireWidth,
+                                tireTreadConfig = scanConfig ?: "",
                                 onScanAborted = ::onScanAborted,
                                 onScanProcessCompleted = ::onScanProcessCompleted,
-                                tireTreadScanViewCallback = ::handleEvent
-                            ) { measurementUUID, exception ->
-                                onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ExceptionCaught(exception.message))
-                                finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, exception.message)
-                            }
+                                tireTreadScanViewCallback = ::handleEvent,
+                                onError = { measurementUUID, exception ->
+                                    onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ExceptionCaught(exception.message))
+                                    finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, exception.message)
+                                }
+                            )
                         }
-
-                        processingLayout.visibility = View.GONE
-                        tireTreadScanView.visibility = View.VISIBLE
-                    }
-
-                    is MeasurementResultStatus.ImageUploaded -> {
-                        if (!useDefaultUi) {
-                            processingProgressBar.isIndeterminate = false
-                            processingProgressBar.max = measurementScanState.measurementResultStatus.total
-                            processingProgressBar.progress = measurementScanState.measurementResultStatus.uploaded
-                            processingLayout.visibility = View.VISIBLE
-                            tireTreadScanView.visibility = View.GONE
-                            processingTextView.text = measurementScanState.measurementResultStatus.statusDescription
-                        }
-                    }
-
-                    is MeasurementResultStatus.ScanProcessCompleted,
-                    is MeasurementResultStatus.TreadDepthResultQueried -> {
-                        processingProgressBar.isIndeterminate = true
-                        processingLayout.visibility = View.VISIBLE
-                        tireTreadScanView.visibility = View.GONE
-                        processingTextView.text = measurementScanState.measurementResultStatus.statusDescription
                     }
 
                     else -> {
-                        processingLayout.visibility = View.GONE
-                        tireTreadScanView.visibility = View.VISIBLE
-                        processingTextView.text = ""
                     }
                 }
             }
@@ -206,10 +127,11 @@ class ScanTireTreadActivity : AppCompatActivity() {
      * @param measurementUUID The unique identifier for the measurement that was aborted.
      */
     private fun onScanAborted(measurementUUID: String?) {
-        Log.d(TAG, "onScanAborted: $measurementUUID")
         MeasurementResultStatus.ScanAborted.also { scanAbortedStatus ->
-            if(measurementUUID == null){
-                scanTireTreadViewModel.measurementResultData = provideNewMeasurementResultData(measurementUUID)
+            scanTireTreadViewModel.measurementResultData = if (measurementUUID == null) {
+                provideNewMeasurementResultData(measurementUUID)
+            } else {
+                scanTireTreadViewModel.measurementResultData
             }
             onMeasurementResultDataStatusUpdate(scanAbortedStatus)
             finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, scanAbortedStatus.statusDescription)
@@ -222,37 +144,13 @@ class ScanTireTreadActivity : AppCompatActivity() {
      * @param measurementUUID The unique identifier for the completed measurement.
      */
     private fun onScanProcessCompleted(measurementUUID: String) {
-        Log.d(TAG, "onScanProcessCompleted: $measurementUUID")
         onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ScanProcessCompleted)
-        when (scopeStrategy) {
-            ScopeStrategy.WaitForProcessing -> {
-                //fetch Tread Depth Report and wait for Result
-                onMeasurementResultDataStatusUpdate(
-                    MeasurementResultStatus.TreadDepthResultQueried(TreadDepthResultStatus.NotYetAvailable)
-                )
-                lifecycleScope.launch(Dispatchers.IO) {
-                    scanTireTreadViewModel.measurementResultData?.getTreadDepthReportResult { treadDepthResultStatus ->
-                        onMeasurementResultDataStatusUpdate(
-                            MeasurementResultStatus.TreadDepthResultQueried(
-                                treadDepthResultStatus
-                            )
-                        )
-                        finishWithResult(RESULT_OK, scanTireTreadViewModel.measurementResultData)
-                    }
-                }
-            }
-
-            ScopeStrategy.CaptureAndUploadOnly -> {
-                //Tread Depth Report Result will be fetch later/somewhere else
-                finishWithResult(RESULT_OK, scanTireTreadViewModel.measurementResultData)
-            }
-        }
+        finishWithResult(RESULT_OK, scanTireTreadViewModel.measurementResultData)
     }
 
     fun provideNewMeasurementResultData(measurementUUID: String?): MeasurementResultData {
         return MeasurementResultData(
-            measurementUUID = measurementUUID,
-            measurementSystem = measurementSystem
+            measurementUUID = measurementUUID
         )
     }
 
@@ -284,16 +182,6 @@ class ScanTireTreadActivity : AppCompatActivity() {
                 )
             }
 
-            is OnDistanceChanged -> {
-                if (event.newStatus == DistanceStatus.OK) {
-                    TireTreadScanner.instance.apply {
-                        if (!isScanning && !useDefaultUi) {
-                            startScanning()
-                        }
-                    }
-                }
-            }
-
             else -> {
                 // handle previously unhandled events
             }
@@ -318,23 +206,10 @@ class ScanTireTreadActivity : AppCompatActivity() {
         }
     }
 
-    enum class ScopeStrategy {
-        @JvmStatic
-        WaitForProcessing,
-
-        @JvmStatic
-        CaptureAndUploadOnly
-    }
-
     @Serializable
     data class ScanTireTreadActivityParameters @JvmOverloads constructor(
-        val configContent: String? = null,
-        val scanSpeed: ScanSpeed? = null,
-        val measurementSystem: MeasurementSystem? = null,
-        val tireWidth: Int? = null,
-        val showGuidance: Boolean? = null,
-        val customData: String? = null,
-        val scopeStrategy: ScopeStrategy = ScopeStrategy.WaitForProcessing
+        val tireTreadConfigJson: String? = null,
+        val customData: String? = null
     ) {
         override fun toString() = Json.encodeToString(this)
 
@@ -354,7 +229,6 @@ class ScanTireTreadActivity : AppCompatActivity() {
 
         const val CANCEL_MESSAGE_ABORTED = "Aborted."
         const val CANCEL_MESSAGE_ABORTED_WHILE_SCANNING = "Aborted while scanning."
-        const val CANCEL_MESSAGE_ABORTED_WHILE_WAITING_FOR_RESULT = "Aborted while waiting for result."
 
         private var measurementResultUpdateInterface: MeasurementResultUpdateInterface? = null
 
@@ -364,8 +238,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
             context: Context,
             scanTireTreadActivityParameters: ScanTireTreadActivityParameters,
             measurementResultUpdateInterface: MeasurementResultUpdateInterface? = null
-        )
-                : Intent {
+        ): Intent {
 
             Companion.measurementResultUpdateInterface = measurementResultUpdateInterface
 

@@ -1,31 +1,73 @@
+## 2.0.0
+
+### Breaking Changes
+
+- The `ScanOptions` class was removed.
+
+  - The `tireTreadPlugin.scan()` function can now receive an instance of the new `TireTreadConfig` class to configure the Plugin instead.
+
+### Added
+
+- The `TireTreadConfig` class was introduced, enabling the configuration of a scan. It consists of:
+
+  - `uiConfig`: Configuration for all UI-related settings and elements
+  - `scanConfig`: Configuration for the scanning process parameters
+  - `additionalContext`: Additional contextual information required for measurements
+
+- The previous UI config properties have been reorganized under `uiConfig`:
+  - `scanSpeed`
+  - `measurementSystem`
+  - `useDefaultUi`
+  - `distanceIndicatorConfig`
+  - `focusPointTooltipConfig`
+  - `tapToStartScanningTooltipConfig`
+  - `tireOverlayConfig`
+  - `uploadViewConfig`
+  - `orientationWarningConfig`
+  - `countdownConfig`
+  - `scanDirectionConfig`
+  - `tireWidthInputConfig`
+  - `missingPermissionConfig`
+
+### Fixed
+
+- Fixed a potential crash when parsing measurements with empty regional results
+- Fixed NSInvalidArgumentException crash when using both the Anyline Mobile and Tire Tread SDKs in a single project.
+
+### Dependencies
+
+Tire Tread SDK 13.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#13-0-2-2025-06-18)
+
 ## 1.2.1
 
 ### Added
 
-* A new event is sent upon successfully starting scanning: `ScanStarted`.
+- A new event is sent upon successfully starting scanning: `ScanStarted`.
 
 ### Fixed
 
-* [Android] A `ScanAborted` event is now sent upon aborting a scan, even if the scan was not successfully started before.
+- [Android] A `ScanAborted` event is now sent upon aborting a scan, even if the scan was not successfully started before.
 
 ### Dependencies
 
 Tire Tread SDK 12.1.0 : [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#12-1-0-2025-04-23)
 
-
 ## 1.2.0
 
 ### Changed
-- The default scan speed is now ScanSpeed.Fast. 
-  - The scan process will now, by default, take 7 seconds to be completed (instead of 10 seconds). 
+
+- The default scan speed is now ScanSpeed.Fast.
+  - The scan process will now, by default, take 7 seconds to be completed (instead of 10 seconds).
   - This configuration can still be changed by setting the scanSpeed property of the TireTreadScanView to ScanSpeed.Slow.
 
 ### Added
+
 - The TireTreadScanView can now also be initialized without any config object/string.
-  - In this scenario, the default config values will be used. 
+  - In this scenario, the default config values will be used.
   - For more details, refer to the Scan Process - Overview page.
 
 #### iOS
+
 - Added support for iOS Simulator builds when using the SPM package
   - While the camera and scanning capabilites cannot be used in the simulator, the package from SPM now can also run on x64 and arm64 simulators, allowing running automated tests, or testing other features in your application.
 
@@ -42,14 +84,14 @@ Tire Tread SDK 12.1.0 : [Release Notes](https://documentation.anyline.com/tiretr
 - Minimum required Gradle version and AGP version is 8.2.1
 
 ### Added
+
 - Added a new MissingPermission screen to the DefaultUI, which can be configured via the MissingPermissionConfig
-    - If DefaultUI is not used, a black screen will be shown, when the user denies camera permission.
+  - If DefaultUI is not used, a black screen will be shown, when the user denies camera permission.
 - Added edge-to-edge support in the DefaultUI for Android API 35 and above
 
 ### Dependencies
 
 Tire Tread SDK 12.0.1 : [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#12-0-1-2025-04-07)
-
 
 ## 1.0.0
 
@@ -93,22 +135,22 @@ Tire Tread SDK 11.1.0 : [Release Notes](https://documentation.anyline.com/tiretr
 
 There are changes in `ScanEvent` which now provides the current state of the scanning process. Some events have been removed and consolidated with new events:
 
-* `UploadAborted` event has been removed and consolidated into `ScanAborted` to simplify communication with the app.
-* `UploadCompleted` event has been removed and consolidated into `ScanProcessCompleted` to simplify communication with the app.
-* `UploadFailed` event has been removed and consolidated into `ScanFailed` to simplify communication with the app.
+- `UploadAborted` event has been removed and consolidated into `ScanAborted` to simplify communication with the app.
+- `UploadCompleted` event has been removed and consolidated into `ScanProcessCompleted` to simplify communication with the app.
+- `UploadFailed` event has been removed and consolidated into `ScanFailed` to simplify communication with the app.
 
 ## 0.0.1
 
-* Initial stable release of the Anyline Tire Tread Flutter Plugin.
+- Initial stable release of the Anyline Tire Tread Flutter Plugin.
 
 ## 0.0.1-alpha.3
 
-* Fix pub.dev scores.
+- Fix pub.dev scores.
 
 ## 0.0.1-alpha.2
 
-* Fix pub.dev scores.
+- Fix pub.dev scores.
 
 ## 0.0.1-alpha.1
 
-* Initial alpha release of the Anyline Tire Tread Flutter Plugin. Please see the included Readme.md for details and usage instructions.
+- Initial alpha release of the Anyline Tire Tread Flutter Plugin. Please see the included Readme.md for details and usage instructions.

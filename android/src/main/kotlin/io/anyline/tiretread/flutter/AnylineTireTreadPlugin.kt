@@ -16,6 +16,11 @@ import io.anyline.tiretread.sdk.types.WrapperInfo
 import io.anyline.tiretread.sdk.sendCommentFeedback
 import io.anyline.tiretread.sdk.sendTreadDepthResultFeedback
 import io.anyline.tiretread.sdk.types.TreadResultRegion
+import io.anyline.tiretread.sdk.config.TireTreadConfig
+import io.anyline.tiretread.sdk.config.HeatmapStyle
+import io.anyline.tiretread.sdk.types.AdditionalContext
+import io.anyline.tiretread.sdk.types.TirePosition
+import io.anyline.tiretread.sdk.types.TireSide
 import io.anyline.tiretread.wrapper.MeasurementResultData
 import io.anyline.tiretread.wrapper.MeasurementResultDetails
 import io.anyline.tiretread.wrapper.MeasurementResultStatus
@@ -36,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 
 /** AnylineTireTreadPlugin */
 class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
@@ -78,17 +84,9 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             Constants.METHOD_SCAN -> {
-                (call.arguments as Map<String, Any>).also { scanArguments ->
+                (call.arguments as Map<String, Any>).also { tireTreadConfigMap ->
                     scan(
-                        configFileContent = scanArguments["configFileContent"]?.toString(),
-                        scanSpeed = scanArguments["scanSpeed"]?.let { ScanSpeed.valueOf(it.toString()) },
-                        measurementSystem = scanArguments["measurementSystem"]?.let {
-                            MeasurementSystem.valueOf(
-                                it.toString()
-                            )
-                        },
-                        tireWidth = (scanArguments["tireWidth"] as Int?),
-                        showGuidance = (scanArguments["showGuidance"] as Boolean?),
+                        tireTreadConfigMap = tireTreadConfigMap,
                         result
                     )
                 }
@@ -237,26 +235,20 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     private fun scan(
-        configFileContent: String? = null,
-        scanSpeed: ScanSpeed? = null,
-        measurementSystem: MeasurementSystem? = null,
-        tireWidth: Int? = null,
-        showGuidance: Boolean? = null,
+        tireTreadConfigMap: Map<String, Any>,
         result: Result
     ) {
         if (activityPluginBinding == null) {
             return PluginError.PluginNotAttachedToActivityError.throwToResult(result)
         }
 
+        // Convert TireTreadConfig map to JSON string using standard JSON serialization
+        val tireTreadConfigJson = org.json.JSONObject(tireTreadConfigMap).toString()
+
         ScanTireTreadActivity.buildIntent(
             activityPluginBinding!!.activity,
             ScanTireTreadActivity.ScanTireTreadActivityParameters(
-                configContent = configFileContent,
-                scanSpeed = scanSpeed,
-                measurementSystem = measurementSystem,
-                tireWidth = tireWidth,
-                showGuidance = showGuidance,
-                scopeStrategy = ScanTireTreadActivity.ScopeStrategy.CaptureAndUploadOnly
+                tireTreadConfigJson = tireTreadConfigJson
             ),
             measurementResultUpdateInterface = { measurementResultData: MeasurementResultData?,
                                                  measurementResultStatus: MeasurementResultStatus, _ ->
@@ -398,6 +390,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
         }
     }
+
 }
 
 

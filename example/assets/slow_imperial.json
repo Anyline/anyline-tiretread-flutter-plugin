@@ -1,7 +1,9 @@
 {
-  "useDefaultUi": true,
-  "useDefaultHaptic": true,
-  "defaultUiConfig": {
+  "uiConfig": {
+    "useDefaultUi": true,
+    "useDefaultHaptic": true,
+    "measurementSystem": "Imperial",
+    "scanSpeed": "Slow",
     "distanceIndicatorConfig": {
       "visible": true,
       "textOk": "Distance OK",
@@ -26,7 +28,5 @@
       "visible": true,
       "text": "Rotate to landscape mode."
     }
-  },
-  "scanSpeed": "Slow",
-  "measurementSystem": "Imperial"
+  }
 }

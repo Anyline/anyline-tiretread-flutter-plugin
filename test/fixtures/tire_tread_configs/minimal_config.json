@@ -1,0 +1,19 @@
+{
+    "uiConfig": {
+        "measurementSystem": "Imperial",
+        "useDefaultUi": true,
+        "scanSpeed": "Slow",
+        "orientationWarningConfig": {
+            "visible": true,
+            "text": "Gire o dispositivo horizontalmente",
+            "rotationLockHint": "Certifique-se de que a rotação automática do dispositivo está ativada."
+        },
+        "missingPermissionConfig": {
+            "title": "Permissão de câmera não concedida!",
+            "text": "A câmera é necessária para escanear o pneu.\nPor favor, vá para as configurações do aplicativo e conceda permissões de câmera."
+        }
+    },
+    "scanConfig": {
+        "heatmapStyle": "GrayScale"
+    }
+}
