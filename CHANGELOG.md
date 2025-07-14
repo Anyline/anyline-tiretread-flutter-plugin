@@ -1,3 +1,9 @@
+## 2.0.1
+
+### Changed
+
+- UI Behaviour is now aligned between Android and iOS. When the Default UI is disabled, no UI will be displayed neither on Android nor on iOS.
+
 ## 2.0.0
 
 ### Breaking Changes
