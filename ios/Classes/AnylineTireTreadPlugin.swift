@@ -11,13 +11,9 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: channel)
         
         // set up Tire Tread Plugin events channel
-        DispatchQueue.main.async {
-            if let rootViewController = UIApplication.shared.delegate?.window??.rootViewController as? FlutterViewController {
-                let eventChannel = FlutterEventChannel(name: "anyline_tire_tread_plugin/events",
-                                                       binaryMessenger: rootViewController.binaryMessenger)
-                eventChannel.setStreamHandler(TTEventHandler.shared)
-            }
-        }
+        let eventChannel = FlutterEventChannel(name: "anyline_tire_tread_plugin/events",
+                                               binaryMessenger: registrar.messenger())
+        eventChannel.setStreamHandler(TTEventHandler.shared)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult)  {
@@ -55,33 +51,41 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     
     private func initializeSdk(result: @escaping FlutterResult, call: FlutterMethodCall) {
             let arguments = call.arguments as? [String: Any]
-            let licenseKey = arguments?[Constants.EXTRA_LICENSE_KEY] as? String
-            let pluginVersion = arguments?[Constants.EXTRA_PLUGIN_VERSION] as? String
+            guard let licenseKey = arguments?[Constants.EXTRA_LICENSE_KEY] as? String else {
+                result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_LICENSE_KEY_NOT_FOUND, details: nil))
+                return
+            }
+            let pluginVersion = arguments?[Constants.EXTRA_PLUGIN_VERSION] as? String ?? ""
 
-            if (licenseKey != nil) {
-                do {
-                    try AnylineTireTreadSdk.shared.doInit(
-                        licenseKey: licenseKey ?? "",
-                        customTag: nil,
-                        wrapperInfo: WrapperInfo.Flutter(version: pluginVersion ?? "")
-                    )
-
-                    result(true)
-                } catch {
-                    let kotlinException = (error as NSError).userInfo["KotlinException"]
-                    // handle pre-identified types of errors
-                    if let sdkInitException = kotlinException as? SdkLicenseKeyForbiddenException {
-                        PluginError.sdkInitializationFailedError.throwToResult(result: result, details: sdkInitException.message)
-                    }else if let sdkInitException = kotlinException as? SdkLicenseKeyInvalidException {
-                        PluginError.sdkInitializationFailedError.throwToResult(result: result, details: sdkInitException.message)
-                    }else if let sdkInitException = kotlinException as? NoConnectionException {
-                        PluginError.sdkInitializationFailedError.throwToResult(result: result, details: sdkInitException.message)
-                    }
-                    else {
-                        // the catch-all generic exception
-                        PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION, error.localizedDescription).throwToResult(result: result, details: error.localizedDescription)
-                    }
+            do {
+                try AnylineTireTreadSdk.shared.doInit(
+                    licenseKey: licenseKey,
+                    customTag: nil,
+                    wrapperInfo: WrapperInfo.Flutter(version: pluginVersion)
+                )
+                result(true)
+            } catch {
+                let kotlinException = (error as NSError).userInfo["KotlinException"]
+                let (details, code, message): (String, String, String)
+                switch kotlinException {
+                case let ex as SdkLicenseKeyForbiddenException:
+                    details = ex.message ?? Constants.ERROR_MESSAGE_LICENSE_KEY_FORBIDDEN
+                    code = Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED
+                    message = Constants.ERROR_MESSAGE_SDK_INITIALIZATION_FAILED
+                case let ex as SdkLicenseKeyInvalidException:
+                    details = ex.message ?? Constants.ERROR_MESSAGE_INVALID_LICENSE_KEY
+                    code = Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED
+                    message = Constants.ERROR_MESSAGE_SDK_INITIALIZATION_FAILED
+                case let ex as NoConnectionException:
+                    details = ex.message ?? Constants.ERROR_MESSAGE_NO_CONNECTION
+                    code = Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED
+                    message = Constants.ERROR_MESSAGE_SDK_INITIALIZATION_FAILED
+                default:
+                    details = error.localizedDescription
+                    code = Constants.ERROR_CODE_GENERIC_EXCEPTION
+                    message = error.localizedDescription
                 }
+                result(FlutterError(code: code, message: message, details: details))
             }
         }
     
@@ -115,7 +119,7 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     private func getResultJSON(result: @escaping FlutterResult, call: FlutterMethodCall) async {
         let arguments = call.arguments as? [String: Any]
         guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_UUID_NOT_FOUND, details: nil))
             return
         }
         
@@ -126,11 +130,11 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                 case let response as ResponseSuccess<TreadDepthResult>:
                     continuation.resume(returning:  result(response.data.toJson()))
                 case let response as ResponseError<TreadDepthResult>:
-                    let message = response.errorMessage ?? "Unknown error"
-                    continuation.resume(returning:  PluginError.genericExceptionError(response.errorCode,message).throwToResult(result: result))
+                    let message = response.errorMessage ?? Constants.ERROR_MESSAGE_UNKNOWN_ERROR
+                    continuation.resume(returning:  result(FlutterError(code: response.errorCode ?? "UNKNOWN_ERROR", message: message, details: nil)))
                 case let responseException as ResponseException<TreadDepthResult>:
-                    let exceptionMessage = "Unable to get tread depth result: " + (responseException.exception.message ?? "Unknown exception")
-                    continuation.resume(returning:  PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,exceptionMessage).throwToResult(result: result))
+                    let exceptionMessage = Constants.ERROR_MESSAGE_UNABLE_TO_GET_TREAD_DEPTH_RESULT + (responseException.exception.message ?? Constants.ERROR_MESSAGE_UNKNOWN_EXCEPTION)
+                    continuation.resume(returning:  result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: exceptionMessage, details: nil)))
                     break
                 default:
                     break
@@ -142,7 +146,7 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     private func getHeatMap(result: @escaping FlutterResult, call: FlutterMethodCall) async{
         let arguments = call.arguments as? [String: Any]
         guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_UUID_NOT_FOUND, details: nil))
             return
         }
 
@@ -153,11 +157,11 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                 case let response as ResponseSuccess<Heatmap>:
                     continuation.resume(returning:  result(response.data.url))
                 case let response as ResponseError<Heatmap>:
-                    let message = response.errorMessage ?? "Unknown error"
-                    continuation.resume(returning:  PluginError.genericExceptionError(response.errorCode,message).throwToResult(result: result))
+                    let message = response.errorMessage ?? Constants.ERROR_MESSAGE_UNKNOWN_ERROR
+                    continuation.resume(returning:  result(FlutterError(code: response.errorCode ?? "UNKNOWN_ERROR", message: message, details: nil)))
                 case let responseException as ResponseException<Heatmap>:
-                    let exceptionMessage = "Unable to get heatmap result: " + (responseException.exception.message ?? "Unknown exception")
-                    continuation.resume(returning:  PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,exceptionMessage).throwToResult(result: result))
+                    let exceptionMessage = Constants.ERROR_MESSAGE_UNABLE_TO_GET_HEATMAP_RESULT + (responseException.exception.message ?? Constants.ERROR_MESSAGE_UNKNOWN_EXCEPTION)
+                    continuation.resume(returning:  result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: exceptionMessage, details: nil)))
                     break
                 default:
                     break
@@ -173,11 +177,11 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     private func postFeedbackComment(result: @escaping FlutterResult, call: FlutterMethodCall) async{
         let arguments = call.arguments as? [String: Any]
         guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_UUID_NOT_FOUND, details: nil))
             return
         }
         guard let comment = arguments?[Constants.EXTRA_FEEDBACK_COMMENT] as? String else {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"comment parameter not found").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_COMMENT_NOT_FOUND, details: nil))
             return
         }
 
@@ -189,11 +193,11 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                 case let response as ResponseSuccess<MeasurementInfo>:
                     continuation.resume(returning:  result(response.data.measurementUuid))
                 case let response as ResponseError<MeasurementInfo>:
-                    let message = response.errorMessage ?? "Unknown error"
-                    continuation.resume(returning:  PluginError.genericExceptionError(response.errorCode,message).throwToResult(result: result))
+                    let message = response.errorMessage ?? Constants.ERROR_MESSAGE_UNKNOWN_ERROR
+                    continuation.resume(returning:  result(FlutterError(code: response.errorCode ?? "UNKNOWN_ERROR", message: message, details: nil)))
                 case let responseException as ResponseException<MeasurementInfo>:
-                    let exceptionMessage = "Unable to get tread depth result: " + (responseException.exception.message ?? "Unknown exception")
-                    continuation.resume(returning:  PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,exceptionMessage).throwToResult(result: result))
+                    let exceptionMessage = Constants.ERROR_MESSAGE_UNABLE_TO_GET_TREAD_DEPTH_RESULT + (responseException.exception.message ?? Constants.ERROR_MESSAGE_UNKNOWN_EXCEPTION)
+                    continuation.resume(returning:  result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: exceptionMessage, details: nil)))
                     break
                 default:
                     break
@@ -209,25 +213,33 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
     private func sendTreadDepthResultFeedback(result: @escaping FlutterResult, call: FlutterMethodCall) async{
         let arguments = call.arguments as? [String: Any]
         guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"uuid parameter not found").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_UUID_NOT_FOUND, details: nil))
             return
         }
         guard let regionsAsString = arguments?[Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK] as? String else {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"comment parameter not found").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_COMMENT_NOT_FOUND, details: nil))
             return
         }
 
-        let data = regionsAsString.data(using: .utf8)
+        guard let data = regionsAsString.data(using: .utf8) else {
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_ENCODING_REGIONS_STRING, details: nil))
+            return
+        }
         var regions: [TreadResultRegion] = []
         do {
-            if let jsonArray = try JSONSerialization.jsonObject(with: data!, options: []) as? [[String: Any]] {
+            if let jsonArray = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] {
                 for name in jsonArray {
-                    let deit = String(data: try  JSONSerialization.data(withJSONObject: name), encoding: .utf8)!
+                    let jsonData = try JSONSerialization.data(withJSONObject: name)
+                    guard let deit = String(data: jsonData, encoding: .utf8) else {
+                        result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_ENCODING_JSON_DATA, details: nil))
+                        return
+                    }
                     regions.append(TreadResultRegion.companion.fromJson(json: deit))
                 }
             }
         } catch {
-            PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,"Error deserializing JSON: \(error)").throwToResult(result: result)
+            result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: Constants.ERROR_MESSAGE_DESERIALIZING_JSON + "\(error)", details: nil))
+            return
         }
 
         await withCheckedContinuation {
@@ -237,11 +249,11 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                 case let response as ResponseSuccess<MeasurementInfo>:
                     continuation.resume(returning:  result(response.data.measurementUuid))
                 case let response as ResponseError<MeasurementInfo>:
-                    let message = response.errorMessage ?? "Unknown error"
-                    continuation.resume(returning:  PluginError.genericExceptionError(response.errorCode,message).throwToResult(result: result))
+                    let message = response.errorMessage ?? Constants.ERROR_MESSAGE_UNKNOWN_ERROR
+                    continuation.resume(returning:  result(FlutterError(code: response.errorCode ?? "UNKNOWN_ERROR", message: message, details: nil)))
                 case let responseException as ResponseException<MeasurementInfo>:
-                    let exceptionMessage = "Unable to get tread depth result: " + (responseException.exception.message ?? "Unknown exception")
-                    continuation.resume(returning:  PluginError.genericExceptionError(Constants.ERROR_CODE_GENERIC_EXCEPTION,exceptionMessage).throwToResult(result: result))
+                    let exceptionMessage = Constants.ERROR_MESSAGE_UNABLE_TO_GET_TREAD_DEPTH_RESULT + (responseException.exception.message ?? Constants.ERROR_MESSAGE_UNKNOWN_EXCEPTION)
+                    continuation.resume(returning:  result(FlutterError(code: Constants.ERROR_CODE_GENERIC_EXCEPTION, message: exceptionMessage, details: nil)))
                     break
                 default:
                     break
@@ -249,35 +261,5 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
             }
         }
 
-    }
-}
-
-
-public class TTEventHandler: NSObject, FlutterStreamHandler {
-    
-    public static let shared = TTEventHandler()
-    
-    private var eventSink: FlutterEventSink?
-    
-    public func onListen(withArguments arguments: Any?,
-                         eventSink: @escaping FlutterEventSink) -> FlutterError? {
-        
-        self.eventSink = eventSink
-        return nil
-    }
-    
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        eventSink = nil
-        return nil
-    }
-    
-    public func sendEvent(type: String, uuid: String? = nil, error: String? = nil) {
-        let eventStr = TTEventHandler.eventString(type: type, uuid: uuid, error: error)
-        self.eventSink?(eventStr)
-    }
-    
-    static func eventString(type: String, uuid: String? = nil, error: String? = nil) -> String {
-        // measurementUUID, error is required, event if the event doesn't come with it.
-        return "{\"measurementResultStatus\":{\"type\":\"io.anyline.tiretread.scanningevent.\(type)\"},\"measurementUUID\":\"\(uuid ?? "")\",\"error\":\"\(error ?? "")\"}"
     }
 }
