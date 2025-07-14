@@ -29,7 +29,7 @@ class MethodChannelAnylineTireTreadPlugin
   Future<bool?> initialize(
       {required String licenseKey, required String pluginVersion}) async {
     final result =
-    await methodChannel.invokeMethod<bool>(Constants.METHOD_INITIALIZE, {
+        await methodChannel.invokeMethod<bool>(Constants.METHOD_INITIALIZE, {
       Constants.EXTRA_LICENSE_KEY: licenseKey,
       Constants.EXTRA_PLUGIN_VERSION: pluginVersion
     });
@@ -63,23 +63,25 @@ class MethodChannelAnylineTireTreadPlugin
   @override
   Stream<ScanEvent> get onScanningEvent {
     return _eventsChannel.receiveBroadcastStream().map((event) {
-      final Map<String, dynamic> eventType =
-          jsonDecode(event as String) as Map<String, dynamic>;
-      String measurementResultStatus =
-          (eventType['measurementResultStatus']['type'] as String)
-              .split('.')
-              .last;
-      switch (measurementResultStatus) {
+      final Map<String, dynamic> eventMap =
+          Map<String, dynamic>.from(event as Map);
+      final String type = eventMap['type'] as String;
+      final String uuid = eventMap['uuid'] as String? ?? "";
+      final String error = eventMap['error'] as String? ?? "";
+
+      debugPrint('Received event: type=$type, uuid=$uuid, error=$error');
+
+      switch (type) {
         case 'ScanAborted':
-          return ScanAborted.fromMap(eventType);
+          return ScanAborted(measurementUUID: uuid);
         case 'ScanProcessCompleted':
-          return ScanProcessCompleted.fromMap(eventType);
+          return ScanProcessCompleted(measurementUUID: uuid);
         case 'ScanFailed':
-          return ScanFailed.fromMap(eventType);
+          return ScanFailed(measurementUUID: uuid, error: error);
         case 'ScanStarted':
-          return ScanStarted.fromMap(eventType);
+          return ScanStarted(measurementUUID: uuid);
         default:
-          return ScanAborted.fromMap(eventType);
+          return ScanAborted(measurementUUID: uuid);
       }
     });
   }
@@ -119,8 +121,8 @@ class MethodChannelAnylineTireTreadPlugin
 
   @override
   Future<void> clearExperimentalFlags() async {
-    final result = await methodChannel.invokeMethod<void>(
-        Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS);
+    final result = await methodChannel
+        .invokeMethod<void>(Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS);
     return result;
   }
 }

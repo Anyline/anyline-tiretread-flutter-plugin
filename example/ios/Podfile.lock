@@ -1,5 +1,5 @@
 PODS:
-  - anyline_tire_tread_plugin (2.0.0):
+  - anyline_tire_tread_plugin (2.0.1):
     - AnylineTireTreadSdk (= 13.0.2)
     - Flutter
   - AnylineTireTreadSdk (13.0.2)
@@ -30,11 +30,11 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  anyline_tire_tread_plugin: 069d3753062232f8c6e4381409ae7fe5b0adc74b
+  anyline_tire_tread_plugin: 5b87a569d624c0b4bccb3dee2e612531b10918c6
   AnylineTireTreadSdk: eec126d7e5cdc09247720b585cc92ff9732d3b28
-  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
 
 PODFILE CHECKSUM: 35ab6dbc143aa836835dc2d40ede947ad4709c22
 
