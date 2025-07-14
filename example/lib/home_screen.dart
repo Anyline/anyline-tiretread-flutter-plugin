@@ -40,14 +40,17 @@ class _HomeScreenState extends State<HomeScreen> {
     tireTreadPlugin.onScanningEvent.listen((event) {
       switch (event) {
         case ScanStarted():
-          debugPrint('UUID : ${event.measurementUUID}');
+          debugPrint('ScanStarted UUID : ${event.measurementUUID}');
         case ScanAborted():
-          debugPrint('UUID : ${event.measurementUUID}');
+          debugPrint('ScanAborted UUID : ${event.measurementUUID}');
         case ScanProcessCompleted():
-          debugPrint('UUID : ${event.measurementUUID}');
-          setState(() => _uuid = event.measurementUUID ?? '');
+          debugPrint('ScanProcessCompleted UUID : ${event.measurementUUID}');
+          setState(() {
+            _uuid = event.measurementUUID ?? '';
+            debugPrint('Set _uuid to: $_uuid');
+          });
         case ScanFailed():
-          debugPrint('Error : ${event.error}');
+          debugPrint('ScanFailed Error : ${event.error}');
       }
     });
     super.initState();
