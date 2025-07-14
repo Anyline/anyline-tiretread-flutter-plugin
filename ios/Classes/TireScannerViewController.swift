@@ -25,9 +25,7 @@ class TireScannerViewController: UIViewController {
     }
     
     var scannerViewController: UIViewController?
-    
-    var uuid: String?
-    
+
     var scanViewConfig: TireTreadConfig!
         
     var scanViewConfigStr: String?
@@ -73,7 +71,9 @@ class TireScannerViewController: UIViewController {
      * @param measurementUUID The unique identifier for the measurement that encountered an error.
      */
     private func onError(measurementUUID: String?, exception: KotlinException) {
-        TTEventHandler.shared.sendEvent(type: "ScanFailed", uuid: measurementUUID, error: exception.message)
+        removeScanViewControllerAsChild()
+        dismiss(animated: true, completion: nil)
+        TTEventHandler.shared.sendEvent(type: "ScanFailed", uuid: measurementUUID, error: exception.message ?? "Unknown error")
     }
     
     /**
