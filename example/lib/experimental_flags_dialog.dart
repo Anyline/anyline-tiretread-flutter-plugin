@@ -1,4 +1,3 @@
-import 'package:anyline_tire_tread_plugin/anyline_tire_tread_plugin.dart';
 import 'package:anyline_tire_tread_plugin_example/app_strings.dart';
 import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/material.dart';
