@@ -1,252 +1,118 @@
-package io.anyline.tiretread.wrapper
+package io.anyline.tiretread.flutter
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.View
-import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import io.anyline.tiretread.flutter.databinding.ActivityScanTireTreadBinding
-import io.anyline.tiretread.sdk.scanner.DistanceStatus
-import io.anyline.tiretread.sdk.scanner.MeasurementSystem
-import io.anyline.tiretread.sdk.scanner.OnDistanceChanged
-import io.anyline.tiretread.sdk.scanner.OnImageUploaded
-import io.anyline.tiretread.sdk.scanner.OnScanStarted
-import io.anyline.tiretread.sdk.scanner.OnScanStopped
 import io.anyline.tiretread.sdk.scanner.ScanEvent
-import io.anyline.tiretread.sdk.scanner.ScanSpeed
-import io.anyline.tiretread.sdk.config.TireTreadConfig
-import io.anyline.tiretread.sdk.config.HeatmapStyle
-import io.anyline.tiretread.sdk.types.AdditionalContext
-import io.anyline.tiretread.sdk.types.TirePosition
-import io.anyline.tiretread.sdk.types.TireSide
-import io.anyline.tiretread.sdk.scanner.TireTreadScanner
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import io.anyline.tiretread.sdk.scanner.OnScanStarted
+import io.anyline.tiretread.sdk.scanner.TireTreadScanView
 
 class ScanTireTreadActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityScanTireTreadBinding
-    private val scanTireTreadViewModel: ScanTireTreadViewModel by lazy {
-        ViewModelProvider(this)[ScanTireTreadViewModel::class.java]
+    
+    private var currentScanView: TireTreadScanView? = null
+    
+    companion object {
+        // Config content extra
+        const val EXTRA_TIRE_TREAD_CONFIG = "tire_tread_config"
+        
+        // Result extras
+        const val RESULT_MEASUREMENT_UUID = "measurement_uuid"
+        const val RESULT_ERROR_MESSAGE = "error_message"
     }
-
-    private var customDataContent: String? = null
-
-    private val TAG = ScanTireTreadActivity::class.qualifiedName
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        inflateLayout()
-    }
-
-    private fun inflateLayout() {
-        binding = ActivityScanTireTreadBinding.inflate(layoutInflater)
-        binding.root.also { rootView ->
-            setContentView(rootView)
-        }
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        observeMeasurementScanState()
-    }
-
-    private fun observeMeasurementScanState() {
-        scanTireTreadViewModel.measurementScanStateLiveData.observe(this) { measurementScanState ->
-            with(binding) {
-                when (measurementScanState.measurementResultStatus) {
-                    null -> {
-                        if (intent.getBooleanExtra(INTENT_EXTRA_IN_UPDATE_INTERFACE, false)) {
-                            measurementResultUpdateInterface?.let {
-                                scanTireTreadViewModel.measurementResultUpdateInterface = it
-                            }
-                            //once set listener to viewModel, release static measurementResultUpdateInterface reference
-                            measurementResultUpdateInterface = null
-                        }
-
-                        val activityParameters: ScanTireTreadActivityParameters =
-                            if (intent.hasExtra(INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS)) {
-                                intent.getStringExtra(INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS)?.let {
-                                    ScanTireTreadActivityParameters.fromString(it)
-                                } ?: ScanTireTreadActivityParameters()
-                            } else {
-                                ScanTireTreadActivityParameters()
-                            }
-
-                        customDataContent = activityParameters.customData
-
-                        binding.tireTreadScanView.apply {
-                            val scanConfig = activityParameters.tireTreadConfigJson
-                            scanTireTreadViewModel.measurementResultData = null
-
-                            this.init(
-                                tireTreadConfig = scanConfig ?: "",
-                                onScanAborted = ::onScanAborted,
-                                onScanProcessCompleted = ::onScanProcessCompleted,
-                                tireTreadScanViewCallback = ::handleEvent,
-                                onError = { measurementUUID, exception ->
-                                    onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ExceptionCaught(exception.message))
-                                    finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, exception.message)
-                                }
-                            )
-                        }
-                    }
-
-                    else -> {
-                    }
-                }
+        
+        val tireTreadConfigJson = intent.getStringExtra(EXTRA_TIRE_TREAD_CONFIG) ?: run {
+                finishWithError("No tire tread configuration provided")
+                return
             }
+        
+        try {
+            setupScanView(tireTreadConfigJson)
+        } catch (e: Exception) {
+            finishWithError("Failed to setup scan view: ${e.message}")
         }
     }
-
-    private fun finishWithResult(
-        result: Int,
-        measurementResultData: MeasurementResultData?,
-        cancelMessage: String? = null
-    ) {
-
-        val resultIntent = Intent()
-        resultIntent.putExtra(INTENT_EXTRA_OUT_MEASUREMENT_RESULT_DATA, measurementResultData?.toString())
-        resultIntent.putExtra(INTENT_EXTRA_OUT_CUSTOM_DATA, customDataContent)
-        resultIntent.putExtra(INTENT_EXTRA_OUT_CANCEL_MESSAGE, cancelMessage)
-        setResult(result, resultIntent)
-        finish()
+    
+    private fun setupScanView(tireTreadConfigJson: String) {
+        currentScanView = TireTreadScanView(this).apply {
+            init(
+                tireTreadConfig = tireTreadConfigJson,
+                onScanAborted = ::onScanAborted,
+                onScanProcessCompleted = ::onScanProcessCompleted,
+                tireTreadScanViewCallback = ::handleScanEvent,
+                onError = ::onScanError
+            )
+        }
+        
+        // Set the scan view as the content view
+        setContentView(currentScanView)
     }
-
+    
     /**
      * Handles the event when a scan is aborted.
      *
      * @param measurementUUID The unique identifier for the measurement that was aborted.
      */
     private fun onScanAborted(measurementUUID: String?) {
-        MeasurementResultStatus.ScanAborted.also { scanAbortedStatus ->
-            scanTireTreadViewModel.measurementResultData = if (measurementUUID == null) {
-                provideNewMeasurementResultData(measurementUUID)
-            } else {
-                scanTireTreadViewModel.measurementResultData
-            }
-            onMeasurementResultDataStatusUpdate(scanAbortedStatus)
-            finishWithResult(RESULT_CANCELED, scanTireTreadViewModel.measurementResultData, scanAbortedStatus.statusDescription)
-        }
+        TTEventHandler.shared.sendEvent(type = "ScanAborted", uuid = measurementUUID)
+        finishWithResult(measurementUUID, "ABORTED")
     }
-
+    
     /**
      * Handles the event when the scan process is completed.
      *
      * @param measurementUUID The unique identifier for the completed measurement.
      */
     private fun onScanProcessCompleted(measurementUUID: String) {
-        onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ScanProcessCompleted)
-        finishWithResult(RESULT_OK, scanTireTreadViewModel.measurementResultData)
+        TTEventHandler.shared.sendEvent(type = "ScanProcessCompleted", uuid = measurementUUID)
+        finishWithResult(measurementUUID, "COMPLETED")
     }
-
-    fun provideNewMeasurementResultData(measurementUUID: String?): MeasurementResultData {
-        return MeasurementResultData(
-            measurementUUID = measurementUUID
-        )
-    }
-
+    
     /**
-     * Handles various scan events and updates the measurement result data accordingly.
+     * Handles the event when an error occurs during the scan process.
+     *
+     * @param measurementUUID The unique identifier for the measurement that encountered an error.
+     * @param exception The exception that occurred during scanning.
+     */
+    private fun onScanError(measurementUUID: String?, exception: Exception) {
+        TTEventHandler.shared.sendEvent(type = "ScanFailed", uuid = measurementUUID, error = exception.message)
+        finishWithError("Scan failed: ${exception.message}")
+    }
+    
+    /**
+     * Handles various scan events and sends appropriate events to Flutter.
      *
      * @param event The scan event to handle.
      */
-    private fun handleEvent(event: ScanEvent) {
-
-        when (event) {
-            is OnScanStarted -> {
-                event.measurementUUID.let { measurementUUID ->
-                    scanTireTreadViewModel.measurementResultData = provideNewMeasurementResultData(measurementUUID)
-                    onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ScanStarted)
-                }
-            }
-
-            is OnScanStopped -> {
-                onMeasurementResultDataStatusUpdate(MeasurementResultStatus.ScanStopped)
-            }
-
-            is OnImageUploaded -> {
-                onMeasurementResultDataStatusUpdate(
-                    MeasurementResultStatus.ImageUploaded(
-                        event.uploaded,
-                        event.total
-                    )
-                )
-            }
-
-            else -> {
-                // handle previously unhandled events
-            }
+    private fun handleScanEvent(event: ScanEvent) {
+        if (event is OnScanStarted) {
+            TTEventHandler.shared.sendEvent(type = "ScanStarted", uuid = event.measurementUUID)
         }
+        // Handle other scan events if needed in the future
     }
-
-    private fun onMeasurementResultDataStatusUpdate(measurementResultStatus: MeasurementResultStatus) {
-        scanTireTreadViewModel.measurementScanStateLiveData.postValue(
-            ScanTireTreadViewModel.MeasurementScanState(
-                TireTreadScanner.instance.isScanning, measurementResultStatus
-            )
-        )
-
-        scanTireTreadViewModel.measurementResultData?.let { measurementResultDataNonNull ->
-            measurementResultDataNonNull.measurementResultStatus = measurementResultStatus
-
-            scanTireTreadViewModel.measurementResultUpdateInterface?.onMeasurementResultDataStatusUpdate(
-                measurementResultDataNonNull,
-                measurementResultStatus,
-                customDataContent
-            )
+    
+    private fun finishWithResult(measurementUUID: String?, status: String) {
+        val resultIntent = Intent().apply {
+            putExtra(RESULT_MEASUREMENT_UUID, measurementUUID ?: "")
+            putExtra("status", status)
         }
+        setResult(Activity.RESULT_OK, resultIntent)
+        finish()
     }
-
-    @Serializable
-    data class ScanTireTreadActivityParameters @JvmOverloads constructor(
-        val tireTreadConfigJson: String? = null,
-        val customData: String? = null
-    ) {
-        override fun toString() = Json.encodeToString(this)
-
-        companion object {
-            @JvmStatic
-            fun fromString(value: String) = Json.decodeFromString<ScanTireTreadActivityParameters>(value)
+    
+    private fun finishWithError(errorMessage: String) {
+        val resultIntent = Intent().apply {
+            putExtra(RESULT_ERROR_MESSAGE, errorMessage)
         }
+        setResult(Activity.RESULT_CANCELED, resultIntent)
+        finish()
     }
-
-    companion object {
-        private const val INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS = "INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS"
-        private const val INTENT_EXTRA_IN_UPDATE_INTERFACE = "INTENT_EXTRA_IN_UPDATE_INTERFACE"
-
-        const val INTENT_EXTRA_OUT_MEASUREMENT_RESULT_DATA = "INTENT_EXTRA_OUT_MEASUREMENT_RESULT_DATA"
-        const val INTENT_EXTRA_OUT_CUSTOM_DATA = "INTENT_EXTRA_OUT_CUSTOM_DATA"
-        const val INTENT_EXTRA_OUT_CANCEL_MESSAGE = "INTENT_EXTRA_OUT_CANCEL_MESSAGE"
-
-        const val CANCEL_MESSAGE_ABORTED = "Aborted."
-        const val CANCEL_MESSAGE_ABORTED_WHILE_SCANNING = "Aborted while scanning."
-
-        private var measurementResultUpdateInterface: MeasurementResultUpdateInterface? = null
-
-        @JvmStatic
-        @JvmOverloads
-        fun buildIntent(
-            context: Context,
-            scanTireTreadActivityParameters: ScanTireTreadActivityParameters,
-            measurementResultUpdateInterface: MeasurementResultUpdateInterface? = null
-        ): Intent {
-
-            Companion.measurementResultUpdateInterface = measurementResultUpdateInterface
-
-            val intent = Intent(context, ScanTireTreadActivity::class.java)
-            intent.putExtra(INTENT_EXTRA_IN_SCAN_TTD_ACTIVITY_PARAMETERS, scanTireTreadActivityParameters.toString())
-            intent.putExtra(INTENT_EXTRA_IN_UPDATE_INTERFACE, (measurementResultUpdateInterface != null))
-
-            return intent
-        }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        currentScanView = null
     }
 }
