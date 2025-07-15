@@ -46,7 +46,6 @@ app.*.map.json
 
 # iOS/CocoaPods related
 ios/Pods/
-ios/Podfile.lock
 ios/.symlinks/
 ios/build/
 ios/Flutter/Flutter.framework
@@ -59,15 +58,12 @@ ios/RunnerArchive.xcarchive/
 ios/*.xcarchive/
 
 # Xcode user data and workspace settings
-ios/Runner.xcworkspace/
 ios/xcuserdata/
 ios/DerivedData/
 
 # Other
 *.xcuserstate
 *.xcscmblueprint
-*.xcworkspacedata
-*.xcsettings
 *.moved-aside
 *.hmap
 *.ipa
