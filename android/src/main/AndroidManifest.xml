@@ -10,9 +10,9 @@
 
     <application>
         <activity
-            android:name="io.anyline.tiretread.wrapper.ScanTireTreadActivity"
-            android:exported="false"
-            android:label="ScanActivity"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar"/>
+            android:name=".ScanTireTreadActivity"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
     </application>
 </manifest>
