@@ -44,7 +44,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub token from secrets
         with:
           tag_name: ${{ github.ref_name }} # Use the generated tag name
-          release_name: Anyline ${{ env.TAG_VERSION}} # Set the release name
+          release_name: Tire Tread Flutter Plugin ${{ env.TAG_VERSION }} # Set the release name
           body: |
             ## What's Changed
             * https://pub.dev/packages/anyline_tire_tread_plugin/versions/${{ env.TAG_VERSION }}/changelog
