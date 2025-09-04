@@ -1,0 +1,65 @@
+# Exclude internal documentation from pub.dev publishing
+lib/src/models/INSTRUCTIONS.md
+
+# Exclude test files and directories
+test/
+
+# Exclude development and IDE files
+.git/
+.gitignore
+.gitlab-ci.yml
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Exclude build and generated files
+build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Exclude example app files that shouldn't be published
+example/
+
+# Exclude documentation that's not meant for pub.dev (except for README.md and CHANGELOG.md, which should be published)
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+
+# Exclude CI/CD and deployment files
+.github/
+.gitlab/
+Jenkinsfile
+*.yaml
+!pubspec.yaml
+
+# Exclude local configuration files
+analysis_options.yaml
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.config.dart
+
+# Exclude coverage and analysis reports
+coverage/
+*.lcov
+*.info
+*.json
+!pubspec.json
+!analysis_options.json
+
+# Exclude temporary files
+*.log
+*.tmp
+*.temp
+*.swp
+*~ 
+
+# Generally ignore all .env files
+*.env
