@@ -9,8 +9,7 @@
     },
     "uiConfig": {
         "measurementSystem": "Metric",
-        "useDefaultUi": true,
-        "useDefaultHaptic": true,
+        "appearance": "Neon",
         "scanSpeed": "Fast",
         "distanceIndicatorConfig": {
             "visible": true,

@@ -1,5 +1,6 @@
 export 'package:anyline_tire_tread_plugin/src/tire_tread_plugin.dart';
 export 'src/scan_event.dart';
+export 'src/enum/appearance.dart';
 export 'src/enum/measurement_system.dart';
 export 'src/enum/scan_speed.dart';
 export 'src/enum/heatmap_style.dart';

@@ -1,3 +1,4 @@
+import 'package:anyline_tire_tread_plugin/src/enum/appearance.dart';
 import 'package:anyline_tire_tread_plugin/src/enum/measurement_system.dart';
 import 'package:anyline_tire_tread_plugin/src/enum/scan_speed.dart';
 
@@ -243,6 +244,7 @@ class TireWidthInputConfig {
   }
 
   bool? visible;
+  /// [Deprecated on Android] This property is deprecated and will be removed in the next major SDK release.
   String? skipButtonText;
   String? titleText;
   String? explanationText;
@@ -308,8 +310,13 @@ class UiConfig {
             'measurementSystem must be either "Metric" or "Imperial"'),
       );
     }
-    config.useDefaultUi = json['useDefaultUi'] as bool?;
-    config.useDefaultHaptic = json['useDefaultHaptic'] as bool?;
+    if (json['appearance'] != null) {
+      config.appearance = Appearance.values.firstWhere(
+        (e) => e.name == json['appearance'],
+        orElse: () => throw ArgumentError(
+            'appearance must be "None", "Classic", or "Neon"'),
+      );
+    }
     if (json['scanSpeed'] != null) {
       config.scanSpeed = ScanSpeed.values.firstWhere(
         (e) => e.name == json['scanSpeed'],
@@ -362,8 +369,7 @@ class UiConfig {
   }
 
   MeasurementSystem? measurementSystem;
-  bool? useDefaultUi;
-  bool? useDefaultHaptic;
+  Appearance? appearance;
   ScanSpeed? scanSpeed;
   DistanceIndicatorConfig? distanceIndicatorConfig;
   FocusPointTooltipConfig? focusPointTooltipConfig;
@@ -381,11 +387,8 @@ class UiConfig {
     if (measurementSystem != null) {
       map['measurementSystem'] = measurementSystem!.name;
     }
-    if (useDefaultUi != null) {
-      map['useDefaultUi'] = useDefaultUi;
-    }
-    if (useDefaultHaptic != null) {
-      map['useDefaultHaptic'] = useDefaultHaptic;
+    if (appearance != null) {
+      map['appearance'] = appearance!.name;
     }
     if (scanSpeed != null) {
       map['scanSpeed'] = scanSpeed!.name;

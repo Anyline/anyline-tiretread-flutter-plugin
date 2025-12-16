@@ -1,3 +1,42 @@
+## 3.0.0
+
+### Breaking Changes
+
+- **Updated to Anyline Tire Tread SDK 14.0.0**
+
+- **UI Configuration API Change**: The `useDefaultUi` and `useDefaultHaptic` boolean properties in `UIConfig` have been replaced with a unified `appearance` enum property.
+
+  **Migration Required**:
+  - Replace `"useDefaultUi": true` with `"appearance": "Neon"` (or omit, as Neon is the new default)
+  - Replace `"useDefaultUi": false` with `"appearance": "None"`
+
+  **New Appearance Options**:
+  - `"Neon"` - New neon UI appearance with haptic feedback (new default)
+  - `"Classic"` - Classic UI appearance with haptic feedback (the previous default UI style)
+  - `"None"` - Disables both UI and haptic feedback (replaces `useDefaultUi: false`)
+
+### Added
+
+- Support for new "Neon" UI theme with modern visual design
+- Support for "Classic" UI theme (the previous default UI style)
+
+### Deprecated
+
+- [Android] The `skipButtonText` property in `TireWidthInputConfig` is now deprecated and will be removed in the next major SDK release. Tire width must be provided either via integration or through the SDK's UI input.
+
+### Changed
+
+- [Android] Build requirements increased:
+  - Minimum Gradle version: 8.7 (up from 8.2.1)
+  - Minimum Android Gradle Plugin: 8.5.1 (up from 8.2.1)
+  - compileSdk: 36 (up from 34)
+  - targetSdk: 36 (up from 34)
+  - **Reason**: Compliance with Android 15+ page size requirements (see [Android Developer Guide](https://developer.android.com/guide/practices/page-sizes))
+
+### Dependencies
+
+Tire Tread SDK 14.0.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#14-0-0)
+
 ## 2.0.2
 
 ### Fixed
