@@ -1,3 +1,13 @@
+## 2.0.2
+
+### Fixed
+
+- [Android] Fixed an issue that prevented the tire width to be set via the TireWidthInput screen.
+
+### Dependencies
+
+Tire Tread SDK 13.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#13-0-3)
+
 ## 2.0.1
 
 ### Changed
