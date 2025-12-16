@@ -1,5 +1,14 @@
 {
+    "additionalContext": {
+        "tirePosition": {
+            "axle": 2,
+            "side": "Center",
+            "positionOnAxle": 3
+        },
+        "correlationId": "00000000-0000-0000-0000-000000000000"
+    },
     "uiConfig": {
+        "appearance": "Neon",
         "measurementSystem": "Metric",
         "scanSpeed": "Fast",
         "distanceIndicatorConfig": {
@@ -39,7 +48,6 @@
         },
         "tireWidthInputConfig": {
             "visible": true,
-            "skipButtonText": "Skip",
             "titleText": "Tire Width",
             "explanationText": "Choose the Tire Width from the options or enter manually.",
             "continueButtonText": "Continue",
@@ -63,7 +71,7 @@
         }
     },
     "scanConfig": {
-        "tireWidth": null,
+        "tireWidth": 200,
         "showMeasuringSpots": true,
         "heatmapStyle": "Colored"
     }

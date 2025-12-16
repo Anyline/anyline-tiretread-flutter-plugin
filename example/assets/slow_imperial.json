@@ -1,7 +1,5 @@
 {
   "uiConfig": {
-    "useDefaultUi": true,
-    "useDefaultHaptic": true,
     "measurementSystem": "Imperial",
     "scanSpeed": "Slow",
     "distanceIndicatorConfig": {

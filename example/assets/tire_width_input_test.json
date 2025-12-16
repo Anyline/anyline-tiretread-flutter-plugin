@@ -1,11 +1,7 @@
 {
   "uiConfig": {
-    "useDefaultUi": true,
-    "useDefaultHaptic": true,
-    "measurementSystem": "Metric",
     "tireWidthInputConfig": {
       "visible": true,
-      "skipButtonText": "Test",
       "titleText": "This is a test string.",
       "explanationText": "This is a test string too.",
       "continueButtonText": "TextButton",
