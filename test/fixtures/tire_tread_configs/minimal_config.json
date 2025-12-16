@@ -1,7 +1,7 @@
 {
     "uiConfig": {
         "measurementSystem": "Imperial",
-        "useDefaultUi": true,
+        "appearance": "Classic",
         "scanSpeed": "Slow",
         "orientationWarningConfig": {
             "visible": true,

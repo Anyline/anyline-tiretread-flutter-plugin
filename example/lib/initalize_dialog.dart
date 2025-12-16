@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:anyline_tire_tread_plugin_example/env_info.dart';
 import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/material.dart';
@@ -34,13 +32,17 @@ class _InitializeDialogState extends State<InitializeDialog> {
   }
 
   Future<void> loadAssetFileNames() async {
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap =
-        json.decode(manifestContent) as Map<String, dynamic>;
-    final files = manifestMap.keys
+    // Load asset manifest using the new AssetManifest API
+    // (AssetManifest.json was deprecated in Flutter 3.19+)
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+
+    // Get all assets and filter for configuration files in assets/ directory
+    final allAssets = assetManifest.listAssets();
+    final files = allAssets
         .where((String key) => key.startsWith('assets/'))
         .toList();
 
+    // Insert empty option at the beginning for "no config" selection
     files.insert(0, '');
 
     setState(() {
@@ -102,8 +104,10 @@ class _InitializeDialogState extends State<InitializeDialog> {
               items: fileNames.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child:
-                      Text(value.split('/').last), // Display only the file name
+                  child: Text(
+                    value.isEmpty ? '(Default)' : value.split('/').last,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 );
               }).toList(),
             ),

@@ -20,16 +20,21 @@ In order to use the Anyline Tire Tread SDK Flutter Plugin, please see to it that
 Your development/application environment is required to have at least the following tools and versions (or newer) available:
 
 - JDK 17
-- Gradle 8.1.0
-  - id 'com.android.application' version '8.1.0' apply false
+- Gradle 8.7 (minimum required by Tire Tread SDK 14.0.0+)
+  - id 'com.android.application' version '8.7.3' apply false
+- Android Gradle Plugin 8.5.1+ (minimum required by Tire Tread SDK 14.0.0+)
 - Kotlin 1.9.0
   - id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
-- compileSdk 34
-  - android { compileSdk 34 ...
+- compileSdk 36 (Android 15, required for 16KB page size compliance)
+  - android { compileSdk 36 ...
+- targetSdk 36
+  - android { targetSdk 36 ...
 - minSdk 26
   - ... minSdk 26 ...
 - Compose Compiler 1.5.0
   - ... composeOptions { kotlinCompilerExtensionVersion = "1.5.0" } ...
+
+> **Note**: Tire Tread SDK 14.0.0+ requires Gradle 8.7+ and AGP 8.5.1+ for Android 15 compliance (16KB page sizes).
 
 ### iOS
 
