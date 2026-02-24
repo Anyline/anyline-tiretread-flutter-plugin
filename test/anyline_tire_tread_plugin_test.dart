@@ -10,7 +10,8 @@ class MockAnylineTireTreadPluginPlatform
     with MockPlatformInterfaceMixin
     implements AnylineTireTreadPluginPlatform {
   @override
-  Future<bool?> initialize({required String licenseKey, required String pluginVersion}) {
+  Future<bool?> initialize(
+      {required String licenseKey, required String pluginVersion}) {
     throw UnimplementedError();
   }
 

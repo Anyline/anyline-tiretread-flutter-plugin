@@ -1,3 +1,13 @@
+## 3.0.1
+
+### Fixed
+
+- [Android] System bars are now hidden during scanning in the Flutter wrapper scan Activity to prevent scan instruction UI overlap with the navigation bar on some devices.
+
+### Dependencies
+
+Tire Tread SDK 14.0.1: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#14-0-1)
+
 ## 3.0.0
 
 ### Breaking Changes

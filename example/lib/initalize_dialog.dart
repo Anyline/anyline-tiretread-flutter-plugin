@@ -38,9 +38,8 @@ class _InitializeDialogState extends State<InitializeDialog> {
 
     // Get all assets and filter for configuration files in assets/ directory
     final allAssets = assetManifest.listAssets();
-    final files = allAssets
-        .where((String key) => key.startsWith('assets/'))
-        .toList();
+    final files =
+        allAssets.where((String key) => key.startsWith('assets/')).toList();
 
     // Insert empty option at the beginning for "no config" selection
     files.insert(0, '');

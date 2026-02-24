@@ -4,14 +4,14 @@ This Flutter plugin provides an interface to the Anyline Tire Tread SDK, allowin
 
 ## Requirements
 
-In order to use the Anyline Tire Tread SDK Flutter Plugin, please see to it that the following requirements are met:
+This SDK requires devices with advanced camera capabilities that provide depth/distance information such as *lens focus distance*. Not all devices support this feature. We recommend testing on your target devices to verify compatibility. In order to use the Anyline Tire Tread SDK Flutter Plugin, please see to it that the following requirements are met:
 
 ### Android
 
 #### Device
 
 - Android 8.0 - Oreo - or newer (API level 26+)
-- Decent camera functionality (recommended: ≥ 720p and adequate **auto focus**)
+- Decent camera functionality (recommended: ≥ 1080p and adequate **auto focus**)
 - 'Flash' capability
 - Stable internet connection
 
@@ -222,7 +222,6 @@ var config = TireTreadConfig()
     ..tireWidthInputConfig = (TireWidthInputConfig()
       ..continueButtonText = 'Continue'
       ..explanationText = 'Choose tire width from options or enter manually.'
-      ..skipButtonText = 'Skip'
       ..titleText = 'Tire width'));
 tireTreadPlugin.scan(config: config);
 ```
