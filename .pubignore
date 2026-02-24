@@ -23,9 +23,6 @@ build/
 .pub/
 pubspec.lock
 
-# Exclude example app files that shouldn't be published
-example/
-
 # Exclude documentation that's not meant for pub.dev (except for README.md and CHANGELOG.md, which should be published)
 docs/
 *.md

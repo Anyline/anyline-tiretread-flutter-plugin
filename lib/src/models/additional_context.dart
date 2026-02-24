@@ -24,6 +24,8 @@ class AdditionalContext {
   TirePosition? tirePosition;
 
   /// Converts the [AdditionalContext] instance to a JSON object.
+  ///
+  /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     if (correlationId != null) map['correlationId'] = correlationId;

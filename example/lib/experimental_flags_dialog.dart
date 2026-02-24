@@ -24,8 +24,7 @@ class ExperimentalFlagsDialog extends StatefulWidget {
 
 class _ExperimentalFlagsDialogState extends State<ExperimentalFlagsDialog> {
   List<String> selectedFlags = [];
-  List<String> flags = [
-  ];
+  List<String> flags = [];
 
   @override
   void initState() {
@@ -64,8 +63,7 @@ class _ExperimentalFlagsDialogState extends State<ExperimentalFlagsDialog> {
               },
               title: Text(
                 (flags[index]),
-                style: const TextStyle(
-                    color: Color(0xFF000000), fontSize: 14),
+                style: const TextStyle(color: Color(0xFF000000), fontSize: 14),
               ),
             ),
           ),

@@ -26,26 +26,22 @@ void main() {
   });
 
   /// Recursively validates that all non-null properties from original are present in generated.
-  void validateObjectProperties(Map<String, dynamic> original, Map<String, dynamic> generated, String filePath, String path) {
+  void validateObjectProperties(Map<String, dynamic> original,
+      Map<String, dynamic> generated, String filePath, String path) {
     original.forEach((key, value) {
       final currentPath = path.isEmpty ? key : '$path.$key';
-      
+
       if (value != null) {
         // Check if the key exists in generated JSON
-        expect(
-          generated.containsKey(key),
-          true,
-          reason: '$filePath: Property "$currentPath" from original JSON is missing in generated JSON. This may indicate incorrect property naming in the model class.'
-        );
-        
+        expect(generated.containsKey(key), true,
+            reason:
+                '$filePath: Property "$currentPath" from original JSON is missing in generated JSON. This may indicate incorrect property naming in the model class.');
+
         // If both are objects, recursively validate
-        if (value is Map<String, dynamic> && generated[key] is Map<String, dynamic>) {
-          validateObjectProperties(
-            value, 
-            generated[key] as Map<String, dynamic>, 
-            filePath, 
-            currentPath
-          );
+        if (value is Map<String, dynamic> &&
+            generated[key] is Map<String, dynamic>) {
+          validateObjectProperties(value,
+              generated[key] as Map<String, dynamic>, filePath, currentPath);
         }
       }
     });
@@ -53,7 +49,8 @@ void main() {
 
   /// Validates that no data is lost during JSON serialization by checking
   /// that all non-null properties from the original JSON are present in the generated JSON.
-  void validateNoDataLoss(Map<String, dynamic> original, Map<String, dynamic> generated, String filePath) {
+  void validateNoDataLoss(Map<String, dynamic> original,
+      Map<String, dynamic> generated, String filePath) {
     validateObjectProperties(original, generated, filePath, '');
   }
 
@@ -95,23 +92,21 @@ void main() {
         // Load original JSON
         final jsonString = await File(file.path).readAsString();
         final originalJson = jsonDecode(jsonString) as Map<String, dynamic>;
-        
+
         // Parse to object and back to JSON
         final config = TireTreadConfig.fromJson(originalJson);
         final generatedJson = config.toJson();
-        
+
         // Parse generated JSON back to object
         final reparsedConfig = TireTreadConfig.fromJson(generatedJson);
         final finalJson = reparsedConfig.toJson();
-        
+
         // The final JSON should be identical to the generated JSON
         // This catches cases where properties are ignored during parsing
-        expect(
-          finalJson, 
-          equals(generatedJson),
-          reason: '${file.path}: Data loss detected in roundtrip - some properties may have incorrect names'
-        );
-        
+        expect(finalJson, equals(generatedJson),
+            reason:
+                '${file.path}: Data loss detected in roundtrip - some properties may have incorrect names');
+
         // Additionally, validate that all non-null properties in original
         // are represented in the generated JSON (allowing for null exclusion)
         validateNoDataLoss(originalJson, generatedJson, file.path);

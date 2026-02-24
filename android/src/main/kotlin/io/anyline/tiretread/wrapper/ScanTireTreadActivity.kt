@@ -3,6 +3,9 @@ package io.anyline.tiretread.flutter
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.appcompat.app.AppCompatActivity
 import io.anyline.tiretread.sdk.scanner.ScanEvent
 import io.anyline.tiretread.sdk.scanner.OnScanStarted
@@ -23,6 +26,7 @@ class ScanTireTreadActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        hideSystemBars()
         
         val tireTreadConfigJson = intent.getStringExtra(EXTRA_TIRE_TREAD_CONFIG) ?: run {
                 finishWithError("No tire tread configuration provided")
@@ -49,6 +53,21 @@ class ScanTireTreadActivity : AppCompatActivity() {
         
         // Set the scan view as the content view
         setContentView(currentScanView)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            hideSystemBars()
+        }
+    }
+
+    private fun hideSystemBars() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
     
     /**
