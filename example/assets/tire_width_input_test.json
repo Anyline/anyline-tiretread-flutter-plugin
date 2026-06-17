@@ -1,7 +1,6 @@
 {
   "uiConfig": {
     "tireWidthInputConfig": {
-      "visible": true,
       "titleText": "This is a test string.",
       "explanationText": "This is a test string too.",
       "continueButtonText": "TextButton",
