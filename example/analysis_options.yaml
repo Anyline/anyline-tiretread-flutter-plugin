@@ -64,7 +64,6 @@ linter:
     - unnecessary_late
     - unnecessary_string_escapes
     - unnecessary_this
-    - unsafe_html
     - use_enums
     - use_function_type_syntax_for_parameters
     - use_setters_to_change_properties

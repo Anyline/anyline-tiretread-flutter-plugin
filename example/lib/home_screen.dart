@@ -37,22 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    tireTreadPlugin.onScanningEvent.listen((event) {
-      switch (event) {
-        case ScanStarted():
-          debugPrint('ScanStarted UUID : ${event.measurementUUID}');
-        case ScanAborted():
-          debugPrint('ScanAborted UUID : ${event.measurementUUID}');
-        case ScanProcessCompleted():
-          debugPrint('ScanProcessCompleted UUID : ${event.measurementUUID}');
-          setState(() {
-            _uuid = event.measurementUUID ?? '';
-            debugPrint('Set _uuid to: $_uuid');
-          });
-        case ScanFailed():
-          debugPrint('ScanFailed Error : ${event.error}');
-      }
-    });
     super.initState();
   }
 
@@ -226,7 +210,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     config.scanConfig.tireWidth = tireWidth;
                   }
 
-                  tireTreadPlugin.scan(config: config);
+                  final outcome = await tireTreadPlugin.scan(config: config);
+                  switch (outcome) {
+                    case ScanCompleted():
+                      setState(() {
+                        _uuid = outcome.measurementUUID;
+                        debugPrint('Set _uuid to: $_uuid');
+                      });
+                    case ScanAborted():
+                      debugPrint('Scan aborted');
+                    case ScanFailed():
+                      debugPrint('Scan failed: ${outcome.error.message}');
+                      if (mounted) {
+                        showSnackBar(context, outcome.error.message);
+                      }
+                  }
                 } on PlatformException catch (error) {
                   if (kDebugMode) {
                     print(error);

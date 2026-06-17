@@ -1,3 +1,37 @@
+## 15.1.0
+
+> **Major version jump (3.0.1 → 15.1.0).** Plugin versioning is now aligned with the underlying Anyline Tire Tread SDK version: the previous release (3.0.1) wrapped TTR SDK 14.0.1, and from this release the plugin's `X.Y.Z` mirrors the bundled SDK release.
+
+For native-side details on the v14 → v15 transition, see the SDK [v14 → v15 Migration Guide](https://documentation.anyline.com/tiretreadsdk-component/latest/migration-guide/v14_v15.html).
+
+### Breaking Changes
+
+- **Updated to Anyline Tire Tread SDK 15.1.0** (Android & iOS).
+
+- **`scan()` now returns a `ScanOutcome`**: The scan `Future` completes directly with `ScanCompleted`, `ScanAborted`, or `ScanFailed` (carrying a structured `SdkError`). Await the outcome instead of listening to events.
+
+- **Event stream removed**: `onScanningEvent` and the `ScanEvent` types (`ScanStarted`, `ScanProcessCompleted`) no longer exist. `ScanAborted` and `ScanFailed` are now `ScanOutcome` variants; `ScanFailed.error` is a structured `SdkError` instead of a `String`.
+
+- **Removed config options dropped by SDK 15**: `UiConfig.countdownConfig`, `UiConfig.scanDirectionConfig`, `UiConfig.tireOverlayConfig`, and `ScanConfig.showMeasuringSpots`. Remove these keys from any JSON configs. See the [Scan Configuration reference](https://documentation.anyline.com/tiretreadsdk-component/latest/scan-configuration.html) for the current options.
+
+- **`getHeatMap` returns the heatmap URL** of the generated image.
+
+- **Result/heatmap polling timeout default changed from 30 to 60 seconds**, and is now configurable per call via `timeoutSeconds` on `getResult` and `getHeatMap`.
+
+- **Structured error codes**: Failures surface SDK 15 `ErrorCode` names (e.g. `INVALID_LICENSE`, `ALREADY_RUNNING`, `TIMEOUT`) instead of the previous numeric plugin codes (`1000`, `1001`). Starting a scan while one is in progress resolves with `ScanFailed` (`alreadyRunning`) instead of throwing. See the [SDK Error Handling reference](https://documentation.anyline.com/tiretreadsdk-component/latest/errors.html) for the full list of codes and categories.
+
+### Added
+
+- `ScanOptions` parameter on `scan()` (e.g. `enableDebugLogging`).
+- `customTag` parameter on `initialize()` for tagging measurements.
+- `sendTireIdFeedback()` for tire ID feedback.
+- `isDeviceSupported()` — checks whether the current device meets the hardware requirements for tire tread scanning. Call this before `initialize()` to verify compatibility. On Android, throws a `PlatformException` with code `CAMERA_PERMISSION_DENIED` if camera permission has not been granted at call time.
+- `SdkError`, `ErrorCode`, and `ErrorType` types — see the [SDK Error Handling reference](https://documentation.anyline.com/tiretreadsdk-component/latest/errors.html).
+
+### Dependencies
+
+Tire Tread SDK 15.1.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#_15_1_0).
+
 ## 3.0.1
 
 ### Fixed

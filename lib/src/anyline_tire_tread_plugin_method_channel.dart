@@ -9,14 +9,10 @@ import 'package:flutter/services.dart';
 
 import 'package:anyline_tire_tread_plugin/src/anyline_tire_tread_plugin_platform_interface.dart';
 
-/// An implementation of [AnylineTireTreadPluginPlatform] that uses method channels.
 class MethodChannelAnylineTireTreadPlugin
     extends AnylineTireTreadPluginPlatform {
-  /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('anyline_tire_tread_plugin');
-
-  final _eventsChannel = const EventChannel('anyline_tire_tread_plugin/events');
 
   @override
   Future<String?> getSdkVersion() async {
@@ -27,78 +23,92 @@ class MethodChannelAnylineTireTreadPlugin
 
   @override
   Future<bool?> initialize(
-      {required String licenseKey, required String pluginVersion}) async {
+      {required String licenseKey,
+      required String pluginVersion,
+      String? customTag}) async {
     final result =
         await methodChannel.invokeMethod<bool>(Constants.METHOD_INITIALIZE, {
       Constants.EXTRA_LICENSE_KEY: licenseKey,
-      Constants.EXTRA_PLUGIN_VERSION: pluginVersion
+      Constants.EXTRA_PLUGIN_VERSION: pluginVersion,
+      Constants.EXTRA_CUSTOM_TAG: customTag,
     });
     return result;
   }
 
   @override
-  Future<bool?> scan({required TireTreadConfig config}) async {
-    final result = await methodChannel.invokeMethod<bool>(
-        Constants.METHOD_SCAN, config.toJson());
-    return result;
+  Future<ScanOutcome> scan(
+      {required TireTreadConfig config, ScanOptions? options}) async {
+    final result = await methodChannel
+        .invokeMapMethod<String, dynamic>(Constants.METHOD_SCAN, {
+      Constants.EXTRA_CONFIG_JSON: jsonEncode(config.toJson()),
+      Constants.EXTRA_SCAN_OPTIONS_JSON:
+          options == null ? null : jsonEncode(options.toJson()),
+    });
+    if (result == null) {
+      return const ScanFailed(
+        measurementUUID: null,
+        error: SdkError(
+          code: ErrorCode.unknownError,
+          type: ErrorType.scanError,
+          message: 'Scan returned null',
+        ),
+      );
+    }
+    return ScanOutcome.fromMap(result);
   }
 
   @override
-  Future<TreadDepthResult?> getResult({required String measurementUUID}) async {
+  Future<bool> isDeviceSupported() async {
+    final result = await methodChannel
+        .invokeMethod<bool>(Constants.METHOD_IS_DEVICE_SUPPORTED);
+    return result ?? false;
+  }
+
+  @override
+  Future<TreadDepthResult?> getResult(
+      {required String measurementUUID, int? timeoutSeconds}) async {
+    final args = <String, dynamic>{
+      Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
+    };
+    if (timeoutSeconds != null) {
+      args[Constants.EXTRA_TIMEOUT_SECONDS] = timeoutSeconds;
+    }
     final result = await methodChannel.invokeMethod<String>(
-        Constants.METHOD_GET_RESULT,
-        {Constants.EXTRA_MEASUREMENT_UUID: measurementUUID});
+        Constants.METHOD_GET_RESULT, args);
+    if (result == null) {
+      return null;
+    }
     return TreadDepthResult.fromJson(
-        jsonDecode(result!) as Map<String, dynamic>);
+        jsonDecode(result) as Map<String, dynamic>);
   }
 
   @override
-  Future<String?> getHeatMap({required String measurementUUID}) async {
-    final version = await methodChannel.invokeMethod<String>(
-        Constants.METHOD_GET_HEATMAP,
-        {Constants.EXTRA_MEASUREMENT_UUID: measurementUUID});
-    return version;
+  Future<String?> getHeatMap(
+      {required String measurementUUID, int? timeoutSeconds}) async {
+    final args = <String, dynamic>{
+      Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
+    };
+    if (timeoutSeconds != null) {
+      args[Constants.EXTRA_TIMEOUT_SECONDS] = timeoutSeconds;
+    }
+    final result = await methodChannel.invokeMethod<String>(
+        Constants.METHOD_GET_HEATMAP, args);
+    return result;
   }
 
   @override
-  Stream<ScanEvent> get onScanningEvent {
-    return _eventsChannel.receiveBroadcastStream().map((event) {
-      final Map<String, dynamic> eventMap =
-          Map<String, dynamic>.from(event as Map);
-      final String type = eventMap['type'] as String;
-      final String uuid = eventMap['uuid'] as String? ?? "";
-      final String error = eventMap['error'] as String? ?? "";
-
-      debugPrint('Received event: type=$type, uuid=$uuid, error=$error');
-
-      switch (type) {
-        case 'ScanAborted':
-          return ScanAborted(measurementUUID: uuid);
-        case 'ScanProcessCompleted':
-          return ScanProcessCompleted(measurementUUID: uuid);
-        case 'ScanFailed':
-          return ScanFailed(measurementUUID: uuid, error: error);
-        case 'ScanStarted':
-          return ScanStarted(measurementUUID: uuid);
-        default:
-          return ScanAborted(measurementUUID: uuid);
-      }
-    });
-  }
-
-  @override
-  Future<String?> sendFeedbackComment(
+  Future<MeasurementInfo?> sendFeedbackComment(
       {required String measurementUUID, required String comment}) async {
     final result = await methodChannel
         .invokeMethod<String>(Constants.METHOD_SEND_FEEDBACK_COMMENT, {
       Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
       Constants.EXTRA_FEEDBACK_COMMENT: comment
     });
-    return result;
+    return _parseMeasurementInfo(result);
   }
 
   @override
-  Future<String?> sendTreadDepthResultFeedback(
+  Future<MeasurementInfo?> sendTreadDepthResultFeedback(
       {required String measurementUUID,
       required List<TreadResultRegion> resultRegions}) async {
     final result = await methodChannel.invokeMethod<String>(
@@ -107,22 +117,48 @@ class MethodChannelAnylineTireTreadPlugin
       Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK:
           jsonEncode(resultRegions.map((obj) => obj.toJson()).toList())
     });
-    return result;
+    return _parseMeasurementInfo(result);
+  }
+
+  @override
+  Future<MeasurementInfo?> sendTireIdFeedback(
+      {required String measurementUUID, required String tireId}) async {
+    final result = await methodChannel
+        .invokeMethod<String>(Constants.METHOD_SEND_TIRE_ID_FEEDBACK, {
+      Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
+      Constants.EXTRA_TIRE_ID: tireId
+    });
+    return _parseMeasurementInfo(result);
+  }
+
+  /// Parses a feedback reply. Native returns the updated [MeasurementInfo] as a
+  /// JSON string (or a bare measurement UUID for backward compatibility).
+  MeasurementInfo? _parseMeasurementInfo(String? raw) {
+    if (raw == null) {
+      return null;
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        return MeasurementInfo.fromJson(Map<String, dynamic>.from(decoded));
+      }
+    } on FormatException {
+      // Not JSON — fall through to treat it as a bare UUID.
+    }
+    return MeasurementInfo(measurementUUID: raw);
   }
 
   @override
   Future<void> setExperimentalFlags(
       {required List<String> experimentalFlags}) async {
-    final result = await methodChannel.invokeMethod<void>(
+    await methodChannel.invokeMethod<void>(
         Constants.METHOD_SET_EXPERIMENTAL_FLAGS,
         {Constants.EXTRA_EXPERIMENTAL_FLAGS: experimentalFlags});
-    return result;
   }
 
   @override
   Future<void> clearExperimentalFlags() async {
-    final result = await methodChannel
+    await methodChannel
         .invokeMethod<void>(Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS);
-    return result;
   }
 }

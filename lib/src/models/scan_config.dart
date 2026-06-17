@@ -12,20 +12,15 @@ class ScanConfig {
         ? HeatmapStyle.values.firstWhere(
             (e) => e.name == json['heatmapStyle'],
             orElse: () => throw ArgumentError(
-                'heatmapStyle must be either "Colored" or "GrayScale"'),
+                'heatmapStyle must be either "Colored" or "Grayscale"'),
           )
         : HeatmapStyle.Colored; // Default value from schema
-    config.showMeasuringSpots = json['showMeasuringSpots'] as bool? ??
-        true; // Default value from schema
     config.tireWidth = json['tireWidth'] as int?;
     return config;
   }
 
   /// The style of the heatmap image.
   HeatmapStyle heatmapStyle = HeatmapStyle.Colored;
-
-  /// Whether to show measuring spots in the result image.
-  bool showMeasuringSpots = true;
 
   /// The width of the tire to be scanned.
   int? tireWidth;
@@ -34,7 +29,6 @@ class ScanConfig {
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{
       'heatmapStyle': heatmapStyle.name,
-      'showMeasuringSpots': showMeasuringSpots,
     };
     if (tireWidth != null) {
       map['tireWidth'] = tireWidth;

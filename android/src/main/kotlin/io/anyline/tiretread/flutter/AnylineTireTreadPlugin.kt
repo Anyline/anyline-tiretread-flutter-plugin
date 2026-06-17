@@ -1,380 +1,398 @@
 package io.anyline.tiretread.flutter
 
-import android.app.Activity
-import android.content.Intent
-import android.util.Log
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import io.anyline.tiretread.sdk.AnylineTireTreadSdk
 import io.anyline.tiretread.sdk.InternalAPI
-import io.anyline.tiretread.sdk.NoConnectionException
-import io.anyline.tiretread.sdk.Response
-import io.anyline.tiretread.sdk.SdkLicenseKeyForbiddenException
-import io.anyline.tiretread.sdk.SdkLicenseKeyInvalidException
-import io.anyline.tiretread.sdk.init
-import io.anyline.tiretread.sdk.scanner.MeasurementSystem
-import io.anyline.tiretread.sdk.scanner.ScanSpeed
-import io.anyline.tiretread.sdk.types.WrapperInfo
-import io.anyline.tiretread.sdk.sendCommentFeedback
-import io.anyline.tiretread.sdk.sendTreadDepthResultFeedback
+import io.anyline.tiretread.sdk.api.AnylineTireTread
+import io.anyline.tiretread.sdk.api.AnylineTireTreadScanner
+import io.anyline.tiretread.sdk.api.Bridge
+import io.anyline.tiretread.sdk.api.ErrorCode
+import io.anyline.tiretread.sdk.api.FailedOutcome
+import io.anyline.tiretread.sdk.api.InitOptions
+import io.anyline.tiretread.sdk.api.ScanOutcome
+import io.anyline.tiretread.sdk.api.SdkError
+import io.anyline.tiretread.sdk.api.SdkResult
+import io.anyline.tiretread.sdk.types.MeasurementInfo
 import io.anyline.tiretread.sdk.types.TreadResultRegion
-import io.anyline.tiretread.sdk.config.TireTreadConfig
-import io.anyline.tiretread.sdk.config.HeatmapStyle
-import io.anyline.tiretread.sdk.types.AdditionalContext
-import io.anyline.tiretread.sdk.types.TirePosition
-import io.anyline.tiretread.sdk.types.TireSide
-import io.anyline.tiretread.sdk.getTreadDepthReportResult
-import io.anyline.tiretread.sdk.getHeatmap
-import io.anyline.tiretread.wrapper.encodeToString
+import io.anyline.tiretread.sdk.types.WrapperInfo
+import org.json.JSONObject
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
-import org.json.JSONObject
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
-/** AnylineTireTreadPlugin */
-class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
-    PluginRegistry.ActivityResultListener {
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-    /// when the Flutter Engine is detached from the Activity
+class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+
     private lateinit var channel: MethodChannel
-    private lateinit var eventChannel: EventChannel
-
+    private var applicationContext: Context? = null
     private var activityPluginBinding: ActivityPluginBinding? = null
     private var pendingScanResult: Result? = null
 
-    private val TAG = AnylineTireTreadPlugin::class.qualifiedName
-    private val SCAN_REQUEST_CODE = 1001
+    // SDK v15 invokes its callbacks on a background dispatcher (Dispatchers.IO).
+    // MethodChannel results must be delivered on the platform (main) thread, so
+    // every SDK callback is marshalled through this handler. Lazy so the class
+    // can still be instantiated in JVM unit tests without a prepared Looper.
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
-    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "anyline_tire_tread_plugin")
-        channel.setMethodCallHandler(this)
-
-        eventChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "anyline_tire_tread_plugin/events")
-        eventChannel.setStreamHandler(TTEventHandler.shared)
+    private fun onMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+        } else {
+            mainHandler.post(block)
+        }
     }
 
-    @OptIn(InternalAPI::class)
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        applicationContext = flutterPluginBinding.applicationContext
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "anyline_tire_tread_plugin")
+        channel.setMethodCallHandler(this)
+    }
+
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             Constants.METHOD_INITIALIZE -> {
-                val licenseKey: String =
-                    call.argument<String?>(Constants.EXTRA_LICENSE_KEY).toString()
-                val pluginVersion: String =
-                    call.argument<String?>(Constants.EXTRA_PLUGIN_VERSION).toString()
-                initializeSdk(licenseKey, pluginVersion, result)
+                val licenseKey = call.argument<String>(Constants.EXTRA_LICENSE_KEY) ?: ""
+                val pluginVersion = call.argument<String>(Constants.EXTRA_PLUGIN_VERSION) ?: ""
+                val customTag = call.argument<String>(Constants.EXTRA_CUSTOM_TAG)
+                initializeSdk(licenseKey, pluginVersion, customTag, result)
             }
-
             Constants.METHOD_GET_SDK_VERSION -> {
-                result.success(AnylineTireTreadSdk.sdkVersion)
+                result.success(AnylineTireTread.sdkVersion)
             }
-
             Constants.METHOD_SCAN -> {
-                (call.arguments as Map<String, Any>).also { tireTreadConfigMap ->
-                    scan(tireTreadConfigMap, result)
-                }
+                val configJson = call.argument<String>(Constants.EXTRA_CONFIG_JSON)
+                val optionsJson = call.argument<String>(Constants.EXTRA_SCAN_OPTIONS_JSON)
+                scan(configJson, optionsJson, result)
             }
-
+            Constants.METHOD_IS_DEVICE_SUPPORTED -> {
+                isDeviceSupported(result)
+            }
             Constants.METHOD_GET_RESULT -> {
-                val measurementUUID: String =
-                    call.argument<String?>(Constants.EXTRA_MEASUREMENT_UUID).toString()
-                getMeasurementResult(measurementUUID, result)
+                val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
+                val timeout = call.argument<Int>(Constants.EXTRA_TIMEOUT_SECONDS)
+                getResult(uuid, timeout, result)
             }
-
             Constants.METHOD_GET_HEATMAP -> {
-                val measurementUUID: String =
-                    call.argument<String?>(Constants.EXTRA_MEASUREMENT_UUID).toString()
-                getHeatMapResult(measurementUUID, result)
+                val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
+                val timeout = call.argument<Int>(Constants.EXTRA_TIMEOUT_SECONDS)
+                getHeatmap(uuid, timeout, result)
             }
-
             Constants.METHOD_SEND_FEEDBACK_COMMENT -> {
-                val measurementUUID: String =
-                    call.argument<String?>(Constants.EXTRA_MEASUREMENT_UUID).toString()
-                val comment: String =
-                    call.argument<String?>(Constants.EXTRA_FEEDBACK_COMMENT).toString()
-                sendCommentFeedback(measurementUUID, comment, result)
+                val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
+                val comment = call.argument<String>(Constants.EXTRA_FEEDBACK_COMMENT) ?: ""
+                sendCommentFeedback(uuid, comment, result)
             }
-
             Constants.METHOD_SEND_TREAD_DEPTH_RESULT_FEEDBACK -> {
-                val measurementUUID: String =
-                    call.argument<String?>(Constants.EXTRA_MEASUREMENT_UUID).toString()
-                val data: List<TreadResultRegion> =
-                    Json.decodeFromString<List<TreadResultRegion>>(call.argument<String?>(Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK).toString())
-                sendTreadDepthResultFeedback(measurementUUID, data, result)
+                val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
+                val regionsJson = call.argument<String>(Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK) ?: "[]"
+                sendTreadDepthResultFeedback(uuid, parseFeedbackRegions(regionsJson), result)
             }
-
+            Constants.METHOD_SEND_TIRE_ID_FEEDBACK -> {
+                val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
+                val tireId = call.argument<String>(Constants.EXTRA_TIRE_ID) ?: ""
+                sendTireIdFeedback(uuid, tireId, result)
+            }
             Constants.METHOD_SET_EXPERIMENTAL_FLAGS -> {
-                val experimentalFlags: List<String>? = call.argument(Constants.EXTRA_EXPERIMENTAL_FLAGS)
-                if (experimentalFlags != null) {
-                    AnylineTireTreadSdk.setExperimentalFlags(newFlags = experimentalFlags)
-                    result.success(true)
-                } else {
-                    result.error("INVALID_ARGUMENT", Constants.ERROR_MESSAGE_EXPERIMENTAL_FLAGS_NULL, null)
-                }
+                setExperimentalFlags(call, result)
             }
-
             Constants.METHOD_CLEAR_EXPERIMENTAL_FLAGS -> {
-                AnylineTireTreadSdk.clearExperimentalFlags()
-                result.success(true)
+                clearExperimentalFlags(result)
             }
-
-            else -> {
-                result.notImplemented()
-            }
+            else -> result.notImplemented()
         }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        eventChannel.setStreamHandler(null)
+        applicationContext = null
     }
 
-    /// ActivityAware
+    // ActivityAware
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityPluginBinding = binding
-        binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        this.onDetachedFromActivity()
+        activityPluginBinding = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        this.onAttachedToActivity(binding)
+        activityPluginBinding = binding
     }
 
     override fun onDetachedFromActivity() {
-        activityPluginBinding?.removeActivityResultListener(this)
         activityPluginBinding = null
     }
-    
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        if (requestCode == SCAN_REQUEST_CODE) {
-            pendingScanResult?.let { result ->
+
+    /// Prefer the current Activity; fall back to the application context
+    /// (matches the React Native wrapper's `currentActivity ?: context`).
+    private fun hostContext(): Context? =
+        activityPluginBinding?.activity ?: applicationContext
+
+    // SDK methods
+
+    private fun initializeSdk(
+        licenseKey: String, pluginVersion: String, customTag: String?, result: Result
+    ) {
+        val context = hostContext()
+        if (context == null) {
+            result.error(ErrorCode.INVALID_ARGUMENT.name, "Plugin is not attached to a context", null)
+            return
+        }
+
+        AnylineTireTread.initialize(
+            context = context,
+            licenseKey = licenseKey,
+            options = InitOptions(
+                customTag = customTag?.trim().takeUnless { it.isNullOrEmpty() },
+                wrapperInfo = WrapperInfo.Flutter(pluginVersion)
+            )
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(true)
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        sdkResult.error.debug?.toString()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun scan(configJson: String?, optionsJson: String?, result: Result) {
+        val context = hostContext()
+        if (context == null) {
+            val outcome = FailedOutcome(
+                measurementUUID = null,
+                error = SdkError(
+                    code = ErrorCode.INVALID_ARGUMENT,
+                    message = "Plugin is not attached to a context"
+                )
+            )
+            result.success(sanitizedOutcome(outcome))
+            return
+        }
+
+        if (pendingScanResult != null) {
+            val outcome = FailedOutcome(
+                measurementUUID = null,
+                error = SdkError(
+                    code = ErrorCode.ALREADY_RUNNING,
+                    message = "A scan is already in progress"
+                )
+            )
+            result.success(sanitizedOutcome(outcome))
+            return
+        }
+
+        pendingScanResult = result
+
+        AnylineTireTreadScanner().scan(
+            from = context,
+            configJson = configJson,
+            optionsJson = optionsJson,
+        ) { outcome ->
+            onMain {
+                val pending = pendingScanResult ?: return@onMain
                 pendingScanResult = null
-                
-                when (resultCode) {
-                    Activity.RESULT_OK -> result.success(null)
-                    Activity.RESULT_CANCELED -> {
-                        val errorMessage = data?.getStringExtra(ScanTireTreadActivity.RESULT_ERROR_MESSAGE) ?: Constants.ERROR_MESSAGE_SCAN_CANCELLED
-                        result.error("SCAN_ERROR", errorMessage, null)
-                    }
-                }
+                pending.success(sanitizedOutcome(outcome))
             }
-            return true
-        }
-        return false
-    }
-
-    /**
-     * This must be called before doing anything else with the AnylineTireTreadSdk.
-     *
-     * It only needs to be called once during your application life-cycle.
-     */
-    @OptIn(InternalAPI::class)
-    private fun initializeSdk(licenseKey: String, pluginVersion: String, result: Result) {
-        try {
-            if (activityPluginBinding == null) {
-                return result.error(Constants.ERROR_CODE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, Constants.ERROR_MESSAGE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, null)
-            }
-
-            activityPluginBinding?.activity?.let { activity ->
-                AnylineTireTreadSdk.init(
-                    licenseKey = licenseKey,
-                    context = activity,
-                    customTag = "",
-                    wrapperInfo = WrapperInfo.Flutter(pluginVersion)
-                )
-                result.success(true)
-            } ?: result.error(Constants.ERROR_CODE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, Constants.ERROR_MESSAGE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, null)
-
-        } catch (e: Exception) {
-            val (code, message, details) = when (e) {
-                is SdkLicenseKeyForbiddenException -> Triple(
-                    Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED,
-                    Constants.ERROR_MESSAGE_SDK_INITIALIZATION_FAILED,
-                    e.localizedMessage ?: Constants.ERROR_MESSAGE_LICENSE_KEY_FORBIDDEN
-                )
-                is SdkLicenseKeyInvalidException -> Triple(
-                    Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED,
-                    Constants.ERROR_MESSAGE_SDK_INITIALIZATION_FAILED,
-                    e.localizedMessage ?: Constants.ERROR_MESSAGE_INVALID_LICENSE_KEY
-                )
-                is NoConnectionException -> Triple(
-                    Constants.ERROR_CODE_SDK_INITIALIZATION_FAILED,
-                    Constants.ERROR_MESSAGE_SDK_INITIALIZATION_FAILED,
-                    e.localizedMessage ?: Constants.ERROR_MESSAGE_NO_CONNECTION
-                )
-                else -> Triple(
-                    Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                    e.message,
-                    e.localizedMessage
-                )
-            }
-            result.error(code, message, details)
         }
     }
 
-    private fun scan(tireTreadConfigMap: Map<String, Any>, result: Result) {
-        if (activityPluginBinding == null) {
-            return result.error(Constants.ERROR_CODE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, Constants.ERROR_MESSAGE_PLUGIN_NOT_ATTACHED_TO_ACTIVITY, null)
-        }
-
-        try {
-            pendingScanResult = result
-            
-            val intent = Intent(activityPluginBinding!!.activity, ScanTireTreadActivity::class.java).apply {
-                putExtra(ScanTireTreadActivity.EXTRA_TIRE_TREAD_CONFIG, JSONObject(tireTreadConfigMap).toString())
-            }
-            
-            activityPluginBinding!!.activity.startActivityForResult(intent, SCAN_REQUEST_CODE)
-            
-        } catch (e: Exception) {
-            result.error(Constants.ERROR_CODE_GENERIC_EXCEPTION, e.message, e.localizedMessage)
-        }
-    }
-
-    private fun getMeasurementResult(
-        measurementUUID: String,
-        result: Result
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            AnylineTireTreadSdk.getTreadDepthReportResult(
-                measurementUUID,
-                onResponse = { response ->
-                    when (response) {
-                        is Response.Success -> {
-                            result.success(response.data.encodeToString())
-                        }
-                        is Response.Error -> {
-                            result.error(
-                                response.errorCode ?: Constants.ERROR_CODE_GENERIC_EXCEPTION, 
-                                response.errorMessage ?: Constants.ERROR_MESSAGE_UNKNOWN_ERROR,
-                                null
-                            )
-                        }
-                        is Response.Exception -> {
-                            result.error(
-                                Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                                response.exception.message,
-                                response.exception.localizedMessage
-                            )
-                        }
-                    }
-                }
+    private fun isDeviceSupported(result: Result) {
+        val context = hostContext()
+        if (context == null) {
+            result.error(
+                ErrorCode.INVALID_ARGUMENT.name,
+                "Plugin is not attached to a context",
+                null
             )
+            return
         }
-    }
-
-
-    private fun getHeatMapResult(
-        measurementUUID: String,
-        result: Result
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            AnylineTireTreadSdk.getHeatmap(
-                measurementUUID,
-                onResponse = { response ->
-                    when (response) {
-                        is Response.Success -> {
-                            result.success(response.data.url)
-                        }
-                        is Response.Error -> {
-                            result.error(
-                                response.errorCode ?: Constants.ERROR_CODE_GENERIC_EXCEPTION, 
-                                response.errorMessage ?: Constants.ERROR_MESSAGE_UNKNOWN_ERROR,
-                                null
-                            )
-                        }
-                        is Response.Exception -> {
-                            result.error(
-                                Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                                response.exception.message,
-                                response.exception.localizedMessage
-                            )
-                        }
-                    }
+        AnylineTireTread.isDeviceSupported(context) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(sdkResult.result)
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        sdkResult.error.debug?.toString()
+                    )
                 }
-            )
+            }
         }
     }
 
-    private fun sendCommentFeedback(
-        measurementUUID: String,
-        comment: String,
-        result: Result
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            AnylineTireTreadSdk.sendCommentFeedback(uuid = measurementUUID, comment = comment) { response ->
-                when (response) {
-                    is Response.Success -> {
-                        result.success(response.data.measurementUuid)
-                    }
+    private fun getResult(uuid: String, timeoutSeconds: Int?, result: Result) {
+        AnylineTireTread.getResult(
+            measurementUUID = uuid,
+            timeoutSeconds = timeoutSeconds ?: 60,
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(Json.encodeToString(sdkResult.result))
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        sdkResult.error.debug?.toString()
+                    )
+                }
+            }
+        }
+    }
 
-                    is Response.Error -> {
-                        result.error(
-                            Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                            response.errorMessage ?: Constants.ERROR_MESSAGE_UNKNOWN_ERROR,
-                            response.errorMessage
-                        )
-                    }
+    private fun getHeatmap(uuid: String, timeoutSeconds: Int?, result: Result) {
+        AnylineTireTread.getHeatmap(
+            measurementUUID = uuid,
+            timeoutSeconds = timeoutSeconds ?: 60,
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(sdkResult.result.url)
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        sdkResult.error.debug?.toString()
+                    )
+                }
+            }
+        }
+    }
 
-                    is Response.Exception -> {
-                        result.error(
-                            Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                            response.exception.message,
-                            response.exception.localizedMessage
-                        )
-                    }
+    private fun sendCommentFeedback(uuid: String, comment: String, result: Result) {
+        AnylineTireTread.sendCommentFeedback(
+            measurementUUID = uuid,
+            comment = comment
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(measurementInfoJson(sdkResult.result))
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        null
+                    )
                 }
             }
         }
     }
 
     private fun sendTreadDepthResultFeedback(
-        measurementUUID: String, treadResultRegions: List<TreadResultRegion>, result: Result
+        uuid: String, regions: List<TreadResultRegion>, result: Result
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            AnylineTireTreadSdk.sendTreadDepthResultFeedback(resultUuid = measurementUUID, treadResultRegions = treadResultRegions) { response ->
-                when (response) {
-                    is Response.Success -> {
-                        result.success(response.data.measurementUuid)
-                    }
-
-                    is Response.Error -> {
-                        result.error(
-                            Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                            response.errorMessage ?: Constants.ERROR_MESSAGE_UNKNOWN_ERROR,
-                            response.errorMessage
-                        )
-                    }
-
-                    is Response.Exception -> {
-                        result.error(
-                            Constants.ERROR_CODE_GENERIC_EXCEPTION,
-                            response.exception.message,
-                            response.exception.localizedMessage
-                        )
-                    }
+        AnylineTireTread.sendTreadDepthResultFeedback(
+            measurementUUID = uuid,
+            treadResultRegions = regions
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(measurementInfoJson(sdkResult.result))
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        null
+                    )
                 }
             }
         }
     }
-}
 
+    private fun sendTireIdFeedback(uuid: String, tireId: String, result: Result) {
+        AnylineTireTread.sendTireIdFeedback(
+            measurementUUID = uuid,
+            tireId = tireId
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(measurementInfoJson(sdkResult.result))
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        null
+                    )
+                }
+            }
+        }
+    }
+
+    @OptIn(InternalAPI::class)
+    private fun setExperimentalFlags(call: MethodCall, result: Result) {
+        val flags: List<String>? = call.argument(Constants.EXTRA_EXPERIMENTAL_FLAGS)
+        if (flags != null) {
+            AnylineTireTreadSdk.setExperimentalFlags(newFlags = flags)
+            result.success(true)
+        } else {
+            result.error(ErrorCode.INVALID_ARGUMENT.name, "Experimental flags are null", null)
+        }
+    }
+
+    @OptIn(InternalAPI::class)
+    private fun clearExperimentalFlags(result: Result) {
+        AnylineTireTreadSdk.clearExperimentalFlags()
+        result.success(true)
+    }
+
+    /// Builds feedback regions from `available` + `value_mm` only, via
+    /// `TreadResultRegion.initMm` — mirroring the RN wrapper and the iOS
+    /// implementation. Deserializing the full region JSON would let the
+    /// `value_inch_32nds` setter re-quantize `value_mm` and lose precision.
+    private fun parseFeedbackRegions(regionsJson: String): List<TreadResultRegion> =
+        Json.parseToJsonElement(regionsJson).jsonArray.map { element ->
+            val region = element.jsonObject
+            TreadResultRegion.initMm(
+                isAvailable = region["available"]?.jsonPrimitive?.booleanOrNull ?: false,
+                value = region["value_mm"]?.jsonPrimitive?.doubleOrNull ?: 0.0
+            )
+        }
+
+    private fun sanitizedOutcome(outcome: ScanOutcome): Map<String, Any?> {
+        val raw = Bridge.outcome(outcome)
+        return raw.filterKeys { it in OUTCOME_KEYS }
+    }
+
+    /// Serializes a [MeasurementInfo] to the JSON shape the Dart
+    /// `MeasurementInfo.fromJson` expects, built from its typed properties.
+    private fun measurementInfoJson(info: MeasurementInfo): String {
+        val json = JSONObject()
+        json.put("measurementUUID", info.measurementUUID)
+        json.put("status", info.status.name)
+        info.additionalContext?.let { context ->
+            val contextJson = JSONObject()
+            context.correlationId?.let { contextJson.put("correlationId", it) }
+            context.tirePosition?.let { position ->
+                contextJson.put(
+                    "tirePosition",
+                    JSONObject()
+                        .put("axle", position.axle)
+                        .put("positionOnAxle", position.positionOnAxle)
+                        .put("side", position.side.name)
+                )
+            }
+            if (contextJson.length() > 0) {
+                json.put("additionalContext", contextJson)
+            }
+        }
+        return json.toString()
+    }
+
+    companion object {
+        private val OUTCOME_KEYS = setOf("kind", "measurementUUID", "error")
+    }
+}

@@ -1,19 +1,18 @@
 {
-    "uiConfig": {
-        "measurementSystem": "Imperial",
-        "appearance": "Classic",
-        "scanSpeed": "Slow",
-        "orientationWarningConfig": {
-            "visible": true,
-            "text": "Gire o dispositivo horizontalmente",
-            "rotationLockHint": "Certifique-se de que a rotação automática do dispositivo está ativada."
-        },
-        "missingPermissionConfig": {
-            "title": "Permissão de câmera não concedida!",
-            "text": "A câmera é necessária para escanear o pneu.\nPor favor, vá para as configurações do aplicativo e conceda permissões de câmera."
-        }
+  "uiConfig": {
+    "measurementSystem": "Imperial",
+    "appearance": "Classic",
+    "scanSpeed": "Slow",
+    "orientationWarningConfig": {
+      "text": "Gire o dispositivo horizontalmente",
+      "rotationLockHint": "Certifique-se de que a rota\u00e7\u00e3o autom\u00e1tica do dispositivo est\u00e1 ativada."
     },
-    "scanConfig": {
-        "heatmapStyle": "GrayScale"
+    "missingPermissionConfig": {
+      "title": "Permiss\u00e3o de c\u00e2mera n\u00e3o concedida!",
+      "text": "A c\u00e2mera \u00e9 necess\u00e1ria para escanear o pneu.\nPor favor, v\u00e1 para as configura\u00e7\u00f5es do aplicativo e conceda permiss\u00f5es de c\u00e2mera."
     }
+  },
+  "scanConfig": {
+    "heatmapStyle": "Grayscale"
+  }
 }

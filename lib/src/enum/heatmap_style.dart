@@ -6,7 +6,7 @@ enum HeatmapStyle {
   Colored,
 
   /// Grayscale heatmap
-  GrayScale;
+  Grayscale;
 
   @override
   String toString() => name;

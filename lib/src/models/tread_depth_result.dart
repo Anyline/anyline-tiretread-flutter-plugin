@@ -1,5 +1,9 @@
 // ignore_for_file: avoid_dynamic_calls, inference_failure_on_untyped_parameter
 
+import 'package:anyline_tire_tread_plugin/src/enum/measurement_status.dart';
+import 'package:anyline_tire_tread_plugin/src/models/additional_context.dart';
+import 'package:anyline_tire_tread_plugin/src/models/measurement_metadata.dart';
+
 /// Represents the complete tread depth measurement result from a tire scan.
 ///
 /// Contains global measurements, regional measurements, and metadata about
@@ -8,7 +12,11 @@ class TreadDepthResult {
   /// Creates a new instance of [TreadDepthResult].
   ///
   /// All parameters are optional and can be null if not available.
-  TreadDepthResult({this.global, this.regions, this.measurementInfo});
+  TreadDepthResult(
+      {this.global,
+      this.regions,
+      this.measurementInfo,
+      this.measurementMetadata});
 
   /// Creates a [TreadDepthResult] from a JSON map.
   ///
@@ -28,6 +36,10 @@ class TreadDepthResult {
         ? MeasurementInfo.fromJson(
             json['measurementInfo'] as Map<String, dynamic>)
         : null;
+    measurementMetadata = json['measurementMetadata'] != null
+        ? MeasurementMetadata.fromJson(
+            json['measurementMetadata'] as Map<String, dynamic>)
+        : null;
   }
 
   /// Global (average) tread depth measurement across the entire tire.
@@ -39,15 +51,21 @@ class TreadDepthResult {
   /// Metadata about the measurement, including UUID and status.
   MeasurementInfo? measurementInfo;
 
+  /// Capture metadata (e.g. movement direction). New in SDK v15.
+  MeasurementMetadata? measurementMetadata;
+
   /// Gets the region with the minimum tread depth value.
   ///
   /// Returns the region with the lowest measurement among available regions,
   /// or the global measurement if no regional data is available.
   TreadResultRegion? get minimumValue {
-    return regions?.where((region) => region.available).reduce(
-            (current, next) =>
-                current.valueMm < next.valueMm ? current : next) ??
-        global;
+    final availableRegions =
+        regions?.where((region) => region.available).toList();
+    if (availableRegions == null || availableRegions.isEmpty) {
+      return global;
+    }
+    return availableRegions.reduce(
+        (current, next) => current.valueMm < next.valueMm ? current : next);
   }
 
   /// Converts this result to a JSON map.
@@ -64,6 +82,9 @@ class TreadDepthResult {
     if (measurementInfo != null) {
       data['measurementInfo'] = measurementInfo!.toJson();
     }
+    if (measurementMetadata != null) {
+      data['measurementMetadata'] = measurementMetadata!.toJson();
+    }
     return data;
   }
 }
@@ -73,27 +94,39 @@ class TreadDepthResult {
 /// Contains the unique identifier for the measurement and its processing status.
 class MeasurementInfo {
   /// Creates a new instance of [MeasurementInfo].
-  MeasurementInfo({this.measurementUuid, this.status});
+  MeasurementInfo({this.measurementUUID, this.status, this.additionalContext});
 
   /// Creates a [MeasurementInfo] from a JSON map.
   ///
-  /// Parses the measurement UUID and status.
+  /// Parses the measurement UUID, typed [status] and any [additionalContext]
+  /// the SDK echoes back.
   MeasurementInfo.fromJson(Map<String, dynamic> json) {
-    measurementUuid = json['measurementUuid'] as String;
-    status = json['status'] as String;
+    measurementUUID = json['measurementUUID'] as String?;
+    final rawStatus = json['status'] as String?;
+    status = rawStatus == null ? null : MeasurementStatus.fromString(rawStatus);
+    additionalContext = json['additionalContext'] != null
+        ? AdditionalContext.fromJson(
+            json['additionalContext'] as Map<String, dynamic>)
+        : null;
   }
 
   /// Unique identifier for this measurement.
-  String? measurementUuid;
+  String? measurementUUID;
 
-  /// Processing status of the measurement (e.g., "completed", "processing").
-  String? status;
+  /// Typed processing status of the measurement.
+  MeasurementStatus? status;
+
+  /// Context the SDK echoes back (correlation ID, tire position).
+  AdditionalContext? additionalContext;
 
   /// Converts this measurement info to a JSON map.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['measurementUuid'] = measurementUuid;
-    data['status'] = status;
+    data['measurementUUID'] = measurementUUID;
+    if (status != null) data['status'] = status!.name;
+    if (additionalContext != null) {
+      data['additionalContext'] = additionalContext!.toJson();
+    }
     return data;
   }
 }
@@ -127,23 +160,25 @@ class TreadResultRegion {
   }
 
   /// Creates a global (average) measurement from a millimeter value.
-  TreadResultRegion.initGlobalMm(double value) {
-    TreadResultRegion.initMm(available: true, valueMm: value);
-  }
+  TreadResultRegion.initGlobalMm(double value)
+      : this.initMm(available: true, valueMm: value);
 
   /// Creates a global (average) measurement from an inch value.
-  TreadResultRegion.initGlobalInch(double value) {
-    TreadResultRegion.initInch(available: true, valueInch: value);
-  }
+  TreadResultRegion.initGlobalInch(double value)
+      : this.initInch(available: true, valueInch: value);
 
   /// Creates a [TreadResultRegion] from a JSON map.
   ///
-  /// Parses all measurement values in different units.
+  /// SDK v15 omits fields that equal their defaults (`available=false`,
+  /// `value_mm=0.0`, ...) from the serialized JSON, so every field must be
+  /// treated as optional. Missing unit conversions are derived from
+  /// `value_mm`.
   TreadResultRegion.fromJson(Map<String, dynamic> json) {
-    available = json['available'] as bool;
-    valueMm = json['value_mm'] as double;
-    valueInch = json['value_inch'] as double;
-    valueInch32nds = json['value_inch_32nds'] as int;
+    available = json['available'] as bool? ?? false;
+    valueMm = (json['value_mm'] as num?)?.toDouble() ?? 0.0;
+    valueInch = (json['value_inch'] as num?)?.toDouble() ?? valueMm / 25.4;
+    valueInch32nds =
+        (json['value_inch_32nds'] as num?)?.toInt() ?? (valueMm / 25.4 * 32).round();
   }
 
   /// Converts the millimeter value to 32nds of an inch.

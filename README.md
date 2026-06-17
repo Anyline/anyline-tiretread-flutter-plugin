@@ -10,7 +10,7 @@ This SDK requires devices with advanced camera capabilities that provide depth/d
 
 #### Device
 
-- Android 8.0 - Oreo - or newer (API level 26+)
+- Android 6.0 - Marshmallow - or newer (API level 23+)
 - Decent camera functionality (recommended: ≥ 1080p and adequate **auto focus**)
 - 'Flash' capability
 - Stable internet connection
@@ -23,22 +23,20 @@ Your development/application environment is required to have at least the follow
 - Gradle 8.7 (minimum required by Tire Tread SDK 14.0.0+)
   - id 'com.android.application' version '8.7.3' apply false
 - Android Gradle Plugin 8.5.1+ (minimum required by Tire Tread SDK 14.0.0+)
-- Kotlin 1.9.0
-  - id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+- Kotlin 2.0.21
+  - id 'org.jetbrains.kotlin.android' version '2.0.21' apply false
 - compileSdk 36 (Android 15, required for 16KB page size compliance)
   - android { compileSdk 36 ...
 - targetSdk 36
   - android { targetSdk 36 ...
-- minSdk 26
-  - ... minSdk 26 ...
-- Compose Compiler 1.5.0
-  - ... composeOptions { kotlinCompilerExtensionVersion = "1.5.0" } ...
+- minSdk 23
+  - ... minSdk 23 ...
 
-> **Note**: Tire Tread SDK 14.0.0+ requires Gradle 8.7+ and AGP 8.5.1+ for Android 15 compliance (16KB page sizes).
+> **Note**: Tire Tread SDK 15.0.0+ requires Gradle 8.7+ and AGP 8.5.1+ for Android 15 compliance (16KB page sizes).
 
 ### iOS
 
-- iOS Version >= 16.4
+- iOS Version >= 13.4
 - Stable internet connection
 - 'Flash' capability
 
@@ -117,14 +115,38 @@ try {
 }
 ```
 
+Optionally, you can provide a custom tag that will be attached to all measurements:
+
+```dart
+await tireTreadPlugin.initialize(licenseKey, customTag: 'my-custom-tag');
+```
+
 ### Start scanning
 
-With an instance of `TireTreadPlugin`, call `scan` on it with the config options:
+With an instance of `TireTreadPlugin`, call `scan` on it with the config options. The returned `Future` completes with a `ScanOutcome` once the scan finishes, is aborted, or fails:
 
 ```dart
 scanWithAnyline() async {
- tireTreadPlugin.scan(config: TireTreadConfig());
+  final outcome = await tireTreadPlugin.scan(config: TireTreadConfig());
+  switch (outcome) {
+    case ScanCompleted():
+      // Results can now be queried with outcome.measurementUUID
+      print('Scan completed: ${outcome.measurementUUID}');
+    case ScanAborted():
+      print('Scan aborted by the user');
+    case ScanFailed():
+      print('Scan failed [${outcome.error.code.name}]: ${outcome.error.message}');
+  }
 }
+```
+
+You can additionally pass `ScanOptions`, e.g. to enable verbose SDK debug logging:
+
+```dart
+await tireTreadPlugin.scan(
+  config: TireTreadConfig(),
+  options: ScanOptions(enableDebugLogging: true),
+);
 ```
 
 ### Audio Feedback
@@ -177,7 +199,7 @@ You can specify the tire width through the scan configuration:
 ```dart
 var config = TireTreadConfig()
   ..scanConfig = (ScanConfig()..tireWidth = 185);
-tireTreadPlugin.scan(config: config);
+await tireTreadPlugin.scan(config: config);
 ```
 
 #### Basic UI Configuration
@@ -189,7 +211,7 @@ var config = TireTreadConfig()
   ..uiConfig = (UiConfig()
     ..measurementSystem = MeasurementSystem.Imperial
     ..scanSpeed = ScanSpeed.Fast);
-tireTreadPlugin.scan(config: config);
+await tireTreadPlugin.scan(config: config);
 ```
 
 #### Full UI Configuration
@@ -223,7 +245,7 @@ var config = TireTreadConfig()
       ..continueButtonText = 'Continue'
       ..explanationText = 'Choose tire width from options or enter manually.'
       ..titleText = 'Tire width'));
-tireTreadPlugin.scan(config: config);
+await tireTreadPlugin.scan(config: config);
 ```
 
 #### Additional Context Configuration
@@ -238,7 +260,7 @@ var config = TireTreadConfig()
       ..positionOnAxle = 2
       ..side = TireSide.Left)
     ..correlationId = '00000000-0000-0000-0000-000000000000'); // Make sure to only provide valid UUIDs!
-tireTreadPlugin.scan(config: config);
+await tireTreadPlugin.scan(config: config);
 ```
 
 #### JSON Configuration
@@ -251,41 +273,42 @@ TireTreadConfig config = TireTreadConfig();
 var data = await rootBundle.loadString('assets/config.json');
 var jsonData = jsonDecode(data) as Map<String, dynamic>;
 config = TireTreadConfig.fromJson(jsonData);
-tireTreadPlugin.scan(config: config);
+await tireTreadPlugin.scan(config: config);
 ```
 
 More information about the JSON configuration can be found here: https://documentation.anyline.com/tiretreadsdk-component/latest/scan-configuration.html
 
-## Handling the SDK’s events
+## Handling the scan outcome
 
-Handling SDK's events with an instance of `TireTreadPlugin` call `onScanningEvent`.
+> **_NOTE:_** The event stream (`onScanningEvent`) from plugin 3.x was removed in 4.0.0. The `scan` `Future` now completes directly with a `ScanOutcome` — see [Start scanning](#start-scanning).
+
+A `ScanOutcome` is one of:
 
 ```dart
- tireTreadPlugin.onScanningEvent.listen((event) {
-   switch (event) {
-     case ScanStarted():
-       debugPrint('UUID : ${event.measurementUUID}');
-     case ScanAborted():
-       debugPrint('measurementUUID : ${event.measurementUUID}');
-     case ScanProcessCompleted():
-       debugPrint('measurementUUID : ${event.measurementUUID}');
-       setState(() => _uuid = event.measurementUUID ?? '');
-     case ScanFailed():
-       debugPrint('error : ${event.error}');
-       debugPrint('measurementUUID : ${event.measurementUUID}');
+switch (outcome) {
+  case ScanCompleted():
+    // measurementUUID is non-null; use it to query results
+    debugPrint('measurementUUID : ${outcome.measurementUUID}');
+  case ScanAborted():
+    // The user cancelled the scan; measurementUUID may be null
+    debugPrint('measurementUUID : ${outcome.measurementUUID}');
+  case ScanFailed():
+    // error is a structured SdkError (code, type, message, debug)
+    debugPrint('error : ${outcome.error.code.name} - ${outcome.error.message}');
 }
- });
 ```
 
 ## Results
 
 ### Obtaining the Measurement Results
 
-After the upload of your scanned frames is completed (that is, the `UploadCompletedEvent` ), your measurement results may still take a few seconds to become available. To fetch the results, call the function `getResult(measurementUuid)`:
+After a scan completes (a `ScanCompleted` outcome), your measurement results may still take a few seconds to become available. To fetch the results, call the function `getResult`:
 
 ```dart
-TreadDepthResult? result = await tireTreadPlugin.getResult(measurementUUID:measurementUUID);
+TreadDepthResult? result = await tireTreadPlugin.getResult(measurementUUID: measurementUUID);
 ```
+
+`getResult` polls until the result is available; you can optionally adjust the polling timeout (default: 60 seconds) with `timeoutSeconds`.
 
 ## User Corrected Values and Comments
 
@@ -315,26 +338,23 @@ List<TreadResultRegion>  myCorrectedResults =  [regionMm, regionInch];
 await tireTreadPlugin.sendTreadDepthResultFeedback(measurementUUID: _uuid, resultRegions: myCorrectedResults);
 ```
 
-## Error Codes
+## Error Handling
 
-| Error Code | Error Origin        | Error Message                                                                                                                                       |
-| ---------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 100        | Platform-native SDK | General Processing Error: Please try again or contact support, if this error persists.                                                              |
-| 110        | Platform-native SDK | Bad Images: too fev images -> record for longer; images too blurry -> move device slower.                                                           |
-| 111        | Platform-native SDK | Unexpected image Count: Server did not receive all send images.                                                                                     |
-| 150        | Platform-native SDK | Processing Error: Measurement could not be processed, please try again. See the documentation for advice on how to perform successful measurements. |
-| 1000       | Flutter Plugin      | Plugin Not Attached To Activity: The plugin has not been integrated with the main activity.                                                         |
-| 1001       | Flutter Plugin      | SDK Initialization Failed: Tire Tread SDK could not be initialized                                                                                  |
+Tire Tread SDK 15 reports structured errors. Scan failures are delivered as a `ScanFailed` outcome carrying an `SdkError` (`code`, `type`, `message`, and optional `debug` details). All other methods (`initialize`, `getResult`, `getHeatMap`, feedback methods) throw a `PlatformException` whose `code` is the name of the SDK `ErrorCode` (e.g. `INVALID_LICENSE`, `NO_CONNECTION`, `TIMEOUT`).
+
+The possible error codes are defined by the `ErrorCode` enum (e.g. `invalidLicense`, `licenseKeyForbidden`, `invalidArgument`, `initializationFailed`, `sdkNotInitialized`, `alreadyRunning`, `cameraPermissionDenied`, `measurementError`, `resultError`, `heatmapError`, `noConnection`, `uploadFailed`, `timeout`, `internalError`, `unknownError`), grouped into `ErrorType` categories (`licenseError`, `configError`, `networkError`, `scanError`, `resultError`).
 
 ## Analytics
 
 ### Heatmap
 
-After the upload of your scanned frames is completed (that is, the `UploadCompletedEvent` ), your heatmap result may still take a few seconds to become available. To fetch the heatmap, call the function `getHeatMap(measurementUuid)`:
+After a scan completes (a `ScanCompleted` outcome), your heatmap result may still take a few seconds to become available. To fetch the heatmap, call the function `getHeatMap`. It returns the **URL** of the generated heatmap image:
 
 ```dart
-String heatmap = await tireTreadPlugin.getHeatMap(measurementUUID:measurementUUID);
+String? heatmapUrl = await tireTreadPlugin.getHeatMap(measurementUUID: measurementUUID);
 ```
+
+`getHeatMap` polls until the heatmap is available; you can optionally adjust the polling timeout (default: 60 seconds) with `timeoutSeconds`.
 
 ## Experimental Flags (internal use only)
 

@@ -13,21 +13,16 @@ class DistanceIndicatorConfig {
   /// Creates a [DistanceIndicatorConfig] from a JSON map.
   ///
   /// Parses the following JSON keys:
-  /// - `visible`: Whether the distance indicator is visible
   /// - `textOk`: Text shown when distance is correct
   /// - `textMoveCloser`: Text shown when user should move closer
   /// - `textMoveAway`: Text shown when user should move away
   factory DistanceIndicatorConfig.fromJson(Map<String, dynamic> json) {
     final config = DistanceIndicatorConfig();
-    config.visible = json['visible'] as bool?;
     config.textOk = json['textOk'] as String?;
     config.textMoveCloser = json['textMoveCloser'] as String?;
     config.textMoveAway = json['textMoveAway'] as String?;
     return config;
   }
-
-  /// Whether the distance indicator UI element is visible during scanning.
-  bool? visible;
 
   /// Text displayed when the distance from the tire is optimal for scanning.
   String? textOk;
@@ -43,7 +38,6 @@ class DistanceIndicatorConfig {
   /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     if (textOk != null) map['textOk'] = textOk;
     if (textMoveCloser != null) map['textMoveCloser'] = textMoveCloser;
     if (textMoveAway != null) map['textMoveAway'] = textMoveAway;
@@ -62,19 +56,14 @@ class FocusPointTooltipConfig {
   /// Creates a [FocusPointTooltipConfig] from a JSON map.
   ///
   /// Parses the following JSON keys:
-  /// - `visible`: Whether the focus point tooltip is visible
   /// - `smallText`: Small text displayed in the tooltip
   /// - `text`: Main text displayed in the tooltip
   factory FocusPointTooltipConfig.fromJson(Map<String, dynamic> json) {
     final config = FocusPointTooltipConfig();
-    config.visible = json['visible'] as bool?;
     config.smallText = json['smallText'] as String?;
     config.text = json['text'] as String?;
     return config;
   }
-
-  /// Whether the focus point tooltip is visible during scanning.
-  bool? visible;
 
   /// Small supplementary text displayed in the tooltip.
   String? smallText;
@@ -87,7 +76,6 @@ class FocusPointTooltipConfig {
   /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     if (smallText != null) map['smallText'] = smallText;
     if (text != null) map['text'] = text;
     return map;
@@ -105,21 +93,16 @@ class TapToStartScanningTooltipConfig {
   /// Creates a [TapToStartScanningTooltipConfig] from a JSON map.
   ///
   /// Parses the following JSON keys:
-  /// - `visible`: Whether the tooltip is visible
   /// - `textOk`: Text shown when tire width is known
   /// - `textNotOkMetric`: Text shown when tire width unknown (metric)
   /// - `textNotOkImperial`: Text shown when tire width unknown (imperial)
   factory TapToStartScanningTooltipConfig.fromJson(Map<String, dynamic> json) {
     final config = TapToStartScanningTooltipConfig();
-    config.visible = json['visible'] as bool?;
     config.textOk = json['textOk'] as String?;
     config.textNotOkMetric = json['textNotOkMetric'] as String?;
     config.textNotOkImperial = json['textNotOkImperial'] as String?;
     return config;
   }
-
-  /// Whether the tap to start scanning tooltip is visible.
-  bool? visible;
 
   /// Text displayed when the tire width is already known.
   String? textOk;
@@ -135,41 +118,9 @@ class TapToStartScanningTooltipConfig {
   /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     if (textOk != null) map['textOk'] = textOk;
     if (textNotOkMetric != null) map['textNotOkMetric'] = textNotOkMetric;
     if (textNotOkImperial != null) map['textNotOkImperial'] = textNotOkImperial;
-    return map;
-  }
-}
-
-/// Configuration for the tire overlay UI element.
-///
-/// The tire overlay shows a visual outline or guide that helps users
-/// position the tire correctly within the scanning frame.
-class TireOverlayConfig {
-  /// Creates a new instance of [TireOverlayConfig].
-  TireOverlayConfig();
-
-  /// Creates a [TireOverlayConfig] from a JSON map.
-  ///
-  /// Parses the following JSON keys:
-  /// - `visible`: Whether the tire overlay is visible
-  factory TireOverlayConfig.fromJson(Map<String, dynamic> json) {
-    final config = TireOverlayConfig();
-    config.visible = json['visible'] as bool?;
-    return config;
-  }
-
-  /// Whether the tire overlay guide is visible during scanning.
-  bool? visible;
-
-  /// Converts this configuration to a JSON map.
-  ///
-  /// Only includes non-null values in the output.
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     return map;
   }
 }
@@ -185,17 +136,12 @@ class UploadViewConfig {
   /// Creates a [UploadViewConfig] from a JSON map.
   ///
   /// Parses the following JSON keys:
-  /// - `visible`: Whether the upload view is visible
   /// - `text`: Text displayed during upload
   factory UploadViewConfig.fromJson(Map<String, dynamic> json) {
     final config = UploadViewConfig();
-    config.visible = json['visible'] as bool?;
     config.text = json['text'] as String?;
     return config;
   }
-
-  /// Whether the upload view is displayed during processing.
-  bool? visible;
 
   /// Text message shown to the user during the upload process.
   String? text;
@@ -205,7 +151,6 @@ class UploadViewConfig {
   /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     if (text != null) map['text'] = text;
     return map;
   }
@@ -222,19 +167,14 @@ class OrientationWarningConfig {
   /// Creates an [OrientationWarningConfig] from a JSON map.
   ///
   /// Parses the following JSON keys:
-  /// - `visible`: Whether the orientation warning is visible
   /// - `text`: Main warning text
   /// - `rotationLockHint`: Hint about device rotation lock
   factory OrientationWarningConfig.fromJson(Map<String, dynamic> json) {
     final config = OrientationWarningConfig();
-    config.visible = json['visible'] as bool?;
     config.text = json['text'] as String?;
     config.rotationLockHint = json['rotationLockHint'] as String?;
     return config;
   }
-
-  /// Whether the orientation warning is displayed when orientation is wrong.
-  bool? visible;
 
   /// Main text of the orientation warning message.
   String? text;
@@ -247,71 +187,8 @@ class OrientationWarningConfig {
   /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     if (text != null) map['text'] = text;
     if (rotationLockHint != null) map['rotationLockHint'] = rotationLockHint;
-    return map;
-  }
-}
-
-/// Configuration for the countdown UI element.
-///
-/// Displays a countdown timer before scanning begins, giving users
-/// time to prepare and position the device correctly.
-class CountdownConfig {
-  /// Creates a new instance of [CountdownConfig].
-  CountdownConfig();
-
-  /// Creates a [CountdownConfig] from a JSON map.
-  ///
-  /// Parses the following JSON keys:
-  /// - `visible`: Whether the countdown is displayed
-  factory CountdownConfig.fromJson(Map<String, dynamic> json) {
-    final config = CountdownConfig();
-    config.visible = json['visible'] as bool?;
-    return config;
-  }
-
-  /// Whether the countdown timer is displayed before scanning starts.
-  bool? visible;
-
-  /// Converts this configuration to a JSON map.
-  ///
-  /// Only includes non-null values in the output.
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
-    return map;
-  }
-}
-
-/// Configuration for the scan direction UI element.
-///
-/// Shows visual guidance indicating the direction in which the user
-/// should move the device during the tire scanning process.
-class ScanDirectionConfig {
-  /// Creates a new instance of [ScanDirectionConfig].
-  ScanDirectionConfig();
-
-  /// Creates a [ScanDirectionConfig] from a JSON map.
-  ///
-  /// Parses the following JSON keys:
-  /// - `visible`: Whether the scan direction indicator is visible
-  factory ScanDirectionConfig.fromJson(Map<String, dynamic> json) {
-    final config = ScanDirectionConfig();
-    config.visible = json['visible'] as bool?;
-    return config;
-  }
-
-  /// Whether the scan direction indicator is displayed during scanning.
-  bool? visible;
-
-  /// Converts this configuration to a JSON map.
-  ///
-  /// Only includes non-null values in the output.
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
     return map;
   }
 }
@@ -331,16 +208,16 @@ class TireWidthRange {
   /// - `upperLimit`: Maximum allowable tire width
   factory TireWidthRange.fromJson(Map<String, dynamic> json) {
     final range = TireWidthRange();
-    range.lowerLimit = json['lowerLimit'] as num?;
-    range.upperLimit = json['upperLimit'] as num?;
+    range.lowerLimit = (json['lowerLimit'] as num?)?.toInt();
+    range.upperLimit = (json['upperLimit'] as num?)?.toInt();
     return range;
   }
 
   /// Minimum allowable tire width value in millimeters.
-  num? lowerLimit;
+  int? lowerLimit;
 
   /// Maximum allowable tire width value in millimeters.
-  num? upperLimit;
+  int? upperLimit;
 
   /// Converts this configuration to a JSON map.
   ///
@@ -364,8 +241,7 @@ class TireWidthInputConfig {
   /// Creates a [TireWidthInputConfig] from a JSON map.
   ///
   /// Parses the following JSON keys:
-  /// - `visible`: Whether the tire width input screen is shown
-  /// - `skipButtonText`: Text for the skip button (deprecated on Android)
+  /// - `skipButtonText`: Text for the skip button (deprecated by the SDK)
   /// - `titleText`: Title text of the input screen
   /// - `explanationText`: Explanation text describing why tire width is needed
   /// - `continueButtonText`: Text for the continue button
@@ -374,7 +250,7 @@ class TireWidthInputConfig {
   /// - `tireWidthOptions`: Predefined tire width options to choose from
   factory TireWidthInputConfig.fromJson(Map<String, dynamic> json) {
     final config = TireWidthInputConfig();
-    config.visible = json['visible'] as bool?;
+    // ignore: deprecated_member_use_from_same_package
     config.skipButtonText = json['skipButtonText'] as String?;
     config.titleText = json['titleText'] as String?;
     config.explanationText = json['explanationText'] as String?;
@@ -392,12 +268,12 @@ class TireWidthInputConfig {
     return config;
   }
 
-  /// Whether the tire width input screen is displayed before scanning.
-  bool? visible;
-
-  /// **Deprecated on Android.** Text for the skip button.
+  /// Text for the skip button.
   ///
-  /// This property is deprecated and will be removed in the next major SDK release.
+  /// Deprecated by the SDK on all platforms: the Skip button will be removed in
+  /// the next major SDK release. Provide the tire width via integration or UI.
+  @Deprecated('The Skip button will be removed in the next major SDK release; '
+      'provide the tire width via integration or UI instead.')
   String? skipButtonText;
 
   /// Title text displayed at the top of the tire width input screen.
@@ -423,7 +299,7 @@ class TireWidthInputConfig {
   /// Only includes non-null values in the output.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (visible != null) map['visible'] = visible;
+    // ignore: deprecated_member_use_from_same_package
     if (skipButtonText != null) map['skipButtonText'] = skipButtonText;
     if (titleText != null) map['titleText'] = titleText;
     if (explanationText != null) map['explanationText'] = explanationText;
@@ -495,11 +371,8 @@ class UiConfig {
   /// - `distanceIndicatorConfig`: Distance indicator configuration
   /// - `focusPointTooltipConfig`: Focus point tooltip configuration
   /// - `tapToStartScanningTooltipConfig`: Tap to start tooltip configuration
-  /// - `tireOverlayConfig`: Tire overlay configuration
   /// - `uploadViewConfig`: Upload view configuration
   /// - `orientationWarningConfig`: Orientation warning configuration
-  /// - `countdownConfig`: Countdown configuration
-  /// - `scanDirectionConfig`: Scan direction indicator configuration
   /// - `tireWidthInputConfig`: Tire width input configuration
   /// - `missingPermissionConfig`: Missing permission dialog configuration
   ///
@@ -540,10 +413,6 @@ class UiConfig {
           TapToStartScanningTooltipConfig.fromJson(
               json['tapToStartScanningTooltipConfig'] as Map<String, dynamic>);
     }
-    if (json['tireOverlayConfig'] != null) {
-      config.tireOverlayConfig = TireOverlayConfig.fromJson(
-          json['tireOverlayConfig'] as Map<String, dynamic>);
-    }
     if (json['uploadViewConfig'] != null) {
       config.uploadViewConfig = UploadViewConfig.fromJson(
           json['uploadViewConfig'] as Map<String, dynamic>);
@@ -551,14 +420,6 @@ class UiConfig {
     if (json['orientationWarningConfig'] != null) {
       config.orientationWarningConfig = OrientationWarningConfig.fromJson(
           json['orientationWarningConfig'] as Map<String, dynamic>);
-    }
-    if (json['countdownConfig'] != null) {
-      config.countdownConfig = CountdownConfig.fromJson(
-          json['countdownConfig'] as Map<String, dynamic>);
-    }
-    if (json['scanDirectionConfig'] != null) {
-      config.scanDirectionConfig = ScanDirectionConfig.fromJson(
-          json['scanDirectionConfig'] as Map<String, dynamic>);
     }
     if (json['tireWidthInputConfig'] != null) {
       config.tireWidthInputConfig = TireWidthInputConfig.fromJson(
@@ -589,20 +450,11 @@ class UiConfig {
   /// Configuration for the tap to start scanning tooltip UI component.
   TapToStartScanningTooltipConfig? tapToStartScanningTooltipConfig;
 
-  /// Configuration for the tire overlay guide UI component.
-  TireOverlayConfig? tireOverlayConfig;
-
   /// Configuration for the upload/processing view UI component.
   UploadViewConfig? uploadViewConfig;
 
   /// Configuration for the orientation warning UI component.
   OrientationWarningConfig? orientationWarningConfig;
-
-  /// Configuration for the countdown timer UI component.
-  CountdownConfig? countdownConfig;
-
-  /// Configuration for the scan direction indicator UI component.
-  ScanDirectionConfig? scanDirectionConfig;
 
   /// Configuration for the tire width input screen UI component.
   TireWidthInputConfig? tireWidthInputConfig;
@@ -634,20 +486,11 @@ class UiConfig {
       map['tapToStartScanningTooltipConfig'] =
           tapToStartScanningTooltipConfig?.toJson();
     }
-    if (tireOverlayConfig != null) {
-      map['tireOverlayConfig'] = tireOverlayConfig?.toJson();
-    }
     if (uploadViewConfig != null) {
       map['uploadViewConfig'] = uploadViewConfig?.toJson();
     }
     if (orientationWarningConfig != null) {
       map['orientationWarningConfig'] = orientationWarningConfig?.toJson();
-    }
-    if (countdownConfig != null) {
-      map['countdownConfig'] = countdownConfig?.toJson();
-    }
-    if (scanDirectionConfig != null) {
-      map['scanDirectionConfig'] = scanDirectionConfig?.toJson();
     }
     if (tireWidthInputConfig != null) {
       map['tireWidthInputConfig'] = tireWidthInputConfig?.toJson();
