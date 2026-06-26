@@ -42,6 +42,13 @@ library;
 export 'package:anyline_tire_tread_plugin/src/tire_tread_plugin.dart';
 export 'src/scan_outcome.dart';
 export 'src/models/sdk_error.dart';
+// Tire Sidewall (TSW) scanner — separate channel, same package.
+export 'package:anyline_tire_tread_plugin/src/tire_sidewall_plugin.dart';
+export 'src/tire_sidewall_outcome.dart';
+export 'src/models/tire_sidewall_config.dart';
+export 'src/models/tire_sidewall_texts.dart';
+export 'src/models/tire_sidewall_support.dart';
+export 'src/enum/environment_lighting.dart';
 export 'src/enum/appearance.dart';
 export 'src/enum/measurement_system.dart';
 export 'src/enum/scan_speed.dart';

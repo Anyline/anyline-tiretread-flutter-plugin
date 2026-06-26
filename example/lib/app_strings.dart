@@ -2,6 +2,7 @@ class AppStrings {
   static const String appTitle = 'Anyline Tire Tread Plugin Example';
   static const String btnInitialize = 'Initialize';
   static const String btnScan = 'Scan';
+  static const String btnScanSidewall = 'Scan Tire Sidewall';
   static const String btnGetResult = 'Get Result';
   static const String btnGetHeatMap = 'Get HeatMap';
   static const String btnSendFeedback = 'Send Feedback Comment';

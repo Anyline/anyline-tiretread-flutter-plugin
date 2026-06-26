@@ -4,7 +4,7 @@ version = "1.0-SNAPSHOT"
 buildscript {
     ext{
         kotlin_version = "2.0.21"
-        tiretread_sdk_version = '15.1.0'
+        tiretread_sdk_version = '15.2.0'
     }
     repositories {
         google()
@@ -61,6 +61,11 @@ android {
 
         // Anyline Tire Tread SDK dependency
         implementation("io.anyline.tiretread.sdk:shared-android:$tiretread_sdk_version")
+
+        // Coroutines — used by the sidewall plugin's suspend isSupported() call.
+        // The SDK depends on coroutines transitively but only at runtime scope,
+        // so declare it explicitly for compilation. Matches the SDK's version.
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.5.0")

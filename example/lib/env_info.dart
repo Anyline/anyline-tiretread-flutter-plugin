@@ -12,4 +12,8 @@ abstract class EnvInfo {
         ? runTimeLicenseKey
         : dotenv.env['licenseKey'] ?? (throw AssertionError());
   }
+
+  /// Client ID used by the Tire Sidewall (TSW) scanner. Set `sidewallClientId`
+  /// in `.env`; empty when unset (the scan will then fail server-side).
+  static String get sidewallClientId => dotenv.env['sidewallClientId'] ?? '';
 }

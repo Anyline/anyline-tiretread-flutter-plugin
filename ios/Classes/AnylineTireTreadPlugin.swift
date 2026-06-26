@@ -11,6 +11,11 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
                                            binaryMessenger: registrar.messenger())
         let instance = AnylineTireTreadPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
+
+        // The Tire Sidewall (TSW) scanner is exposed over its own channel. A
+        // Flutter package declares a single pluginClass per platform, so register
+        // the sidewall handler here.
+        AnylineTireSidewallPlugin.register(with: registrar)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
