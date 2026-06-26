@@ -1,3 +1,17 @@
+## 15.2.0
+
+### Added
+
+- **Tire Sidewall (TSW) scanner** — a new on-device scanner exposed over a dedicated `anyline_tire_sidewall_plugin` channel via `TireSidewallPlugin`:
+  - `scan({required String clientId, TireSidewallConfig? config})` completes with a `TswScanOutcome` (`TswScanCompleted` carrying the raw result JSON, the captured image bytes, and the detected `EnvironmentLighting`; `TswScanAborted`; or `TswScanFailed` with a structured `SdkError`).
+  - `isSupported()` returns a `TireSidewallSupport` (on Android it checks Google Play Services + the TFLite runtime; on iOS it is always supported). Does not require SDK initialization.
+  - `resolvePlayServices()` shows the Google Play Services resolution dialog after a user-resolvable `isSupported()` failure (Android only; no-op on iOS).
+  - New types: `TireSidewallConfig`, `TireSidewallTexts`, `TireSidewallSupport`, `TswScanOutcome`, and the `EnvironmentLighting` enum.
+
+### Dependencies
+
+Tire Tread SDK 15.2.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#_15_2_0).
+
 ## 15.1.0
 
 > **Major version jump (3.0.1 → 15.1.0).** Plugin versioning is now aligned with the underlying Anyline Tire Tread SDK version: the previous release (3.0.1) wrapped TTR SDK 14.0.1, and from this release the plugin's `X.Y.Z` mirrors the bundled SDK release.

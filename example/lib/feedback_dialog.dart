@@ -1,3 +1,4 @@
+import 'package:anyline_tire_tread_plugin_example/app_colors.dart';
 import 'package:anyline_tire_tread_plugin_example/app_strings.dart';
 import 'package:anyline_tire_tread_plugin_example/widgets.dart';
 import 'package:flutter/material.dart';
@@ -25,37 +26,39 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final accent = context.ds.brand;
     _feedbackTextController.selection = TextSelection(
         baseOffset: 0, extentOffset: _feedbackTextController.text.length);
 
-    return Container(
-      padding: const EdgeInsets.all(16).copyWith(bottom: 0),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+    return Padding(
+      padding: const EdgeInsets.all(16).copyWith(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            AppStrings.titleCommentFeedbackDialog,
-            style: TextStyle(fontSize: 16, color: Color(0xFF0099FF)),
-          ),
+          Text(AppStrings.titleCommentFeedbackDialog,
+              style: TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.w700, color: accent)),
           sizedBox,
           TextField(
-              controller: _feedbackTextController,
-              autofocus: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0xFF0099FF), width: 1.0)),
-              )),
+            controller: _feedbackTextController,
+            autofocus: true,
+            decoration: InputDecoration(
+              isDense: true,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: accent, width: 1.5),
+              ),
+            ),
+          ),
           sizedBox,
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF0099FF),
-                ),
+                style: TextButton.styleFrom(foregroundColor: accent),
                 onPressed: () {
                   _feedbackTextController.text = '';
                   widget.onCancel();
@@ -64,7 +67,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               ),
               TextButton(
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF0099FF),
+                  foregroundColor: accent,
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onPressed: () async {

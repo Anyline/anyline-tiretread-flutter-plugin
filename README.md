@@ -103,6 +103,32 @@ With this import, you can use the `TireTreadPlugin` class to call methods access
 var tireTreadPlugin = TireTreadPlugin();
 ```
 
+### Check device support
+
+Before initializing, you can verify that the current device meets the hardware requirements for tire tread scanning. `isDeviceSupported()` returns a `bool`:
+
+```dart
+final supported = await tireTreadPlugin.isDeviceSupported();
+if (!supported) {
+  // This device can't run tire tread scanning.
+}
+```
+
+> **_NOTE:_** On Android, this check requires the camera permission — it throws a `PlatformException` with code `CAMERA_PERMISSION_DENIED` if it hasn't been granted at call time.
+
+#### Automatic camera permission (Android)
+
+For the SDK to request the camera permission **automatically** when you call `isDeviceSupported()`, your Android host activity must extend `FlutterFragmentActivity` instead of the default `FlutterActivity`:
+
+```kotlin
+// android/app/src/main/kotlin/.../MainActivity.kt
+import io.flutter.embedding.android.FlutterFragmentActivity
+
+class MainActivity : FlutterFragmentActivity()
+```
+
+If you keep `FlutterActivity`, request the camera permission yourself before calling `isDeviceSupported()`. This is only needed for `isDeviceSupported()` — the tread and sidewall **scanners request the camera permission themselves** and do **not** require it.
+
 ### Initialize the SDK
 
 During app startup, before calling any other plugin method, initialize the Anyline Tire Tread SDK by calling the plugin object’s `initialize` method, providing it with your license key:
@@ -355,6 +381,74 @@ String? heatmapUrl = await tireTreadPlugin.getHeatMap(measurementUUID: measureme
 ```
 
 `getHeatMap` polls until the heatmap is available; you can optionally adjust the polling timeout (default: 60 seconds) with `timeoutSeconds`.
+
+## Tire Sidewall (TSW) Scanner
+
+The Tire Sidewall scanner reads a tire's sidewall markings (e.g. the tire size) end to end. It presents a guided, full-screen camera experience, **captures the sidewall automatically** once it is correctly framed, uploads the photo to the Anyline Cloud API on your behalf, and returns the structured reading together with the captured image. It is a separate scanner from tire tread and does **not** require `initialize()`.
+
+### What you need
+
+- A **Cloud API client ID** — a string that authenticates the upload to the Anyline Cloud API. This is **separate** from your SDK license key and is provided by Anyline.
+- **Camera permission.** The scanner requests it at runtime (no special Android host-activity setup required). On iOS, add an `NSCameraUsageDescription` entry to your `Info.plist`.
+
+### Create the plugin
+
+```dart
+import 'package:anyline_tire_tread_plugin/anyline_tire_tread_plugin.dart';
+
+final tireSidewallPlugin = TireSidewallPlugin();
+```
+
+### Check device support (optional)
+
+`isSupported()` reports whether the device can run the sidewall scanner and does not require initialization. On Android, if the failure is user-resolvable (e.g. Google Play Services needs updating), call `resolvePlayServices()` to show the system dialog. On iOS it is always supported.
+
+```dart
+final support = await tireSidewallPlugin.isSupported();
+if (!support.supported) {
+  if (support.userResolvable) await tireSidewallPlugin.resolvePlayServices();
+  return;
+}
+```
+
+### Start a scan
+
+Call `scan` with your Cloud API client ID (and an optional `TireSidewallConfig`). The returned `Future` completes once with a `TswScanOutcome`:
+
+```dart
+final outcome = await tireSidewallPlugin.scan(clientId: '<YOUR_CLOUD_API_CLIENT_ID>');
+switch (outcome) {
+  case TswScanCompleted():
+    final reading = outcome.resultJson;   // raw cloud reading (JSON string)
+    final image = outcome.imageBytes;     // captured image (Uint8List), e.g. Image.memory(image)
+    final lighting = outcome.lighting;    // EnvironmentLighting? — Dark / Bright / Good / null
+  case TswScanAborted():
+    // the user dismissed the scanner before a capture was taken
+  case TswScanFailed():
+    // outcome.error is a structured SdkError (code, type, message)
+    debugPrint('${outcome.error.code.name}: ${outcome.error.message}');
+}
+```
+
+The captured `imageBytes` is returned in **3:4 (portrait)** orientation — size any preview accordingly. Parse `resultJson` with your JSON library of choice.
+
+### Configuration (optional)
+
+Pass a `TireSidewallConfig` to override the defaults:
+
+```dart
+final config = TireSidewallConfig()
+  ..correlationId = '00000000-0000-0000-0000-000000000000' // optional, v4 UUID
+  ..texts = (TireSidewallTexts()..alignTire = 'Align the tire'); // optional overlay-string overrides
+final outcome = await tireSidewallPlugin.scan(clientId: clientId, config: config);
+```
+
+- `correlationId` — an optional **version-4 UUID** used to correlate this scan with a matching Tire Tread scan (the same value is available on the tread scan's `AdditionalContext`). An invalid value fails the scan with `INVALID_UUID`.
+- `texts` — overridable strings shown on the scanner overlay (`alignTire`, `holdSteady`, …); any field you leave unset keeps its English default.
+
+### Errors
+
+A `TswScanFailed` carries a structured `SdkError`. Codes a sidewall scan can surface include `INVALID_LICENSE` (client ID missing, invalid, or unauthorized), `CAMERA_PERMISSION_DENIED`, `NO_CONNECTION` / `TIMEOUT`, `UPLOAD_FAILED`, `INVALID_UUID`, and `ALREADY_RUNNING`. See [Error Handling](#error-handling) for the `SdkError` structure.
 
 ## Experimental Flags (internal use only)
 

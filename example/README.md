@@ -5,8 +5,13 @@ This Flutter plugin enables the integration of Anyline Tire Tread SDK features.
 ## Create .env file
 
 - Navigate to path_to_plugin_root_folder/example
-- Create .env file and add below line of code
+- Create .env file and add the lines below
   > licenseKey="{REPLACE WITH YOUR LICENSE KEY}"
+  >
+  > sidewallClientId="{REPLACE WITH YOUR SIDEWALL CLIENT ID}"
+
+`sidewallClientId` is required only by the Tire Sidewall (TSW) scanner; leave it
+out if you are only using tire-tread scanning.
 
 ## How to run the example app
 

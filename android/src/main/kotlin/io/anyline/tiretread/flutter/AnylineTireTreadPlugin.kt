@@ -41,6 +41,11 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var activityPluginBinding: ActivityPluginBinding? = null
     private var pendingScanResult: Result? = null
 
+    // The Tire Sidewall (TSW) scanner is exposed over its own channel. A Flutter
+    // package declares a single pluginClass per platform, so this plugin owns
+    // the sidewall handler and forwards the FlutterPlugin/ActivityAware lifecycle.
+    private val sidewallPlugin = AnylineTireSidewallPlugin()
+
     // SDK v15 invokes its callbacks on a background dispatcher (Dispatchers.IO).
     // MethodChannel results must be delivered on the platform (main) thread, so
     // every SDK callback is marshalled through this handler. Lazy so the class
@@ -59,6 +64,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         applicationContext = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "anyline_tire_tread_plugin")
         channel.setMethodCallHandler(this)
+        sidewallPlugin.onAttachedToEngine(flutterPluginBinding)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -118,24 +124,29 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         applicationContext = null
+        sidewallPlugin.onDetachedFromEngine(binding)
     }
 
     // ActivityAware
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityPluginBinding = binding
+        sidewallPlugin.onAttachedToActivity(binding)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
         activityPluginBinding = null
+        sidewallPlugin.onDetachedFromActivityForConfigChanges()
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activityPluginBinding = binding
+        sidewallPlugin.onReattachedToActivityForConfigChanges(binding)
     }
 
     override fun onDetachedFromActivity() {
         activityPluginBinding = null
+        sidewallPlugin.onDetachedFromActivity()
     }
 
     /// Prefer the current Activity; fall back to the application context
