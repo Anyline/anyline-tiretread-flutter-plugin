@@ -1,3 +1,13 @@
+## 15.3.0
+
+### Added
+
+- **Configurable upload timeout** — new optional `uploadTimeoutMillis` named argument on `TireTreadPlugin.initialize(...)` for tuning the per-attempt image-upload timeout. Default is 20 s. See the [Getting Started](https://documentation.anyline.com/tiretreadsdk-component/latest/getting-started.html) page.
+
+### Dependencies
+
+Tire Tread SDK 15.3.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#_15_3_0).
+
 ## 15.2.0
 
 ### Added

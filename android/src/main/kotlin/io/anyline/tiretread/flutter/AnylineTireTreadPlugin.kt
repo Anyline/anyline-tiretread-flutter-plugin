@@ -73,7 +73,9 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val licenseKey = call.argument<String>(Constants.EXTRA_LICENSE_KEY) ?: ""
                 val pluginVersion = call.argument<String>(Constants.EXTRA_PLUGIN_VERSION) ?: ""
                 val customTag = call.argument<String>(Constants.EXTRA_CUSTOM_TAG)
-                initializeSdk(licenseKey, pluginVersion, customTag, result)
+                val uploadTimeoutMillis =
+                    (call.argument<Number>(Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS))?.toLong()
+                initializeSdk(licenseKey, pluginVersion, customTag, uploadTimeoutMillis, result)
             }
             Constants.METHOD_GET_SDK_VERSION -> {
                 result.success(AnylineTireTread.sdkVersion)
@@ -157,7 +159,11 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     // SDK methods
 
     private fun initializeSdk(
-        licenseKey: String, pluginVersion: String, customTag: String?, result: Result
+        licenseKey: String,
+        pluginVersion: String,
+        customTag: String?,
+        uploadTimeoutMillis: Long?,
+        result: Result
     ) {
         val context = hostContext()
         if (context == null) {
@@ -165,13 +171,18 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             return
         }
 
+        val baseOptions = InitOptions(
+            customTag = customTag?.trim().takeUnless { it.isNullOrEmpty() },
+            wrapperInfo = WrapperInfo.Flutter(pluginVersion)
+        )
+        val options = uploadTimeoutMillis
+            ?.let { baseOptions.copy(uploadTimeoutMillis = it) }
+            ?: baseOptions
+
         AnylineTireTread.initialize(
             context = context,
             licenseKey = licenseKey,
-            options = InitOptions(
-                customTag = customTag?.trim().takeUnless { it.isNullOrEmpty() },
-                wrapperInfo = WrapperInfo.Flutter(pluginVersion)
-            )
+            options = options
         ) { sdkResult ->
             onMain {
                 when (sdkResult) {

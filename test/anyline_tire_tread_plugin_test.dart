@@ -14,7 +14,8 @@ class MockAnylineTireTreadPluginPlatform
   Future<bool?> initialize(
       {required String licenseKey,
       required String pluginVersion,
-      String? customTag}) {
+      String? customTag,
+      int? uploadTimeoutMillis}) {
     throw UnimplementedError();
   }
 
