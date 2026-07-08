@@ -30,4 +30,5 @@ class Constants {
   static const String EXTRA_CONFIG_JSON = 'EXTRA_CONFIG_JSON';
   static const String EXTRA_SCAN_OPTIONS_JSON = 'EXTRA_SCAN_OPTIONS_JSON';
   static const String EXTRA_CUSTOM_TAG = 'EXTRA_CUSTOM_TAG';
+  static const String EXTRA_UPLOAD_TIMEOUT_MILLIS = 'EXTRA_UPLOAD_TIMEOUT_MILLIS';
 }

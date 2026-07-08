@@ -46,7 +46,8 @@ void main() {
       }
     });
 
-    test('passes licenseKey, pluginVersion and customTag to native', () async {
+    test('passes licenseKey, pluginVersion, customTag and uploadTimeoutMillis to native',
+        () async {
       Map<String, dynamic>? capturedArguments;
       setMockHandler((methodCall) async {
         if (methodCall.method == Constants.METHOD_INITIALIZE) {
@@ -58,14 +59,19 @@ void main() {
       });
 
       await platform.initialize(
-          licenseKey: 'key', pluginVersion: '4.0.0', customTag: 'garage-7');
+          licenseKey: 'key',
+          pluginVersion: '4.0.0',
+          customTag: 'garage-7',
+          uploadTimeoutMillis: 30000);
 
       expect(capturedArguments?[Constants.EXTRA_LICENSE_KEY], 'key');
       expect(capturedArguments?[Constants.EXTRA_PLUGIN_VERSION], '4.0.0');
       expect(capturedArguments?[Constants.EXTRA_CUSTOM_TAG], 'garage-7');
+      expect(capturedArguments?[Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS], 30000);
     });
 
-    test('passes null customTag when not provided', () async {
+    test('passes null customTag and uploadTimeoutMillis when not provided',
+        () async {
       Map<String, dynamic>? capturedArguments;
       setMockHandler((methodCall) async {
         if (methodCall.method == Constants.METHOD_INITIALIZE) {
@@ -80,6 +86,10 @@ void main() {
 
       expect(capturedArguments?.containsKey(Constants.EXTRA_CUSTOM_TAG), true);
       expect(capturedArguments?[Constants.EXTRA_CUSTOM_TAG], isNull);
+      expect(
+          capturedArguments?.containsKey(Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS),
+          true);
+      expect(capturedArguments?[Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS], isNull);
     });
   });
 
