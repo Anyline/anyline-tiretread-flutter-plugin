@@ -32,7 +32,7 @@ target 'Runner' do
   use_modular_headers!
 
   # Anyline Tire Tread SDK release candidate (not published to the CocoaPods trunk).
-  pod 'AnylineTireTreadSdk', :podspec => 'https://storage.googleapis.com/ttr-sdk-ios.anyline.io/release-candidates/15.3.2-rc.1/AnylineTireTreadSdk.podspec'
+  pod 'AnylineTireTreadSdk', :podspec => 'https://storage.googleapis.com/ttr-sdk-ios.anyline.io/release-candidates/15.3.2-rc.2/AnylineTireTreadSdk.podspec'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
