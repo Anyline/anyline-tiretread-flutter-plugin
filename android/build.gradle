@@ -4,7 +4,7 @@ version = "1.0-SNAPSHOT"
 buildscript {
     ext{
         kotlin_version = "2.0.21"
-        tiretread_sdk_version = '15.3.0'
+        tiretread_sdk_version = '15.3.2-rc.1'
     }
     repositories {
         google()
@@ -23,7 +23,7 @@ allprojects {
         google()
         mavenCentral()
         // Anyline Maven registry
-        maven { url "https://europe-maven.pkg.dev/anyline-ttr-sdk/maven" }
+        maven { url "https://europe-maven.pkg.dev/anyline-ttr-sdk/release-candidates" }
     }
 }
 

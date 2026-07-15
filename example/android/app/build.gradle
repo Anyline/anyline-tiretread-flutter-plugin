@@ -10,7 +10,7 @@ allprojects {
         google()
         mavenCentral()
         // Anyline Maven registry
-        maven { url "https://europe-maven.pkg.dev/anyline-ttr-sdk/maven" }
+        maven { url "https://europe-maven.pkg.dev/anyline-ttr-sdk/release-candidates" }
     }
 }
 
