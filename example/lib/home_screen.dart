@@ -54,7 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String _treadOutcome = '';
   bool _treadOutcomeIsError = false;
   TreadDepthResult? _result;
+
+  // Scan-config JSON selected in the Tire Tread card. Empty = SDK defaults.
   String selectedConfig = '';
+  List<String> _configFiles = [];
 
   // Tire width (mm) used by the tread scan. Lives in the Tire Tread card; a
   // sidewall scan auto-fills it (see [_runSidewallScan]), otherwise it stays
@@ -75,6 +78,27 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _correlationId = _uuidV4();
     _checkSidewallSupport();
+    _loadConfigFiles();
+  }
+
+  Future<void> _loadConfigFiles() async {
+    // Load asset manifest using the new AssetManifest API
+    // (AssetManifest.json was deprecated in Flutter 3.19+)
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+
+    // Only list JSON scan-config files; other bundled assets (e.g. the SVG
+    // icons under assets/icons/) are not selectable configs.
+    final files = assetManifest
+        .listAssets()
+        .where((String key) =>
+            key.startsWith('assets/') && key.endsWith('.json'))
+        .toList()
+      ..sort();
+
+    // Insert empty option at the beginning for "no config" (SDK defaults).
+    files.insert(0, '');
+
+    if (mounted) setState(() => _configFiles = files);
   }
 
   @override
@@ -440,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
           : const MutedChip('Init required'),
       children: [
         if (_includeCorrelationId) _attachedChip(context),
-        _configSummary(context),
+        _configField(context),
         _tireWidthField(context),
         DevExButton(
           label: AppStrings.btnScan,
@@ -461,33 +485,57 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _configSummary(BuildContext context) {
+  /// Scan-config picker for the tread scan. Lists the JSON configs bundled
+  /// under assets/; the empty option runs with the SDK defaults. Editable per
+  /// scan — the selection is read in [_runTreadScan].
+  Widget _configField(BuildContext context) {
     final ds = context.ds;
-    final file =
-        selectedConfig.isEmpty ? 'Default config' : selectedConfig.split('/').last;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
-      decoration: BoxDecoration(
-        color: ds.inset,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.tune, size: 16, color: ds.fg3),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(file,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: ds.fg2)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
+            style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w600, color: ds.fg2),
+            children: [
+              const TextSpan(text: 'Scan config '),
+              TextSpan(text: '(JSON)', style: TextStyle(color: ds.fg3)),
+            ],
           ),
-          Text('set on initialize',
-              style: TextStyle(fontSize: 10.5, color: ds.fg3)),
-        ],
-      ),
+        ),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          // _configFiles is filled asynchronously by _loadConfigFiles; until it
+          // is, the dropdown would assert on a value that matches no item, so
+          // fall back to null while the list is still empty.
+          value: _configFiles.contains(selectedConfig) ? selectedConfig : null,
+          isExpanded: true,
+          icon: Icon(Icons.tune, size: 16, color: ds.fg3),
+          style: TextStyle(
+              fontSize: 12.5, fontWeight: FontWeight.w600, color: ds.fg2),
+          onChanged: (v) => setState(() => selectedConfig = v ?? ''),
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: ds.inset,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 11, vertical: 11),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          items: _configFiles.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value.isEmpty ? 'Default config' : value.split('/').last,
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -856,7 +904,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => Dialog(
         child: InitializeDialog(
           onCancel: () => Navigator.pop(context),
-          onDone: (licenseKey, selectedFile) async {
+          onDone: (licenseKey) async {
             EnvInfo.runTimeLicenseKey = licenseKey;
             Navigator.of(context).pop();
             setState(() {
@@ -864,7 +912,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _uuidController.text = '';
               _result = null;
               _treadOutcome = '';
-              selectedConfig = selectedFile;
             });
             await _startInitialization();
           },
