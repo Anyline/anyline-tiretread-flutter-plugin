@@ -46,7 +46,8 @@ void main() {
       }
     });
 
-    test('passes licenseKey, pluginVersion, customTag and uploadTimeoutMillis to native',
+    test(
+        'passes licenseKey, pluginVersion, customTag and uploadTimeoutMillis to native',
         () async {
       Map<String, dynamic>? capturedArguments;
       setMockHandler((methodCall) async {
@@ -235,8 +236,7 @@ void main() {
           capturedArguments?[Constants.EXTRA_CONFIG_JSON] as String?;
       expect(configJson, isNotNull);
       final decodedConfig = jsonDecode(configJson!) as Map<String, dynamic>;
-      expect(
-          (decodedConfig['scanConfig'] as Map<String, dynamic>)['tireWidth'],
+      expect((decodedConfig['scanConfig'] as Map<String, dynamic>)['tireWidth'],
           205);
 
       final optionsJson =
@@ -261,8 +261,7 @@ void main() {
 
       await platform.scan(config: TireTreadConfig());
 
-      expect(
-          capturedArguments?[Constants.EXTRA_SCAN_OPTIONS_JSON], isNull);
+      expect(capturedArguments?[Constants.EXTRA_SCAN_OPTIONS_JSON], isNull);
     });
   });
 
@@ -329,8 +328,8 @@ void main() {
     test('returns null when native returns null', () async {
       setMockHandler((methodCall) async => null);
 
-      final info = await platform.sendTireIdFeedback(
-          measurementUUID: 'x', tireId: 'y');
+      final info =
+          await platform.sendTireIdFeedback(measurementUUID: 'x', tireId: 'y');
       expect(info, isNull);
     });
   });

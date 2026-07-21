@@ -16,7 +16,8 @@ sealed class TswScanOutcome {
     switch (kind) {
       case SidewallConstants.KIND_COMPLETED:
         return TswScanCompleted(
-          resultJson: map[SidewallConstants.OUTCOME_RESULT_JSON] as String? ?? '',
+          resultJson:
+              map[SidewallConstants.OUTCOME_RESULT_JSON] as String? ?? '',
           imageBytes: _asBytes(map[SidewallConstants.OUTCOME_IMAGE_BYTES]),
           lighting: EnvironmentLighting.fromName(
               map[SidewallConstants.OUTCOME_ENVIRONMENT_LIGHTING] as String?),

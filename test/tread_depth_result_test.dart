@@ -32,8 +32,7 @@ void main() {
       expect(region.valueMm, 3.0);
     });
 
-    test('tolerates omitted value fields (available=true, 0.0 mm reading)',
-        () {
+    test('tolerates omitted value fields (available=true, 0.0 mm reading)', () {
       // Fully worn tire: value_mm == 0.0 is omitted by the SDK serializer.
       final region = TreadResultRegion.fromJson({'available': true});
       expect(region.available, true);

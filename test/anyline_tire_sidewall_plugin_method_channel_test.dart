@@ -68,7 +68,8 @@ void main() {
     });
 
     test('returns TswScanAborted when native reports aborted', () async {
-      setMockHandler((methodCall) async => <String, dynamic>{'kind': 'aborted'});
+      setMockHandler(
+          (methodCall) async => <String, dynamic>{'kind': 'aborted'});
 
       final outcome = await platform.scan(clientId: 'client-1');
       expect(outcome, isA<TswScanAborted>());
@@ -123,7 +124,8 @@ void main() {
       expect(configJson, isNotNull);
       final decoded = jsonDecode(configJson!) as Map<String, dynamic>;
       expect(decoded['correlationId'], 'corr-1');
-      expect((decoded['texts'] as Map<String, dynamic>)['alignTire'], 'Align it');
+      expect(
+          (decoded['texts'] as Map<String, dynamic>)['alignTire'], 'Align it');
     });
 
     test('passes null config JSON when no config provided', () async {
@@ -136,7 +138,8 @@ void main() {
 
       await platform.scan(clientId: 'client-7');
 
-      expect(capturedArguments?.containsKey(SidewallConstants.EXTRA_CONFIG_JSON),
+      expect(
+          capturedArguments?.containsKey(SidewallConstants.EXTRA_CONFIG_JSON),
           true);
       expect(capturedArguments?[SidewallConstants.EXTRA_CONFIG_JSON], isNull);
     });
@@ -214,7 +217,8 @@ void main() {
   group('EnvironmentLighting.fromName', () {
     test('parses known names and null-safes unknown/absent', () {
       expect(EnvironmentLighting.fromName('Good'), EnvironmentLighting.Good);
-      expect(EnvironmentLighting.fromName('Bright'), EnvironmentLighting.Bright);
+      expect(
+          EnvironmentLighting.fromName('Bright'), EnvironmentLighting.Bright);
       expect(EnvironmentLighting.fromName(null), isNull);
       expect(EnvironmentLighting.fromName('nope'), isNull);
     });

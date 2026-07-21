@@ -64,8 +64,8 @@ class _TreadDepthResultFeedbackDialogState
                   children: [
                     TextField(
                       controller: _textController[index],
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         isDense: true,
@@ -80,8 +80,7 @@ class _TreadDepthResultFeedbackDialogState
                     ),
                     const SizedBox(height: 8),
                     Text('R$index · $unit',
-                        style: TextStyle(
-                            fontSize: 13, color: context.ds.fg2)),
+                        style: TextStyle(fontSize: 13, color: context.ds.fg2)),
                   ],
                 ),
               );

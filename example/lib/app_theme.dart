@@ -28,8 +28,7 @@ class AppTheme {
       scaffoldBackgroundColor:
           isDark ? const Color(0xFF000000) : const Color(0xFFEEF0F3),
       cardColor: scheme.surface,
-      dividerColor:
-          isDark ? const Color(0xFF38383A) : const Color(0x263C3C43),
+      dividerColor: isDark ? const Color(0xFF38383A) : const Color(0x263C3C43),
       appBarTheme: AppBarTheme(
         backgroundColor:
             isDark ? const Color(0xFF000000) : const Color(0xFFEEF0F3),
@@ -41,14 +40,13 @@ class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
             (s) => s.contains(WidgetState.selected) ? Colors.white : null),
-        trackColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? ds.brand : ds.inset),
+        trackColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? ds.brand : ds.inset),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }

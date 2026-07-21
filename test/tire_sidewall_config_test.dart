@@ -37,8 +37,8 @@ void main() {
         ..texts = (TireSidewallTexts()..holdSteady = 'Hold steady');
       final json = config.toJson();
       expect(json['correlationId'], 'corr-2');
-      expect((json['texts'] as Map<String, dynamic>)['holdSteady'],
-          'Hold steady');
+      expect(
+          (json['texts'] as Map<String, dynamic>)['holdSteady'], 'Hold steady');
     });
   });
 

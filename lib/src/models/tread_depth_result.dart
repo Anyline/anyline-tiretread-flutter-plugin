@@ -177,8 +177,8 @@ class TreadResultRegion {
     available = json['available'] as bool? ?? false;
     valueMm = (json['value_mm'] as num?)?.toDouble() ?? 0.0;
     valueInch = (json['value_inch'] as num?)?.toDouble() ?? valueMm / 25.4;
-    valueInch32nds =
-        (json['value_inch_32nds'] as num?)?.toInt() ?? (valueMm / 25.4 * 32).round();
+    valueInch32nds = (json['value_inch_32nds'] as num?)?.toInt() ??
+        (valueMm / 25.4 * 32).round();
   }
 
   /// Converts the millimeter value to 32nds of an inch.

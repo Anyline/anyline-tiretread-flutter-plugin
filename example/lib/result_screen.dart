@@ -55,8 +55,8 @@ class _ResultScreenState extends State<ResultScreen> {
                     }
                     return const Padding(
                       padding: EdgeInsets.all(24),
-                      child: CircularProgressIndicator(
-                          color: AppColors.primary),
+                      child:
+                          CircularProgressIndicator(color: AppColors.primary),
                     );
                   },
                 ),
@@ -96,8 +96,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   }
                   return const Padding(
                     padding: EdgeInsets.all(24),
-                    child:
-                        CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   );
                 },
               ),
