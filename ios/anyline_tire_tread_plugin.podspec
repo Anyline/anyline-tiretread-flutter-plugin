@@ -15,7 +15,7 @@ The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'AnylineTireTreadSdk', '15.3.2'
+  s.dependency 'AnylineTireTreadSdk', '15.3.3'
   s.platform = :ios, '13.4'
   s.ios.deployment_target = '13.4'
   s.static_framework = true
