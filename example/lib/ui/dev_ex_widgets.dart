@@ -11,7 +11,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 /// Numbered group label: `1 · SET UP`. Makes order-of-operations explicit.
 class GroupHeader extends StatelessWidget {
-  const GroupHeader(this.number, this.title, {super.key, this.hint, this.trailing});
+  const GroupHeader(this.number, this.title,
+      {super.key, this.hint, this.trailing});
 
   final int number;
   final String title;
@@ -167,7 +168,8 @@ class SectionCard extends StatelessWidget {
                   ),
                 for (final child in children)
                   Padding(
-                    padding: EdgeInsets.only(top: _hasHeader || child != children.first ? 12 : 0),
+                    padding: EdgeInsets.only(
+                        top: _hasHeader || child != children.first ? 12 : 0),
                     child: child,
                   ),
               ],
@@ -227,7 +229,9 @@ class MutedChip extends StatelessWidget {
       ),
       child: Text(text,
           style: TextStyle(
-              color: context.ds.fg3, fontSize: 10, fontWeight: FontWeight.w600)),
+              color: context.ds.fg3,
+              fontSize: 10,
+              fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -469,8 +473,8 @@ class DevExOutlineButton extends StatelessWidget {
               vertical: dense ? 10 : 12, horizontal: dense ? 16 : 12),
           side: BorderSide(
               color: enabled ? c : Theme.of(context).dividerColor, width: 1.5),
-          textStyle: TextStyle(
-              fontSize: dense ? 13 : 14, fontWeight: FontWeight.w700),
+          textStyle:
+              TextStyle(fontSize: dense ? 13 : 14, fontWeight: FontWeight.w700),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),

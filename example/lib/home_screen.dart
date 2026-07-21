@@ -90,8 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // icons under assets/icons/) are not selectable configs.
     final files = assetManifest
         .listAssets()
-        .where((String key) =>
-            key.startsWith('assets/') && key.endsWith('.json'))
+        .where(
+            (String key) => key.startsWith('assets/') && key.endsWith('.json'))
         .toList()
       ..sort();
 
@@ -237,7 +237,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? ds.success
                   : ds.fg3,
           button: _SoftButton(
-            label: status == InitializationStatus.done ? 'Re-init' : 'Initialize',
+            label:
+                status == InitializationStatus.done ? 'Re-init' : 'Initialize',
             onPressed: status == InitializationStatus.start
                 ? null
                 : () => _openInitializeDialog(context),
@@ -297,9 +298,8 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: done ? const Color(0xFF00BB8E) : context.ds.inset,
-            border: done
-                ? null
-                : Border.all(color: Theme.of(context).dividerColor),
+            border:
+                done ? null : Border.all(color: Theme.of(context).dividerColor),
           ),
           child: done
               ? const Icon(Icons.check, size: 15, color: Colors.white)
@@ -316,7 +316,9 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 2),
               Text(detail,
                   style: TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.w600, color: detailColor)),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: detailColor)),
             ],
           ),
         ),
@@ -358,8 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 tooltip: 'Regenerate',
                 icon: Icon(Icons.refresh, size: 20, color: ds.correlation),
-                onPressed: () =>
-                    setState(() => _correlationId = _uuidV4()),
+                onPressed: () => setState(() => _correlationId = _uuidV4()),
               ),
             ],
           ),
@@ -439,7 +440,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 20, fontWeight: FontWeight.w800)),
               if (_detectedTireWidth != null) ...[
                 const SizedBox(height: 7),
-                _handoffChip(context, 'Width $_detectedTireWidth mm sent to Tread'),
+                _handoffChip(
+                    context, 'Width $_detectedTireWidth mm sent to Tread'),
               ],
             ],
           ),
@@ -566,9 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Text('from sidewall',
                 style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: ds.brand)),
+                    fontSize: 9, fontWeight: FontWeight.w700, color: ds.brand)),
           ),
           const SizedBox(width: 8),
         ],
@@ -618,8 +618,8 @@ class _HomeScreenState extends State<HomeScreen> {
         TextField(
           controller: _uuidController,
           onChanged: (v) => setState(() => _uuid = v.trim()),
-          style: TextStyle(
-              fontFamily: 'monospace', fontSize: 12, color: ds.fg2),
+          style:
+              TextStyle(fontFamily: 'monospace', fontSize: 12, color: ds.fg2),
           decoration: InputDecoration(
             isDense: true,
             hintText: 'set by a scan, or paste one to fetch results',
@@ -658,7 +658,8 @@ class _HomeScreenState extends State<HomeScreen> {
             dense: true,
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute<void>(builder: (_) => ResultScreen(uuid: _uuid)),
+              MaterialPageRoute<void>(
+                  builder: (_) => ResultScreen(uuid: _uuid)),
             ),
           ),
         if (_result != null) _feedbackSection(context),
@@ -932,15 +933,16 @@ class _HomeScreenState extends State<HomeScreen> {
       TireTreadConfig config = TireTreadConfig();
       if (selectedConfig.isNotEmpty) {
         final data = await rootBundle.loadString(selectedConfig);
-        config = TireTreadConfig.fromJson(jsonDecode(data) as Map<String, dynamic>);
+        config =
+            TireTreadConfig.fromJson(jsonDecode(data) as Map<String, dynamic>);
       }
       if (tireWidth != null) {
         config.scanConfig.tireWidth = tireWidth;
       }
       if (_includeCorrelationId) {
-        config.additionalContext =
-            (config.additionalContext ?? AdditionalContext())
-              ..correlationId = _correlationId;
+        config.additionalContext = (config.additionalContext ??
+            AdditionalContext())
+          ..correlationId = _correlationId;
       }
 
       final outcome = await tireTreadPlugin.scan(config: config);
@@ -1054,7 +1056,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final result = await tireTreadPlugin.getResult(measurementUUID: _uuid);
       if (mounted) setState(() => _result = result);
     } on PlatformException catch (error) {
-      if (mounted) showSnackBar(context, error.message ?? 'Failed to get result');
+      if (mounted) {
+        showSnackBar(context, error.message ?? 'Failed to get result');
+      }
     } finally {
       if (mounted) setState(() => showLoader = false);
     }
@@ -1198,8 +1202,8 @@ class MonoBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(7),
       ),
       child: Text(value,
-          style:
-              TextStyle(fontFamily: 'monospace', fontSize: 12.5, color: ds.fg3)),
+          style: TextStyle(
+              fontFamily: 'monospace', fontSize: 12.5, color: ds.fg3)),
     );
   }
 }

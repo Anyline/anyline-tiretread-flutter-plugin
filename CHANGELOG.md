@@ -1,3 +1,18 @@
+## 15.3.3
+
+### Changed
+
+- Updated the bundled Anyline Tire Tread SDK to 15.3.3 (Android & iOS). Notable SDK changes:
+  - Tire Sidewall Scanner (iOS): more robust camera-preview orientation handling on iPad, particularly in multi-window and split-view layouts.
+
+### Fixed
+
+- Bundled SDK — iOS: Tire Sidewall Scanner could fail to open on a fresh app installation, showing a black screen until the OS terminated the app after about 10 seconds; subsequent attempts would gradually start working.
+
+### Dependencies
+
+Tire Tread SDK 15.3.3: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#15-3-3-2026-07-21).
+
 ## 15.3.2
 
 ### Changed
