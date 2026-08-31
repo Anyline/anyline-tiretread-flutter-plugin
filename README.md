@@ -83,11 +83,48 @@ repositories {
 
 > **_NOTE:_** Find more information about adding Anyline Tire Tread SDK as dependency [here](https://documentation.anyline.com/tiretreadsdk-component/latest/android/getting-started.html#add-the-anyline-tire-tread-sdk-as-dependency).
 
+On **iOS** there is nothing to add. The plugin brings the Anyline Tire Tread SDK with it, and `pod install` puts it in place.
+
+If you are curious what changed: the plugin used to resolve the iOS SDK from CocoaPods Trunk as a normal pod dependency. It now downloads a prebuilt `AnylineTireTreadSdk.xcframework` from the Anyline CDN while `pod install` runs, and checks it against a SHA-256 pinned in the plugin's podspec. Your integration steps are unchanged: install the plugin, run `pod install`. The two failure modes this introduces are described under [iOS installation troubleshooting](#ios-installation-troubleshooting).
+
 ### Install via pub.dev
 
 Install the package dependencies from the command line:  
 `bash flutter pub get `  
 Alternatively, your IDE might support `flutter pub get`. Check their documentation to learn more.
+
+### iOS installation troubleshooting
+
+Two things can go wrong specifically because the iOS SDK is downloaded during `pod install`. Neither affects Android.
+
+**The framework is missing and `pod install` will not fetch it again**
+
+If you delete `ios/AnylineTireTreadSdk.xcframework`, or a cleaning script removes it, a later `pod install` may not bring it back. The build then fails with the SDK missing even though `pod install` reported success.
+
+This happens because CocoaPods only runs the plugin's download step when it actually reinstalls the plugin. The framework sits outside `Pods/`, so CocoaPods cannot see that it has gone, and if `Pods/Manifest.lock` still matches `Podfile.lock` it treats the plugin as already installed and skips the download.
+
+The tell is in the `pod install` output: it prints `Pod installation complete!` but **no** `Installing anyline_tire_tread_plugin` line. A successful download prints nothing, so the missing install line is the signal rather than missing download output.
+
+To recover, delete the manifest so CocoaPods performs a real install:
+
+```bash
+rm -f ios/Pods/Manifest.lock
+cd ios && pod install
+```
+
+Deleting the framework on its own is not enough, and neither is `flutter clean`. A plugin version change is not affected, because that changes the podspec and forces a real install.
+
+**`pod install` fails with a checksum mismatch**
+
+The plugin verifies the downloaded archive against a SHA-256 checksum pinned in its podspec, and stops if they differ:
+
+```
+error: checksum mismatch for AnylineTireTreadSdk.xcframework <version>
+```
+
+Nothing is left half-installed when this happens. The usual cause is a corrupted or truncated download, so retrying `pod install` is worth doing first. A proxy or corporate network appliance that rewrites HTTPS responses will also trigger it.
+
+If it repeats on a clean network, please [contact Anyline support](https://anyline.com/support) and include the version and both checksums from the error. Do not work around it by editing the checksum in the podspec: the check exists to guarantee you are building against the exact binary Anyline published.
 
 ### Import Anyline into your Flutter project
 

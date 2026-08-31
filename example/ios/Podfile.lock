@@ -1,0 +1,34 @@
+PODS:
+  - anyline_tire_tread_plugin (15.5.0):
+    - Flutter
+  - device_info_plus (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - integration_test (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - anyline_tire_tread_plugin (from `.symlinks/plugins/anyline_tire_tread_plugin/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - Flutter (from `Flutter`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+
+EXTERNAL SOURCES:
+  anyline_tire_tread_plugin:
+    :path: ".symlinks/plugins/anyline_tire_tread_plugin/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
+  Flutter:
+    :path: Flutter
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+
+SPEC CHECKSUMS:
+  anyline_tire_tread_plugin: 548b03dbc443e83c56ca19acb29d31a530385e00
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+
+PODFILE CHECKSUM: f6e9bbe1c611753388eef015187d0d762163292d
+
+COCOAPODS: 1.17.0
