@@ -6,12 +6,12 @@
 # Single source of truth for the bundled AnylineTireTreadSdk. The checksum is the
 # SHA-256 of the xcframework archive, and matches the one published in the SDK's
 # Package.swift. Both lines are updated together at release time — keep adjacent.
-anyline_ttr_sdk_version  = '15.5.0'
-anyline_ttr_sdk_checksum = '16835a6b486db7bef1fc939042db072f5101b6b318eee2f67b1702068ea0ab22'
+anyline_ttr_sdk_version  = '16.0.0'
+anyline_ttr_sdk_checksum = 'a6845a1f554c46001f1ce2feb5d172c989269ed42931c55583218badc912799c'
 
 Pod::Spec.new do |s|
   s.name             = 'anyline_tire_tread_plugin'
-  s.version          = '15.5.0'
+  s.version          = '16.0.0'
   s.summary          = 'The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device.'
   s.description      = <<-DESC
 The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and wear with a mobile device.
@@ -30,8 +30,8 @@ The Anyline Tire Tread Flutter Plugin allows you to measure tire tread depth and
   s.preserve_paths = 'fetch_anyline_sdk.sh'
   s.prepare_command = "sh fetch_anyline_sdk.sh #{anyline_ttr_sdk_version} #{anyline_ttr_sdk_checksum}"
 
-  s.platform = :ios, '13.4'
-  s.ios.deployment_target = '13.4'
+  s.platform = :ios, '15.0'
+  s.ios.deployment_target = '15.0'
   s.static_framework = true
 
   # Flutter.framework does not contain a i386 slice.

@@ -36,3 +36,6 @@ Icon?
 /Flutter/Generated.xcconfig
 /Flutter/ephemeral/
 /Flutter/flutter_export_environment.sh
+
+# Anyline Tire Tread SDK xcframework, fetched at `pod install` (TREX-269)
+AnylineTireTreadSdk.xcframework/

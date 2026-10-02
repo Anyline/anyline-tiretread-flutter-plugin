@@ -36,7 +36,7 @@ Your development/application environment is required to have at least the follow
 
 ### iOS
 
-- iOS Version >= 13.4
+- iOS Version >= 15.0
 - Stable internet connection
 - 'Flash' capability
 
@@ -60,8 +60,9 @@ To be able to use the Flutter plugin you will have to get a license key by follo
 
 Add the following dependency to your `pubspec.yaml` :
 
-```yaml dependencies:
-anyline_tire_tread_plugin: ^x.y.z
+```yaml
+dependencies:
+  anyline_tire_tread_plugin: ^x.y.z
 ```
 
 ### Add the Anyline Tire Tread SDK as dependency
@@ -72,7 +73,7 @@ To integrate the Anyline Tire Tread SDK into your Android project, follow these 
 - Locate the build.gradle file of your project. This file is typically found in the root directory of your project.
 - Add the Anyline Maven registry to your repositories section. This allows your project to access the Anyline Tire Tread SDK from the specified Maven repository. Update your repositories block to include the Anyline Maven registry URL:
 
-```bash
+```groovy
 repositories {
     // ... your other repositories ...
     mavenCentral()
@@ -81,7 +82,7 @@ repositories {
 }
 ```
 
-> **_NOTE:_** Find more information about adding Anyline Tire Tread SDK as dependency [here](https://documentation.anyline.com/tiretreadsdk-component/latest/android/getting-started.html#add-the-anyline-tire-tread-sdk-as-dependency).
+> **_NOTE:_** Find more information about adding Anyline Tire Tread SDK as dependency [here](https://documentation.anyline.com/tiretreadsdk-component/latest/getting-started.html#add-the-anyline-tire-tread-sdk-as-dependency).
 
 On **iOS** there is nothing to add. The plugin brings the Anyline Tire Tread SDK with it, and `pod install` puts it in place.
 
@@ -89,8 +90,12 @@ If you are curious what changed: the plugin used to resolve the iOS SDK from Coc
 
 ### Install via pub.dev
 
-Install the package dependencies from the command line:  
-`bash flutter pub get `  
+Install the package dependencies from the command line:
+
+```bash
+flutter pub get
+```
+
 Alternatively, your IDE might support `flutter pub get`. Check their documentation to learn more.
 
 ### iOS installation troubleshooting
@@ -216,10 +221,12 @@ await tireTreadPlugin.scan(
 
 The Tire Tread Plugin can provide audio feedback to guide users through the scan process.
 
-To make use of these audio feedbacks, your application needs to provide the audio files inside the below folders.
+To make use of these audio feedbacks, your application needs to provide the audio files in its own project:
 
-1. path_to_plugin_root_folder/example/ios/Resources for iOS
-2. path_to_plugin_root_folder/example/android/app/src/main/assets for Android
+1. iOS: add the files to your Runner target's resources (e.g. `ios/Runner/Resources`) so they are copied into the app bundle.
+2. Android: place the files in `android/app/src/main/assets`.
+
+The plugin's example app ships sample files in `example/ios/Runner/Resources` and `example/android/app/src/main/assets`.
 
 The audio feedbacks (with their respective files names) on iOS/Android are played on:
 
@@ -343,7 +350,7 @@ More information about the JSON configuration can be found here: https://documen
 
 ## Handling the scan outcome
 
-> **_NOTE:_** The event stream (`onScanningEvent`) from plugin 3.x was removed in 4.0.0. The `scan` `Future` now completes directly with a `ScanOutcome` — see [Start scanning](#start-scanning).
+> **_NOTE:_** The event stream (`onScanningEvent`) from plugin 3.x was removed in 15.1.0. The `scan` `Future` now completes directly with a `ScanOutcome` — see [Start scanning](#start-scanning).
 
 A `ScanOutcome` is one of:
 
@@ -388,7 +395,7 @@ await tireTreadPlugin.sendFeedbackComment(measurementUUID: _uuid, comment: comme
 To send user corrected region values, use the `sendTreadDepthResultFeedback` function from the TireTreadPlugin. The result feedback should be provided as a list of `TreadResultRegion`, ordered from left to right.
 
 > **_IMPORTANT:_** You can only provide feedback for the regions returned by the SDK in the `TreadDepthResult` object.
-> The values of all regions need be added to the list before sending the feedback.
+> The values of all regions need to be added to the list before sending the feedback.
 
 The TreadResultRegion objects can be initialized with Millimeters or Inches, e.g.:
 
@@ -502,7 +509,7 @@ You should always enable/disable the experimental flags before using the functio
 To enable an experimental flag in your project, use the `setExperimentalFlags` function of the TireTreadPlugin.
 
 ```dart
-await tireTreadPlugin.setExperimentalFlags(experimentalFlags:[ExperimentalFlags.ExperimentalContinuousPictureFocusMode, "Another_Flag_Name"]);
+await tireTreadPlugin.setExperimentalFlags(experimentalFlags: ["Flag_Name"]);
 ```
 
 > **_NOTE:_** Trying to set a flag that does not exist will not produce any effect, and the flag will be ignored. You will not be notified.
@@ -517,6 +524,4 @@ await tireTreadPlugin.clearExperimentalFlags();
 
 ### Experimental Flags available
 
-The Tire Tread SDK currently includes the following experimental flags:
-
-- Experimental_Continuous_Picture_Focus_Mode
+There are no experimental flags currently available.
