@@ -1,3 +1,24 @@
+## 16.0.0
+
+### Breaking Changes
+
+- **Minimum iOS version raised from 13.4 to 15.0** (iOS). Xcode 27 rejects deployment targets below 15.0, so the plugin now declares 15.0.
+
+  **Migration Required**:
+  - Set your app's iOS deployment target to 15.0 or later, in the Runner target and in your `Podfile` (`platform :ios, '15.0'`).
+  - If your app must support iOS versions below 15.0, stay on 15.5.0.
+
+### Changed
+
+- Updated the bundled Anyline Tire Tread SDK to 16.0.0 (Android & iOS). Notable SDK changes:
+  - [iOS] Fixed landscape scanning in apps built with Xcode 27 and running on iOS 27.
+  - [iOS] Fixed the scan screen closing when the app lost focus before a scan had started.
+  - [iOS] Fixed the torch staying on after closing the scan screen shortly after opening it.
+
+### Dependencies
+
+Tire Tread SDK 16.0.0: [Release Notes](https://documentation.anyline.com/tiretreadsdk-component/latest/release-notes.html#16-0-0-2026-09-30).
+
 ## 15.5.0
 
 ### Changed

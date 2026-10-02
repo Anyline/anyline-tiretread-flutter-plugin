@@ -4,7 +4,7 @@ version = "1.0-SNAPSHOT"
 buildscript {
     ext{
         kotlin_version = "2.0.21"
-        tiretread_sdk_version = '15.5.0'
+        tiretread_sdk_version = '16.0.0'
     }
     repositories {
         google()
