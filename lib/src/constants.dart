@@ -32,4 +32,6 @@ class Constants {
   static const String EXTRA_CUSTOM_TAG = 'EXTRA_CUSTOM_TAG';
   static const String EXTRA_UPLOAD_TIMEOUT_MILLIS =
       'EXTRA_UPLOAD_TIMEOUT_MILLIS';
+  static const String EXTRA_SHOULDER_WEAR_ENABLED =
+      'EXTRA_SHOULDER_WEAR_ENABLED';
 }

@@ -29,7 +29,8 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
       {required String licenseKey,
       required String pluginVersion,
       String? customTag,
-      int? uploadTimeoutMillis}) {
+      int? uploadTimeoutMillis,
+      bool? shoulderWearEnabled}) {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 

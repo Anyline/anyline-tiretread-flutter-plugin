@@ -14,7 +14,12 @@
     "distanceIndicatorConfig": {
       "textOk": "Distance OK",
       "textMoveCloser": "Move closer",
-      "textMoveAway": "Move away"
+      "textMoveAway": "Move away",
+      "textKeepDistanceMetric": "Keep distance at 20 cm",
+      "textKeepDistanceImperial": "Keep distance at 8 in",
+      "textKeepDistanceSuffixMetric": "keep distance at 20 cm",
+      "textKeepDistanceSuffixImperial": "keep distance at 8 in",
+      "textIncorrectDistance": "Incorrect distance"
     },
     "focusPointTooltipConfig": {
       "smallText": "Initializing tire detection...",

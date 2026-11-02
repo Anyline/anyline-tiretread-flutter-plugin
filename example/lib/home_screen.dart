@@ -44,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // field of the initialize dialog and the tread scan config.
   int? _detectedTireWidth;
 
+  // ── Shoulder wear (BETA), read by the SDK on initialize ─────────────────
+  bool _shoulderWearEnabled = false;
+
   // ── Correlation ID (optional, shared by both scanners) ──────────────────
   bool _includeCorrelationId = true;
   String _correlationId = '';
@@ -224,6 +227,18 @@ class _HomeScreenState extends State<HomeScreen> {
             busy: _checkingSupport,
             onPressed: _checkingSupport ? null : _checkDeviceSupport,
           ),
+        ),
+        _hairline(context),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Shoulder wear (BETA)',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          subtitle: Text('shoulderWearEnabled, applied on Initialize',
+              style: TextStyle(fontSize: 12, color: ds.fg3)),
+          value: _shoulderWearEnabled,
+          onChanged: status == InitializationStatus.start
+              ? null
+              : (v) => setState(() => _shoulderWearEnabled = v),
         ),
         _hairline(context),
         _setupRow(
@@ -702,14 +717,39 @@ class _HomeScreenState extends State<HomeScreen> {
               _regionTile(context, 'R$i', mm(regions[i])),
           ],
         ),
+        Text('SHOULDER WEAR (BETA)',
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: ds.fg3)),
+        Row(
+          children: [
+            Expanded(
+                child: _regionTile(context, 'Left',
+                    _shoulderWearText(regions.first.shoulderWear),
+                    width: null)),
+            const SizedBox(width: 8),
+            Expanded(
+                child: _regionTile(context, 'Right',
+                    _shoulderWearText(regions.last.shoulderWear),
+                    width: null)),
+          ],
+        ),
       ],
     ];
   }
 
-  Widget _regionTile(BuildContext context, String label, String value) {
+  String _shoulderWearText(ShoulderWear? shoulderWear) {
+    if (shoulderWear == null) return 'No estimate';
+    return shoulderWear.isWorn ? 'Worn' : 'Not worn';
+  }
+
+  Widget _regionTile(BuildContext context, String label, String value,
+      {double? width = 76}) {
     final ds = context.ds;
     return Container(
-      width: 76,
+      width: width,
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: ds.inset,
@@ -1119,7 +1159,8 @@ class _HomeScreenState extends State<HomeScreen> {
         showLoader = true;
       });
       initializationStatus.value = InitializationStatus.start;
-      await tireTreadPlugin.initialize(EnvInfo.licenseKey ?? '');
+      await tireTreadPlugin.initialize(EnvInfo.licenseKey ?? '',
+          shoulderWearEnabled: _shoulderWearEnabled);
       initializationStatus.value = InitializationStatus.done;
     } on PlatformException catch (error) {
       initializationStatus.value = InitializationStatus.fail;

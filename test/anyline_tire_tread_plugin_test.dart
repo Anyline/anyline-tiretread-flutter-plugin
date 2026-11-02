@@ -15,7 +15,8 @@ class MockAnylineTireTreadPluginPlatform
       {required String licenseKey,
       required String pluginVersion,
       String? customTag,
-      int? uploadTimeoutMillis}) {
+      int? uploadTimeoutMillis,
+      bool? shoulderWearEnabled}) {
     throw UnimplementedError();
   }
 

@@ -16,11 +16,24 @@ class DistanceIndicatorConfig {
   /// - `textOk`: Text shown when distance is correct
   /// - `textMoveCloser`: Text shown when user should move closer
   /// - `textMoveAway`: Text shown when user should move away
+  /// - `textKeepDistanceMetric`, `textKeepDistanceImperial`: Neon UI text
+  ///   shown before the scan when the distance is not right
+  /// - `textKeepDistanceSuffixMetric`, `textKeepDistanceSuffixImperial`: Neon
+  ///   UI text added after the move text during the scan
+  /// - `textIncorrectDistance`: Neon UI text shown when the distance is unknown
   factory DistanceIndicatorConfig.fromJson(Map<String, dynamic> json) {
     final config = DistanceIndicatorConfig();
     config.textOk = json['textOk'] as String?;
     config.textMoveCloser = json['textMoveCloser'] as String?;
     config.textMoveAway = json['textMoveAway'] as String?;
+    config.textKeepDistanceMetric = json['textKeepDistanceMetric'] as String?;
+    config.textKeepDistanceImperial =
+        json['textKeepDistanceImperial'] as String?;
+    config.textKeepDistanceSuffixMetric =
+        json['textKeepDistanceSuffixMetric'] as String?;
+    config.textKeepDistanceSuffixImperial =
+        json['textKeepDistanceSuffixImperial'] as String?;
+    config.textIncorrectDistance = json['textIncorrectDistance'] as String?;
     return config;
   }
 
@@ -33,6 +46,30 @@ class DistanceIndicatorConfig {
   /// Text displayed when the user needs to move away from the tire.
   String? textMoveAway;
 
+  /// Neon UI only. Text displayed before the scan when the distance is not
+  /// right, in metric units. Defaults to "Keep distance at 20 cm".
+  String? textKeepDistanceMetric;
+
+  /// Neon UI only. Text displayed before the scan when the distance is not
+  /// right, in imperial units. Defaults to "Keep distance at 8 in".
+  String? textKeepDistanceImperial;
+
+  /// Neon UI only. Text added after [textMoveAway] or [textMoveCloser],
+  /// separated by " - ", when the user is much too close or too far during the
+  /// scan, in metric units. An empty text shows only the move text.
+  /// Defaults to "keep distance at 20 cm".
+  String? textKeepDistanceSuffixMetric;
+
+  /// Neon UI only. Text added after [textMoveAway] or [textMoveCloser],
+  /// separated by " - ", when the user is much too close or too far during the
+  /// scan, in imperial units. An empty text shows only the move text.
+  /// Defaults to "keep distance at 8 in".
+  String? textKeepDistanceSuffixImperial;
+
+  /// Neon UI only. Text displayed during the scan when the distance cannot be
+  /// determined. Defaults to "Incorrect distance".
+  String? textIncorrectDistance;
+
   /// Converts this configuration to a JSON map.
   ///
   /// Only includes non-null values in the output.
@@ -41,6 +78,21 @@ class DistanceIndicatorConfig {
     if (textOk != null) map['textOk'] = textOk;
     if (textMoveCloser != null) map['textMoveCloser'] = textMoveCloser;
     if (textMoveAway != null) map['textMoveAway'] = textMoveAway;
+    if (textKeepDistanceMetric != null) {
+      map['textKeepDistanceMetric'] = textKeepDistanceMetric;
+    }
+    if (textKeepDistanceImperial != null) {
+      map['textKeepDistanceImperial'] = textKeepDistanceImperial;
+    }
+    if (textKeepDistanceSuffixMetric != null) {
+      map['textKeepDistanceSuffixMetric'] = textKeepDistanceSuffixMetric;
+    }
+    if (textKeepDistanceSuffixImperial != null) {
+      map['textKeepDistanceSuffixImperial'] = textKeepDistanceSuffixImperial;
+    }
+    if (textIncorrectDistance != null) {
+      map['textIncorrectDistance'] = textIncorrectDistance;
+    }
     return map;
   }
 }

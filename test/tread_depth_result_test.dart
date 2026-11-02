@@ -117,6 +117,63 @@ void main() {
     });
   });
 
+  group('ShoulderWear (BETA)', () {
+    test('parses shoulder_wear on a region', () {
+      final region = TreadResultRegion.fromJson({
+        'available': true,
+        'value_mm': 4.0,
+        'shoulder_wear': {'worn': true},
+      });
+      expect(region.shoulderWear?.isWorn, true);
+    });
+
+    test('absent or null shoulder_wear -> null', () {
+      expect(
+          TreadResultRegion.fromJson({'value_mm': 4.0}).shoulderWear, isNull);
+      expect(
+          TreadResultRegion.fromJson({'value_mm': 4.0, 'shoulder_wear': null})
+              .shoulderWear,
+          isNull);
+    });
+
+    test('toJson writes shoulder_wear only when set', () {
+      final withEstimate = TreadResultRegion.fromJson({
+        'shoulder_wear': {'worn': false}
+      });
+      expect(withEstimate.toJson()['shoulder_wear'], {'worn': false});
+      expect(
+          TreadResultRegion.fromJson(withEstimate.toJson())
+              .shoulderWear
+              ?.isWorn,
+          false);
+      expect(TreadResultRegion.initGlobalMm(4.2).toJson(),
+          isNot(contains('shoulder_wear')));
+    });
+
+    test('result carries shoulder wear on the outer regions only', () {
+      final result = TreadDepthResult.fromJson({
+        'global': {'available': true, 'value_mm': 4.5},
+        'regions': [
+          {
+            'available': true,
+            'value_mm': 4.0,
+            'shoulder_wear': {'worn': true}
+          },
+          {'available': true, 'value_mm': 5.0},
+          {
+            'available': true,
+            'value_mm': 4.5,
+            'shoulder_wear': {'worn': false}
+          },
+        ],
+      });
+      expect(result.regions!.first.shoulderWear?.isWorn, true);
+      expect(result.regions![1].shoulderWear, isNull);
+      expect(result.regions!.last.shoulderWear?.isWorn, false);
+      expect(result.global?.shoulderWear, isNull);
+    });
+  });
+
   group('TreadDepthResult.fromJson (v15 payload)', () {
     test('parses result with empty (all-defaults) regions filtered out', () {
       final result = TreadDepthResult.fromJson({

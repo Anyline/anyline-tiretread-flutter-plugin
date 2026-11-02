@@ -7,6 +7,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 
@@ -71,5 +73,30 @@ internal class AnylineTireTreadPluginTest {
     @Suppress("UNCHECKED_CAST")
     val error = outcome["error"] as Map<String, Any?>
     assertEquals(ErrorCode.INVALID_ARGUMENT.name, error["code"])
+  }
+
+  @Test
+  fun initOptions_withShoulderWearEnabled_setsItOnInitOptions() {
+    val options = AnylineTireTreadPlugin.initOptions(
+      customTag = null,
+      pluginVersion = "16.0.0",
+      uploadTimeoutMillis = 30_000L,
+      shoulderWearEnabled = true,
+    )
+
+    assertTrue(options.shoulderWearEnabled)
+    assertEquals(30_000L, options.uploadTimeoutMillis)
+  }
+
+  @Test
+  fun initOptions_withShoulderWearDisabled_keepsItOff() {
+    val options = AnylineTireTreadPlugin.initOptions(
+      customTag = null,
+      pluginVersion = "16.0.0",
+      uploadTimeoutMillis = null,
+      shoulderWearEnabled = false,
+    )
+
+    assertFalse(options.shoulderWearEnabled)
   }
 }

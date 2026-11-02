@@ -26,13 +26,15 @@ class MethodChannelAnylineTireTreadPlugin
       {required String licenseKey,
       required String pluginVersion,
       String? customTag,
-      int? uploadTimeoutMillis}) async {
+      int? uploadTimeoutMillis,
+      bool? shoulderWearEnabled}) async {
     final result =
         await methodChannel.invokeMethod<bool>(Constants.METHOD_INITIALIZE, {
       Constants.EXTRA_LICENSE_KEY: licenseKey,
       Constants.EXTRA_PLUGIN_VERSION: pluginVersion,
       Constants.EXTRA_CUSTOM_TAG: customTag,
       Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS: uploadTimeoutMillis,
+      Constants.EXTRA_SHOULDER_WEAR_ENABLED: shoulderWearEnabled,
     });
     return result;
   }
