@@ -59,18 +59,20 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
         let rawCustomTag = (arguments?[Constants.EXTRA_CUSTOM_TAG] as? String)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
         let customTag = (rawCustomTag?.isEmpty ?? true) ? nil : rawCustomTag
-        // Kotlin/Native only exposes the 3-param InitOptions init to Swift, so we
-        // must pass a value even when the caller omits one. The SDK exposes its
+        // Kotlin/Native exposes no default arguments to Swift, so we must pass a
+        // value even when the caller omits one. The SDK exposes its
         // own default via the InitOptions companion; use that instead of a literal.
         let uploadTimeoutMillis = (arguments?[Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS] as? NSNumber)?.int64Value
             ?? InitOptions.companion.DEFAULT_UPLOAD_TIMEOUT_MILLIS
+        let shoulderWearEnabled = (arguments?[Constants.EXTRA_SHOULDER_WEAR_ENABLED] as? Bool) ?? false
 
         AnylineTireTread.shared.initialize(
             licenseKey: licenseKey,
             options: InitOptions(
                 customTag: customTag,
                 wrapperInfo: WrapperInfo.Flutter(version: pluginVersion),
-                uploadTimeoutMillis: uploadTimeoutMillis
+                uploadTimeoutMillis: uploadTimeoutMillis,
+                shoulderWearEnabled: shoulderWearEnabled
             )
         ) { sdkResult in
             DispatchQueue.main.async {

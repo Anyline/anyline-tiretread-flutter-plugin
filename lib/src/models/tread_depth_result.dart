@@ -179,6 +179,9 @@ class TreadResultRegion {
     valueInch = (json['value_inch'] as num?)?.toDouble() ?? valueMm / 25.4;
     valueInch32nds = (json['value_inch_32nds'] as num?)?.toInt() ??
         (valueMm / 25.4 * 32).round();
+    shoulderWear = json['shoulder_wear'] != null
+        ? ShoulderWear.fromJson(json['shoulder_wear'] as Map<String, dynamic>)
+        : null;
   }
 
   /// Converts the millimeter value to 32nds of an inch.
@@ -202,6 +205,13 @@ class TreadResultRegion {
   /// Tread depth value in 32nds of an inch (common US tire measurement).
   int valueInch32nds = 0;
 
+  /// BETA: Shoulder wear estimate, set only on the first and the last region.
+  ///
+  /// Null on the middle regions, on the global result, when
+  /// `shoulderWearEnabled` was not set on `TireTreadPlugin.initialize`, and
+  /// whenever there is no estimate.
+  ShoulderWear? shoulderWear;
+
   /// Converts this region to a JSON map.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -209,6 +219,28 @@ class TreadResultRegion {
     data['value_mm'] = valueMm;
     data['value_inch'] = valueInch;
     data['value_inch_32nds'] = valueInch32nds;
+    if (shoulderWear != null) {
+      data['shoulder_wear'] = shoulderWear!.toJson();
+    }
     return data;
   }
+}
+
+/// BETA: Shoulder wear estimate for the tire shoulder next to an outer region.
+///
+/// It is an automated estimate from the scan images, not a guaranteed
+/// assessment of the tire's condition.
+class ShoulderWear {
+  /// Creates a new instance of [ShoulderWear].
+  ShoulderWear({required this.isWorn});
+
+  /// Creates a [ShoulderWear] from a JSON map.
+  ShoulderWear.fromJson(Map<String, dynamic> json)
+      : isWorn = json['worn'] as bool;
+
+  /// Whether the tire shoulder is probably worn.
+  final bool isWorn;
+
+  /// Converts this estimate to a JSON map.
+  Map<String, dynamic> toJson() => <String, dynamic>{'worn': isWorn};
 }

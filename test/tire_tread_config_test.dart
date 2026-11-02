@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:anyline_tire_tread_plugin/src/models/tire_tread_config.dart';
+import 'package:anyline_tire_tread_plugin/src/models/ui_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:json_schema/json_schema.dart';
 
@@ -111,6 +112,32 @@ void main() {
         // are represented in the generated JSON (allowing for null exclusion)
         validateNoDataLoss(originalJson, generatedJson, file.path);
       }
+    });
+  });
+
+  group('DistanceIndicatorConfig', () {
+    test('serializes the Neon distance texts', () {
+      final config = DistanceIndicatorConfig()
+        ..textKeepDistanceMetric = 'a'
+        ..textKeepDistanceImperial = 'b'
+        ..textKeepDistanceSuffixMetric = 'c'
+        ..textKeepDistanceSuffixImperial = ''
+        ..textIncorrectDistance = 'e';
+
+      final json = config.toJson();
+
+      expect(json, {
+        'textKeepDistanceMetric': 'a',
+        'textKeepDistanceImperial': 'b',
+        'textKeepDistanceSuffixMetric': 'c',
+        'textKeepDistanceSuffixImperial': '',
+        'textIncorrectDistance': 'e',
+      });
+      expect(DistanceIndicatorConfig.fromJson(json).toJson(), json);
+    });
+
+    test('leaves out unset texts so the SDK defaults apply', () {
+      expect(DistanceIndicatorConfig().toJson(), isEmpty);
     });
   });
 }

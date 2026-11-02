@@ -75,7 +75,13 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val customTag = call.argument<String>(Constants.EXTRA_CUSTOM_TAG)
                 val uploadTimeoutMillis =
                     (call.argument<Number>(Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS))?.toLong()
-                initializeSdk(licenseKey, pluginVersion, customTag, uploadTimeoutMillis, result)
+                val shoulderWearEnabled =
+                    call.argument<Boolean>(Constants.EXTRA_SHOULDER_WEAR_ENABLED) ?: false
+                initializeSdk(
+                    licenseKey,
+                    initOptions(customTag, pluginVersion, uploadTimeoutMillis, shoulderWearEnabled),
+                    result
+                )
             }
             Constants.METHOD_GET_SDK_VERSION -> {
                 result.success(AnylineTireTread.sdkVersion)
@@ -160,9 +166,7 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun initializeSdk(
         licenseKey: String,
-        pluginVersion: String,
-        customTag: String?,
-        uploadTimeoutMillis: Long?,
+        options: InitOptions,
         result: Result
     ) {
         val context = hostContext()
@@ -170,14 +174,6 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error(ErrorCode.INVALID_ARGUMENT.name, "Plugin is not attached to a context", null)
             return
         }
-
-        val baseOptions = InitOptions(
-            customTag = customTag?.trim().takeUnless { it.isNullOrEmpty() },
-            wrapperInfo = WrapperInfo.Flutter(pluginVersion)
-        )
-        val options = uploadTimeoutMillis
-            ?.let { baseOptions.copy(uploadTimeoutMillis = it) }
-            ?: baseOptions
 
         AnylineTireTread.initialize(
             context = context,
@@ -416,5 +412,21 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     companion object {
         private val OUTCOME_KEYS = setOf("kind", "measurementUUID", "error")
+
+        internal fun initOptions(
+            customTag: String?,
+            pluginVersion: String,
+            uploadTimeoutMillis: Long?,
+            shoulderWearEnabled: Boolean
+        ): InitOptions {
+            val baseOptions = InitOptions(
+                customTag = customTag?.trim().takeUnless { it.isNullOrEmpty() },
+                wrapperInfo = WrapperInfo.Flutter(pluginVersion),
+                shoulderWearEnabled = shoulderWearEnabled
+            )
+            return uploadTimeoutMillis
+                ?.let { baseOptions.copy(uploadTimeoutMillis = it) }
+                ?: baseOptions
+        }
     }
 }

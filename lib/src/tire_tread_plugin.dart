@@ -28,14 +28,22 @@ class TireTreadPlugin {
   /// per attempt when uploading a single captured image. Each image is tried up
   /// to 2 times (1 retry) internally. Raise for poor-connectivity fleets, lower
   /// to fail fast. Defaults to `20000` when `null` is passed.
+  ///
+  /// [shoulderWearEnabled] (BETA) makes results carry the shoulder wear
+  /// estimate (`TreadResultRegion.shoulderWear`). When `false`, it is always
+  /// `null`. Defaults to `false` when `null` is passed. It is read once here;
+  /// changing it requires calling [initialize] again.
   Future<bool?> initialize(String licenseKey,
-      {String? customTag, int? uploadTimeoutMillis}) async {
+      {String? customTag,
+      int? uploadTimeoutMillis,
+      bool? shoulderWearEnabled}) async {
     final version = await pluginVersion;
     return AnylineTireTreadPluginPlatform.instance.initialize(
         licenseKey: licenseKey,
         pluginVersion: version,
         customTag: customTag,
-        uploadTimeoutMillis: uploadTimeoutMillis);
+        uploadTimeoutMillis: uploadTimeoutMillis,
+        shoulderWearEnabled: shoulderWearEnabled);
   }
 
   /// Starts a scan and completes with its [ScanOutcome]

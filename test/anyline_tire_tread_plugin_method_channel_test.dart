@@ -47,7 +47,7 @@ void main() {
     });
 
     test(
-        'passes licenseKey, pluginVersion, customTag and uploadTimeoutMillis to native',
+        'passes licenseKey, pluginVersion, customTag, uploadTimeoutMillis and shoulderWearEnabled to native',
         () async {
       Map<String, dynamic>? capturedArguments;
       setMockHandler((methodCall) async {
@@ -63,15 +63,18 @@ void main() {
           licenseKey: 'key',
           pluginVersion: '4.0.0',
           customTag: 'garage-7',
-          uploadTimeoutMillis: 30000);
+          uploadTimeoutMillis: 30000,
+          shoulderWearEnabled: true);
 
       expect(capturedArguments?[Constants.EXTRA_LICENSE_KEY], 'key');
       expect(capturedArguments?[Constants.EXTRA_PLUGIN_VERSION], '4.0.0');
       expect(capturedArguments?[Constants.EXTRA_CUSTOM_TAG], 'garage-7');
       expect(capturedArguments?[Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS], 30000);
+      expect(capturedArguments?[Constants.EXTRA_SHOULDER_WEAR_ENABLED], true);
     });
 
-    test('passes null customTag and uploadTimeoutMillis when not provided',
+    test(
+        'passes null customTag, uploadTimeoutMillis and shoulderWearEnabled when not provided',
         () async {
       Map<String, dynamic>? capturedArguments;
       setMockHandler((methodCall) async {
@@ -91,6 +94,10 @@ void main() {
           capturedArguments?.containsKey(Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS),
           true);
       expect(capturedArguments?[Constants.EXTRA_UPLOAD_TIMEOUT_MILLIS], isNull);
+      expect(
+          capturedArguments?.containsKey(Constants.EXTRA_SHOULDER_WEAR_ENABLED),
+          true);
+      expect(capturedArguments?[Constants.EXTRA_SHOULDER_WEAR_ENABLED], isNull);
     });
   });
 

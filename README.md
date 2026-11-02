@@ -189,6 +189,12 @@ Optionally, you can provide a custom tag that will be attached to all measuremen
 await tireTreadPlugin.initialize(licenseKey, customTag: 'my-custom-tag');
 ```
 
+To receive the shoulder wear estimate (BETA) in your results, set `shoulderWearEnabled` (see [Shoulder wear (BETA)](#shoulder-wear-beta)):
+
+```dart
+await tireTreadPlugin.initialize(licenseKey, shoulderWearEnabled: true);
+```
+
 ### Start scanning
 
 With an instance of `TireTreadPlugin`, call `scan` on it with the config options. The returned `Future` completes with a `ScanOutcome` once the scan finishes, is aborted, or fails:
@@ -296,7 +302,12 @@ var config = TireTreadConfig()
     ..distanceIndicatorConfig = (DistanceIndicatorConfig()
       ..textMoveAway = 'Move device away'
       ..textMoveCloser = 'Move device closer'
-      ..textOk = 'Hold distance')
+      ..textOk = 'Hold distance'
+      ..textKeepDistanceMetric = 'Hold device 20cm from tire'
+      ..textKeepDistanceImperial = 'Hold device 8in from tire'
+      ..textKeepDistanceSuffixMetric = 'hold device 20cm from tire'
+      ..textKeepDistanceSuffixImperial = 'hold device 8in from tire'
+      ..textIncorrectDistance = 'Distance unknown')
     ..focusPointTooltipConfig = (FocusPointTooltipConfig()
       ..text = 'Locating tire...'
       ..smallText = 'Move device closer')
@@ -379,6 +390,23 @@ TreadDepthResult? result = await tireTreadPlugin.getResult(measurementUUID: meas
 ```
 
 `getResult` polls until the result is available; you can optionally adjust the polling timeout (default: 60 seconds) with `timeoutSeconds`.
+
+### Shoulder wear (BETA)
+
+> Shoulder wear is a BETA feature. Its shape may change in a future release. The value is an automated estimate from the scan images, not a guaranteed assessment of the tire's condition.
+
+To receive it, pass `shoulderWearEnabled: true` to `initialize`. It is off by default and applies to every result fetched after that initialization; to change it, call `initialize` again.
+
+The first and the last `TreadResultRegion` in `result.regions` then carry a `shoulderWear`, an estimate of whether the tire shoulder next to that region is worn:
+
+- `shoulderWear.isWorn`: `true` if the shoulder is probably worn, `false` if it is probably not.
+- `shoulderWear` is `null` on the middle regions and on `global`.
+- `shoulderWear` is also `null` when `shoulderWearEnabled` is not set, or when there is no estimate for the measurement.
+
+```dart
+final leftShoulderWorn = result?.regions?.firstOrNull?.shoulderWear?.isWorn;
+final rightShoulderWorn = result?.regions?.lastOrNull?.shoulderWear?.isWorn;
+```
 
 ## User Corrected Values and Comments
 
