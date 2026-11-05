@@ -125,6 +125,20 @@ class MethodChannelAnylineTireTreadPlugin
   }
 
   @override
+  Future<MeasurementInfo?> sendShoulderWearFeedback(
+      {required String measurementUUID,
+      ShoulderWear? left,
+      ShoulderWear? right}) async {
+    final result = await methodChannel.invokeMethod<String>(
+        Constants.METHOD_SEND_SHOULDER_WEAR_FEEDBACK, {
+      Constants.EXTRA_MEASUREMENT_UUID: measurementUUID,
+      Constants.EXTRA_SHOULDER_WEAR_LEFT_WORN: left?.isWorn,
+      Constants.EXTRA_SHOULDER_WEAR_RIGHT_WORN: right?.isWorn,
+    });
+    return _parseMeasurementInfo(result);
+  }
+
+  @override
   Future<MeasurementInfo?> sendTireIdFeedback(
       {required String measurementUUID, required String tireId}) async {
     final result = await methodChannel

@@ -15,6 +15,7 @@ import io.anyline.tiretread.sdk.api.ScanOutcome
 import io.anyline.tiretread.sdk.api.SdkError
 import io.anyline.tiretread.sdk.api.SdkResult
 import io.anyline.tiretread.sdk.types.MeasurementInfo
+import io.anyline.tiretread.sdk.types.ShoulderWear
 import io.anyline.tiretread.sdk.types.TreadResultRegion
 import io.anyline.tiretread.sdk.types.WrapperInfo
 import org.json.JSONObject
@@ -113,6 +114,12 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
                 val regionsJson = call.argument<String>(Constants.EXTRA_TREAD_DEPTH_RESULT_FEEDBACK) ?: "[]"
                 sendTreadDepthResultFeedback(uuid, parseFeedbackRegions(regionsJson), result)
+            }
+            Constants.METHOD_SEND_SHOULDER_WEAR_FEEDBACK -> {
+                val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
+                val left = call.argument<Boolean>(Constants.EXTRA_SHOULDER_WEAR_LEFT_WORN)?.let { ShoulderWear(isWorn = it) }
+                val right = call.argument<Boolean>(Constants.EXTRA_SHOULDER_WEAR_RIGHT_WORN)?.let { ShoulderWear(isWorn = it) }
+                sendShoulderWearFeedback(uuid, left, right, result)
             }
             Constants.METHOD_SEND_TIRE_ID_FEEDBACK -> {
                 val uuid = call.argument<String>(Constants.EXTRA_MEASUREMENT_UUID) ?: ""
@@ -318,6 +325,27 @@ class AnylineTireTreadPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         AnylineTireTread.sendTreadDepthResultFeedback(
             measurementUUID = uuid,
             treadResultRegions = regions
+        ) { sdkResult ->
+            onMain {
+                when (sdkResult) {
+                    is SdkResult.Ok -> result.success(measurementInfoJson(sdkResult.result))
+                    is SdkResult.Err -> result.error(
+                        sdkResult.error.code.name,
+                        sdkResult.error.message,
+                        null
+                    )
+                }
+            }
+        }
+    }
+
+    private fun sendShoulderWearFeedback(
+        uuid: String, left: ShoulderWear?, right: ShoulderWear?, result: Result
+    ) {
+        AnylineTireTread.sendShoulderWearFeedback(
+            measurementUUID = uuid,
+            left = left,
+            right = right
         ) { sdkResult ->
             onMain {
                 when (sdkResult) {

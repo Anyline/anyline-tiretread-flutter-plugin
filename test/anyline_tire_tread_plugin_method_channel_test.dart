@@ -340,4 +340,55 @@ void main() {
       expect(info, isNull);
     });
   });
+
+  group('sendShoulderWearFeedback', () {
+    Map<Object?, Object?>? sentArguments;
+
+    setUp(() {
+      sentArguments = null;
+      setMockHandler((methodCall) async {
+        if (methodCall.method == Constants.METHOD_SEND_SHOULDER_WEAR_FEEDBACK) {
+          sentArguments = methodCall.arguments as Map<Object?, Object?>;
+          return jsonEncode({'measurementUUID': 'uuid-1', 'status': 'Completed'});
+        }
+        return null;
+      });
+    });
+
+    test('sends both sides', () async {
+      final info = await platform.sendShoulderWearFeedback(
+          measurementUUID: 'uuid-1',
+          left: ShoulderWear(isWorn: true),
+          right: ShoulderWear(isWorn: false));
+
+      expect(sentArguments?[Constants.EXTRA_MEASUREMENT_UUID], 'uuid-1');
+      expect(sentArguments?[Constants.EXTRA_SHOULDER_WEAR_LEFT_WORN], true);
+      expect(sentArguments?[Constants.EXTRA_SHOULDER_WEAR_RIGHT_WORN], false);
+      expect(info?.measurementUUID, 'uuid-1');
+    });
+
+    test('sends null for a side that is left out', () async {
+      await platform.sendShoulderWearFeedback(
+          measurementUUID: 'uuid-1', left: ShoulderWear(isWorn: true));
+
+      expect(sentArguments?[Constants.EXTRA_SHOULDER_WEAR_LEFT_WORN], true);
+      expect(sentArguments?.containsKey(Constants.EXTRA_SHOULDER_WEAR_RIGHT_WORN),
+          true);
+      expect(sentArguments?[Constants.EXTRA_SHOULDER_WEAR_RIGHT_WORN], isNull);
+    });
+
+    test('passes the SDK error on as PlatformException', () async {
+      setMockHandler((methodCall) async {
+        throw PlatformException(
+            code: 'INVALID_ARGUMENT',
+            message: 'Shoulder wear feedback needs at least one side.');
+      });
+
+      await expectLater(
+        platform.sendShoulderWearFeedback(measurementUUID: 'uuid-1'),
+        throwsA(isA<PlatformException>()
+            .having((e) => e.code, 'code', 'INVALID_ARGUMENT')),
+      );
+    });
+  });
 }

@@ -36,6 +36,8 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
             sendCommentFeedback(result: result, call: call)
         case Constants.METHOD_SEND_TREAD_DEPTH_RESULT_FEEDBACK:
             sendTreadDepthResultFeedback(result: result, call: call)
+        case Constants.METHOD_SEND_SHOULDER_WEAR_FEEDBACK:
+            sendShoulderWearFeedback(result: result, call: call)
         case Constants.METHOD_SEND_TIRE_ID_FEEDBACK:
             sendTireIdFeedback(result: result, call: call)
         case Constants.METHOD_SET_EXPERIMENTAL_FLAGS:
@@ -266,6 +268,35 @@ public class AnylineTireTreadPlugin: NSObject, FlutterPlugin {
         AnylineTireTread.shared.sendTreadDepthResultFeedback(
             measurementUUID: uuid,
             treadResultRegions: regions
+        ) { sdkResult in
+            DispatchQueue.main.async {
+                if let info = sdkResult.result {
+                    result(self.measurementInfoJson(info))
+                } else if let error = sdkResult.error {
+                    result(FlutterError(
+                        code: error.code.name,
+                        message: error.message,
+                        details: nil
+                    ))
+                }
+            }
+        }
+    }
+
+    private func sendShoulderWearFeedback(result: @escaping FlutterResult, call: FlutterMethodCall) {
+        let arguments = call.arguments as? [String: Any]
+        guard let uuid = arguments?[Constants.EXTRA_MEASUREMENT_UUID] as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "uuid parameter not found", details: nil))
+            return
+        }
+        // A side the caller left out arrives as NSNull, which `as? Bool` maps to nil.
+        let left = (arguments?[Constants.EXTRA_SHOULDER_WEAR_LEFT_WORN] as? Bool).map { ShoulderWear(isWorn: $0) }
+        let right = (arguments?[Constants.EXTRA_SHOULDER_WEAR_RIGHT_WORN] as? Bool).map { ShoulderWear(isWorn: $0) }
+
+        AnylineTireTread.shared.sendShoulderWearFeedback(
+            measurementUUID: uuid,
+            left: left,
+            right: right
         ) { sdkResult in
             DispatchQueue.main.async {
                 if let info = sdkResult.result {
