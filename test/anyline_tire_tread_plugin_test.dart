@@ -62,6 +62,14 @@ class MockAnylineTireTreadPluginPlatform
   }
 
   @override
+  Future<MeasurementInfo?> sendShoulderWearFeedback(
+      {required String measurementUUID,
+      ShoulderWear? left,
+      ShoulderWear? right}) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<MeasurementInfo?> sendTireIdFeedback(
       {required String measurementUUID, required String tireId}) {
     throw UnimplementedError();

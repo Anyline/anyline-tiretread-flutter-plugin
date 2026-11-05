@@ -9,6 +9,7 @@ import 'package:anyline_tire_tread_plugin_example/feedback_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/initalize_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/main.dart';
 import 'package:anyline_tire_tread_plugin_example/result_screen.dart';
+import 'package:anyline_tire_tread_plugin_example/shoulder_wear_feedback_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/tread_depth_feedback_dialog.dart';
 import 'package:anyline_tire_tread_plugin_example/ui/dev_ex_widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -800,6 +801,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.straighten,
                 dense: true,
                 onPressed: () => _openValueFeedback(context, isMm: false)),
+            DevExOutlineButton(
+                label: 'Shoulder wear (BETA)',
+                icon: Icons.tire_repair,
+                dense: true,
+                onPressed: () => _openShoulderWearFeedback(context)),
           ],
         ),
       ],
@@ -1134,6 +1140,26 @@ class _HomeScreenState extends State<HomeScreen> {
             await _runFeedback(() =>
                 tireTreadPlugin.sendTreadDepthResultFeedback(
                     measurementUUID: _uuid, resultRegions: regions));
+          },
+        ),
+      ),
+    );
+  }
+
+  void _openShoulderWearFeedback(BuildContext context) {
+    final regions = _result?.regions ?? const <TreadResultRegion>[];
+    showDialog<void>(
+      barrierDismissible: false,
+      context: context,
+      builder: (con) => Dialog(
+        child: ShoulderWearFeedbackDialog(
+          initialLeft: regions.isEmpty ? null : regions.first.shoulderWear,
+          initialRight: regions.isEmpty ? null : regions.last.shoulderWear,
+          onCancel: () => Navigator.pop(con),
+          onDone: (left, right) async {
+            Navigator.of(con).pop();
+            await _runFeedback(() => tireTreadPlugin.sendShoulderWearFeedback(
+                measurementUUID: _uuid, left: left, right: right));
           },
         ),
       ),

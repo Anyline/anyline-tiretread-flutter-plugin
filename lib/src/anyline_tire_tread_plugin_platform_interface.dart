@@ -65,6 +65,14 @@ abstract class AnylineTireTreadPluginPlatform extends PlatformInterface {
         'sendTreadDepthResultFeedback() has not been implemented.');
   }
 
+  Future<MeasurementInfo?> sendShoulderWearFeedback(
+      {required String measurementUUID,
+      ShoulderWear? left,
+      ShoulderWear? right}) {
+    throw UnimplementedError(
+        'sendShoulderWearFeedback() has not been implemented.');
+  }
+
   Future<MeasurementInfo?> sendTireIdFeedback(
       {required String measurementUUID, required String tireId}) {
     throw UnimplementedError('sendTireIdFeedback() has not been implemented.');

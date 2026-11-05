@@ -403,6 +403,8 @@ The first and the last `TreadResultRegion` in `result.regions` then carry a `sho
 - `shoulderWear` is `null` on the middle regions and on `global`.
 - `shoulderWear` is also `null` when `shoulderWearEnabled` is not set, or when there is no estimate for the measurement.
 
+To send a correction, see [User Corrected Shoulder Wear (BETA)](#user-corrected-shoulder-wear-beta).
+
 ```dart
 final leftShoulderWorn = result?.regions?.firstOrNull?.shoulderWear?.isWorn;
 final rightShoulderWorn = result?.regions?.lastOrNull?.shoulderWear?.isWorn;
@@ -434,6 +436,29 @@ TreadResultRegion regionInch = TreadResultRegion.initInch(available: true,valueI
 List<TreadResultRegion>  myCorrectedResults =  [regionMm, regionInch];
 
 await tireTreadPlugin.sendTreadDepthResultFeedback(measurementUUID: _uuid, resultRegions: myCorrectedResults);
+```
+
+### User Corrected Shoulder Wear (BETA)
+
+> Shoulder wear is a BETA feature. Its shape may change in a future release.
+
+To send user corrected shoulder wear results, use the `sendShoulderWearFeedback` function from the TireTreadPlugin. It works whether or not `shoulderWearEnabled` is set.
+
+Send the state the user sees, the same way as for the region values:
+
+- For a side the user corrected, pass `ShoulderWear(isWorn: ...)` with the user's correction.
+- For a side the user did not change, pass the `shoulderWear` from the result: the first region for `left`, the last region for `right`.
+- Leave a side out (or pass `null`) only when there is neither an estimate nor a correction for it.
+
+> **_IMPORTANT:_** At least one side is required. If both sides are `null`, the call throws a `PlatformException` with the code `INVALID_ARGUMENT`.
+> Each call replaces the shoulder wear feedback sent before for the same measurement. A side left out clears an earlier correction for that side.
+
+```dart
+await tireTreadPlugin.sendShoulderWearFeedback(
+  measurementUUID: _uuid,
+  left: ShoulderWear(isWorn: true),
+  right: result?.regions?.lastOrNull?.shoulderWear,
+);
 ```
 
 ## Error Handling

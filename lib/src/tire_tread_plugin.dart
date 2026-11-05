@@ -105,6 +105,29 @@ class TireTreadPlugin {
         measurementUUID: measurementUUID, resultRegions: resultRegions);
   }
 
+  /// BETA: Submits the user-corrected shoulder wear results for
+  /// [measurementUUID].
+  ///
+  /// Send the state the user sees: for a side the user did not change, pass
+  /// the `shoulderWear` estimate from the result (first region for [left],
+  /// last region for [right]). Pass `null` for a side only when there is
+  /// neither an estimate nor a correction for it. At least one side is required; with both `null`
+  /// the call throws a [PlatformException] with code `INVALID_ARGUMENT`.
+  ///
+  /// Each call replaces the shoulder wear feedback sent before for the same
+  /// measurement, so a side passed as `null` clears an earlier correction.
+  /// Works whether or not `shoulderWearEnabled` was set on [initialize].
+  ///
+  /// Returns the updated [MeasurementInfo]; errors are thrown as
+  /// [PlatformException] with `code` equal to the SDK `ErrorCode` name.
+  Future<MeasurementInfo?> sendShoulderWearFeedback(
+      {required String measurementUUID,
+      ShoulderWear? left,
+      ShoulderWear? right}) {
+    return AnylineTireTreadPluginPlatform.instance.sendShoulderWearFeedback(
+        measurementUUID: measurementUUID, left: left, right: right);
+  }
+
   /// Submits a tire identifier for [measurementUUID].
   ///
   /// Returns the updated [MeasurementInfo]; errors are thrown as
